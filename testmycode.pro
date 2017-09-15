@@ -43,7 +43,7 @@ isEmpty(IDE_LIBRARY_BASENAME): IDE_LIBRARY_BASENAME = $$QTC_LIBRARY_BASENAME
 ###### <dirname>_dependencies.pri, where <dirname> is the name of the directory containing the
 ###### plugin's sources.
 
-QTC_PLUGIN_NAME = TMC
+QTC_PLUGIN_NAME = TestMyCode
 QTC_LIB_DEPENDS += \
     # nothing here at this time
 
