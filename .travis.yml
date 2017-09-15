@@ -32,3 +32,5 @@ script:
   - qmake ${PROJECT_PRO_FILE} -r ${QMAKE_PARAMS}
   - make
 
+notifications:
+    slack: qt-creator-tmc:vy5LHrlSP5ZUFAxX6YqvotQY
