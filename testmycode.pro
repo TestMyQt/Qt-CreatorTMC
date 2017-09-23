@@ -66,3 +66,10 @@ isEmpty(BUILD_OUTPUT_PATH) : BUILD_OUTPUT_PATH = $$(BUILD_OUTPUT_PATH)
 }
 
 message("Plugin output path: $$DESTDIR")
+test {
+    message(Configuring test build)
+    QT += testlib
+
+    SOURCES += \
+        test/testmycode_tests.cpp
+}
