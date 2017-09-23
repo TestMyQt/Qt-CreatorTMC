@@ -2,6 +2,14 @@ DEFINES += TESTMYCODE_LIBRARY
 
 # TestMyCode files
 
+test {
+    message(Configuring test build)
+    QT += testlib
+
+    SOURCES += \
+        test/testmycode_tests.cpp
+} else {
+
 SOURCES += src/testmycode.cpp
 
 HEADERS += src/testmycode.h \
@@ -66,10 +74,4 @@ isEmpty(BUILD_OUTPUT_PATH) : BUILD_OUTPUT_PATH = $$(BUILD_OUTPUT_PATH)
 }
 
 message("Plugin output path: $$DESTDIR")
-test {
-    message(Configuring test build)
-    QT += testlib
-
-    SOURCES += \
-        test/testmycode_tests.cpp
 }
