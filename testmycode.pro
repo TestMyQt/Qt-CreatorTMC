@@ -75,3 +75,6 @@ isEmpty(BUILD_OUTPUT_PATH) : BUILD_OUTPUT_PATH = $$(BUILD_OUTPUT_PATH)
 
 message("Plugin output path: $$DESTDIR")
 }
+
+FORMS += \
+    loginscreen.ui

@@ -7,21 +7,21 @@
 namespace TestMyCodePlugin {
 namespace Internal {
 
-class TestMyCodePlugin : public ExtensionSystem::IPlugin
+class TestMyCode : public ExtensionSystem::IPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QtCreatorPlugin" FILE "TestMyCode.json")
 
 public:
-    TestMyCodePlugin();
-    ~TestMyCodePlugin();
+    TestMyCode();
+    ~TestMyCode();
 
     bool initialize(const QStringList &arguments, QString *errorString);
     void extensionsInitialized();
     ShutdownFlag aboutToShutdown();
 
 private:
-    void triggerAction();
+    void createLoginForm();
 };
 
 } // namespace Internal

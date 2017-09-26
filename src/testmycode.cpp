@@ -15,23 +15,26 @@
 
 #include <QtPlugin>
 
+#include "ui_loginscreen.h"
+
+
 using namespace TestMyCodePlugin::Internal;
 
 namespace TestMyCodePlugin {
 namespace Internal {
 
-TestMyCodePlugin::TestMyCodePlugin()
+TestMyCode::TestMyCode()
 {
     // Create your members
 }
 
-TestMyCodePlugin::~TestMyCodePlugin()
+TestMyCode::~TestMyCode()
 {
     // Unregister objects from the plugin manager's object pool
     // Delete members
 }
 
-bool TestMyCodePlugin::initialize(const QStringList &arguments, QString *errorString)
+bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool
     // Load settings
@@ -43,28 +46,32 @@ bool TestMyCodePlugin::initialize(const QStringList &arguments, QString *errorSt
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
 
-    auto action = new QAction(tr("TestMyCode Action"), this);
+    auto action = new QAction(tr("Login"), this);
     Core::Command *cmd = Core::ActionManager::registerAction(action, Constants::ACTION_ID,
                                                              Core::Context(Core::Constants::C_GLOBAL));
-    cmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+Meta+A")));
-    connect(action, &QAction::triggered, this, &TestMyCodePlugin::triggerAction);
+    // Shortcut
+    // cmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+K")));
+    connect(action, &QAction::triggered, this, &TestMyCode::createLoginForm);
 
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
+
     menu->menu()->setTitle(tr("TestMyCode"));
     menu->addAction(cmd);
+
     Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
+
 
     return true;
 }
 
-void TestMyCodePlugin::extensionsInitialized()
+void TestMyCode::extensionsInitialized()
 {
     // Retrieve objects from the plugin manager's object pool
     // In the extensionsInitialized function, a plugin can be sure that all
     // plugins that depend on it are completely initialized.
 }
 
-ExtensionSystem::IPlugin::ShutdownFlag TestMyCodePlugin::aboutToShutdown()
+ExtensionSystem::IPlugin::ShutdownFlag TestMyCode::aboutToShutdown()
 {
     // Save settings
     // Disconnect from signals that are not needed during shutdown
@@ -72,11 +79,12 @@ ExtensionSystem::IPlugin::ShutdownFlag TestMyCodePlugin::aboutToShutdown()
     return SynchronousShutdown;
 }
 
-void TestMyCodePlugin::triggerAction()
+void TestMyCode::createLoginForm()
 {
-    QMessageBox::information(Core::ICore::mainWindow(),
-                             tr("Action Triggered"),
-                             tr("This is an action from TestMyCode."));
+    QWidget *widget = new QWidget;
+    Ui::loginform ui;
+    ui.setupUi(widget);
+    widget->show();
 }
 
 } // namespace Internal
