@@ -1,7 +1,6 @@
 #pragma once
-
+#include <ui_loginscreen.h>
 #include "testmycode_global.h"
-
 #include <extensionsystem/iplugin.h>
 
 namespace TestMyCodePlugin {
@@ -21,6 +20,7 @@ public:
     ShutdownFlag aboutToShutdown();
 
 private:
+    Ui::loginform *login;
     void createLoginForm();
 };
 

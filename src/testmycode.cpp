@@ -1,6 +1,8 @@
 #include "testmycode.h"
 #include "testmycodeconstants.h"
 
+#include <ui_loginscreen.h>
+
 #include <coreplugin/icore.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/actionmanager/actionmanager.h>
@@ -15,7 +17,6 @@
 
 #include <QtPlugin>
 
-#include "ui_loginscreen.h"
 
 
 using namespace TestMyCodePlugin::Internal;
@@ -82,10 +83,11 @@ ExtensionSystem::IPlugin::ShutdownFlag TestMyCode::aboutToShutdown()
 void TestMyCode::createLoginForm()
 {
     QWidget *widget = new QWidget;
-    Ui::loginform ui;
-    ui.setupUi(widget);
+    login = new Ui::loginform;
+    login->setupUi(widget);
     widget->show();
 }
 
 } // namespace Internal
 } // namespace TestMyCodePlugin
+
