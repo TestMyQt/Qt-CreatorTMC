@@ -14,7 +14,7 @@ env:
     - QTC_LIBRARY_BASENAME=lib/x86_64-linux-gnu
     - PROJECT_PRO_FILE="testmycode.pro"
     - BUILD_OUTPUT_PATH=${TRAVIS_BUILD_DIR}
-    - QMAKE_PARAMS="-spec linux-g++"
+    - QMAKE_PARAMS="-spec linux-g++ CONFIG+=test"
 
 install:
   - echo "Installing ${QTC_VERSION} with ${QT_MINOR}"
@@ -31,6 +31,7 @@ script:
   - echo "Executing qmake..."
   - qmake ${PROJECT_PRO_FILE} -r ${QMAKE_PARAMS}
   - make
+  - ./testmycode -platform offscreen
 
 notifications:
     slack: qt-creator-tmc:vy5LHrlSP5ZUFAxX6YqvotQY

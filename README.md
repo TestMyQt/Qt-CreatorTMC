@@ -3,9 +3,9 @@
 
 [backlog](https://docs.google.com/spreadsheets/d/1SZ1n11YmaVU5PIb6m-NHczgdKhNN1TSwjyNvZwEiMIg/edit#gid=0)
 
-## Developement setup
+## Development setup
 
-Environment variables:
+_Environment variables_:
 
 - `QTC_BUILD` your Qt Creator build
 - `QTC_SOURCE` your Qt Creator sources
