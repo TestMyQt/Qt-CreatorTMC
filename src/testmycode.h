@@ -2,6 +2,7 @@
 #include <ui_loginscreen.h>
 #include "testmycode_global.h"
 #include <extensionsystem/iplugin.h>
+#include <QWidget>
 
 namespace TestMyCodePlugin {
 namespace Internal {
@@ -19,9 +20,15 @@ public:
     void extensionsInitialized();
     ShutdownFlag aboutToShutdown();
 
+private slots:
+    void on_cancelbutton_clicked();
+    void on_loginbutton_clicked();
+
 private:
+    // Loginform
     Ui::loginform *login;
-    void createLoginForm();
+    QWidget *loginWidget;
+    void showLoginWidget();
 };
 
 } // namespace Internal

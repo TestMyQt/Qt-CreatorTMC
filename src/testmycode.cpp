@@ -17,8 +17,6 @@
 
 #include <QtPlugin>
 
-
-
 using namespace TestMyCodePlugin::Internal;
 
 namespace TestMyCodePlugin {
@@ -52,7 +50,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
                                                              Core::Context(Core::Constants::C_GLOBAL));
     // Shortcut
     // cmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+K")));
-    connect(action, &QAction::triggered, this, &TestMyCode::createLoginForm);
+    connect(action, &QAction::triggered, this, &TestMyCode::showLoginWidget);
 
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
 
@@ -61,6 +59,13 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
 
+    // Initialize login window
+    loginWidget = new QWidget;
+    login = new Ui::loginform;
+    login->setupUi(loginWidget);
+    // Signal-Slot for login window
+    QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_cancelbutton_clicked()));
+    QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_loginbutton_clicked()));
 
     return true;
 }
@@ -80,14 +85,20 @@ ExtensionSystem::IPlugin::ShutdownFlag TestMyCode::aboutToShutdown()
     return SynchronousShutdown;
 }
 
-void TestMyCode::createLoginForm()
+void TestMyCode::showLoginWidget()
 {
-    QWidget *widget = new QWidget;
-    login = new Ui::loginform;
-    login->setupUi(widget);
-    widget->show();
+    loginWidget->show();
 }
 
 } // namespace Internal
 } // namespace TestMyCodePlugin
 
+void TestMyCodePlugin::Internal::TestMyCode::on_cancelbutton_clicked()
+{
+    loginWidget->close();
+}
+
+void TestMyCodePlugin::Internal::TestMyCode::on_loginbutton_clicked()
+{
+    // TODO: Authentication
+}

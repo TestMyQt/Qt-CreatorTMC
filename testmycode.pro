@@ -4,7 +4,7 @@ DEFINES += TESTMYCODE_LIBRARY
 
 test {
     message(Configuring test build)
-    QT += testlib
+    QT += testlib network
 
     SOURCES += \
         test/testmycode_tests.cpp
