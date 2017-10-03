@@ -5,7 +5,7 @@
 
 ## Development setup
 
-Environment variables:
+_Environment variables_:
 
 - `QTC_BUILD` your Qt Creator build
 - `QTC_SOURCE` your Qt Creator sources
