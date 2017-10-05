@@ -4,7 +4,7 @@ DEFINES += TESTMYCODE_LIBRARY
 
 test {
     message(Configuring test build)
-    QT += testlib
+    QT += testlib network
 
     SOURCES += \
         test/testmycode_tests.cpp
@@ -75,3 +75,8 @@ isEmpty(BUILD_OUTPUT_PATH) : BUILD_OUTPUT_PATH = $$(BUILD_OUTPUT_PATH)
 
 message("Plugin output path: $$DESTDIR")
 }
+
+FORMS += \
+    loginscreen.ui
+
+STATECHARTS +=

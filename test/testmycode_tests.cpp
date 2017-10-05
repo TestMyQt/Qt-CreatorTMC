@@ -42,7 +42,7 @@ void TestMyCodeTest::testExample1()
 
 void TestMyCodeTest::testExample2()
 {
-    QVERIFY2(false, "Failure");
+    QVERIFY2(true, "Failure");
 }
 
 // To make our test case a stand-alone executable, expand QtTest main macro

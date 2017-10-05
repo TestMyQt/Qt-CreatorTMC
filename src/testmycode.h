@@ -1,27 +1,34 @@
 #pragma once
-
+#include <ui_loginscreen.h>
 #include "testmycode_global.h"
-
 #include <extensionsystem/iplugin.h>
+#include <QWidget>
 
 namespace TestMyCodePlugin {
 namespace Internal {
 
-class TestMyCodePlugin : public ExtensionSystem::IPlugin
+class TestMyCode : public ExtensionSystem::IPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QtCreatorPlugin" FILE "TestMyCode.json")
 
 public:
-    TestMyCodePlugin();
-    ~TestMyCodePlugin();
+    TestMyCode();
+    ~TestMyCode();
 
     bool initialize(const QStringList &arguments, QString *errorString);
     void extensionsInitialized();
     ShutdownFlag aboutToShutdown();
 
+private slots:
+    void on_cancelbutton_clicked();
+    void on_loginbutton_clicked();
+
 private:
-    void triggerAction();
+    // Loginform
+    Ui::loginform *login;
+    QWidget *loginWidget;
+    void showLoginWidget();
 };
 
 } // namespace Internal
