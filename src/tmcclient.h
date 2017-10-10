@@ -12,6 +12,7 @@
 #include <QUrlQuery>
 
 
+
 class TmcClient : public QObject
 {
     Q_OBJECT
@@ -26,6 +27,7 @@ public slots:
 
 private:
     QNetworkAccessManager *manager;
+    QString accessToken;
 
 };
 

@@ -1,4 +1,7 @@
 #include "tmcclient.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 
 TmcClient::TmcClient(QObject *parent ) : QObject(parent)
 {
@@ -43,6 +46,11 @@ void TmcClient::replyFinished(QNetworkReply *reply)
         qDebug() << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
         qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         qDebug() << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+
+        QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+        auto name = json.object();
+        QString token = name["access_token"].toString();
+        qDebug() << token;
 
         QFile *file = new QFile("/tmp/downloadedTMC.txt");
         if(file->open(QFile::Append))
