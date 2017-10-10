@@ -84,7 +84,7 @@ FORMS += \
 STATECHARTS +=
 
 HEADERS += \
-    src/authentication.h
+    src/tmcclient.h
 
 SOURCES += \
-    src/authentication.cpp
+    src/tmcclient.cpp

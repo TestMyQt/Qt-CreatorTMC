@@ -1,6 +1,6 @@
 #include "testmycode.h"
 #include "testmycodeconstants.h"
-#include "authentication.h"
+#include "tmcclient.h"
 
 #include <ui_loginscreen.h>
 
@@ -104,7 +104,7 @@ void TestMyCodePlugin::Internal::TestMyCode::on_loginbutton_clicked()
     // TODO: Authentication
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
-    auth.doDownload(username, password);
+    auth.authenticate(username, password);
 
 
 }

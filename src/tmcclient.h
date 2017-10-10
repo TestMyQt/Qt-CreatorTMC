@@ -12,12 +12,12 @@
 #include <QUrlQuery>
 
 
-class Authentication : public QObject
+class TmcClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit Authentication(QObject *parent = 0);
-    void doDownload(QString username, QString password);
+    explicit TmcClient(QObject *parent = 0);
+    void authenticate(QString username, QString password);
 
 signals:
 
