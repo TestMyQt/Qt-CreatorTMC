@@ -17,7 +17,7 @@ class Authentication : public QObject
     Q_OBJECT
 public:
     explicit Authentication(QObject *parent = 0);
-    void doDownload();
+    void doDownload(QString username, QString password);
 
 signals:
 

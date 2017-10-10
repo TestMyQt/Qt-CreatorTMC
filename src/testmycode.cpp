@@ -46,10 +46,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
 
-    //here just to test auth
-    Authentication a;
-    a.doDownload();
-
     auto action = new QAction(tr("Login"), this);
     Core::Command *cmd = Core::ActionManager::registerAction(action, Constants::ACTION_ID,
                                                              Core::Context(Core::Constants::C_GLOBAL));
@@ -106,4 +102,9 @@ void TestMyCodePlugin::Internal::TestMyCode::on_cancelbutton_clicked()
 void TestMyCodePlugin::Internal::TestMyCode::on_loginbutton_clicked()
 {
     // TODO: Authentication
+    QString username = login->usernameinput->text();
+    QString password = login->passwordinput->text();
+    auth.doDownload(username, password);
+
+
 }

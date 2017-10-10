@@ -4,12 +4,12 @@ Authentication::Authentication(QObject *parent ) : QObject(parent)
 {
 }
 
-void Authentication::doDownload()
+void Authentication::doDownload(QString username, QString password)
 {
     QString client_id = "8355b4a75a4191edfedeae7b074571278fd4987d4234c01569678b9ad11f526d";
     QString client_secret = "c2b1176a6189ceaa16cd51f805ef20ea6c993d36fdb76aa873ac35471d2df4f1";
-    QString username_ = "testiTunnus";
-    QString password_ = "salasana123";
+    QString username_ = username;
+    QString password_ = password;
     QString grant_type = "password";
 
     manager = new QNetworkAccessManager(this);

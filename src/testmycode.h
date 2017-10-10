@@ -1,6 +1,7 @@
 #pragma once
 #include <ui_loginscreen.h>
 #include "testmycode_global.h"
+#include "authentication.h"
 #include <extensionsystem/iplugin.h>
 #include <QWidget>
 
@@ -29,6 +30,7 @@ private:
     Ui::loginform *login;
     QWidget *loginWidget;
     void showLoginWidget();
+    Authentication auth;
 };
 
 } // namespace Internal
