@@ -2,6 +2,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QMessageBox>
 
 TmcClient::TmcClient(QObject *parent ) : QObject(parent)
 {
@@ -53,7 +54,8 @@ void TmcClient::replyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
         qDebug() << "Error at replyfinished";
-        qDebug() << reply->errorString();
+        QMessageBox::StandardButton loginFailed;
+        loginFailed = QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
     } else {
         qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
         qDebug() << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();;
