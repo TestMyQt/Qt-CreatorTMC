@@ -1,5 +1,6 @@
 #include "testmycode.h"
 #include "testmycodeconstants.h"
+#include "authentication.h"
 
 #include <ui_loginscreen.h>
 
@@ -44,6 +45,10 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
+
+    //here just to test auth
+    Authentication a;
+    a.doDownload();
 
     auto action = new QAction(tr("Login"), this);
     Core::Command *cmd = Core::ActionManager::registerAction(action, Constants::ACTION_ID,

@@ -1,5 +1,7 @@
 DEFINES += TESTMYCODE_LIBRARY
 
+QT += network
+
 # TestMyCode files
 
 test {
@@ -80,3 +82,9 @@ FORMS += \
     loginscreen.ui
 
 STATECHARTS +=
+
+HEADERS += \
+    src/authentication.h
+
+SOURCES += \
+    src/authentication.cpp
