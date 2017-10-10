@@ -1,6 +1,6 @@
 DEFINES += TESTMYCODE_LIBRARY
 
-QT += network
+QT += network widgets
 
 # TestMyCode files
 
