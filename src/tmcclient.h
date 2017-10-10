@@ -22,6 +22,7 @@ public:
     void getUserInfo();
 
 signals:
+    void loginFinished();
 
 public slots:
     void replyFinished (QNetworkReply *reply);

@@ -54,8 +54,7 @@ void TmcClient::replyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
         qDebug() << "Error at replyfinished";
-        QMessageBox::StandardButton loginFailed;
-        loginFailed = QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
+        QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
     } else {
         qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
         qDebug() << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();;
@@ -67,6 +66,8 @@ void TmcClient::replyFinished(QNetworkReply *reply)
         auto name = json.object();
         accessToken = name["access_token"].toString();
         qDebug() << accessToken;
+
+        emit loginFinished();
     }
     reply->deleteLater();
     getUserInfo();
