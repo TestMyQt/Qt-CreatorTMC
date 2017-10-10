@@ -15,8 +15,6 @@ void TmcClient::authenticate(QString username, QString password)
     QString password_ = password;
     QString grant_type = "password";
 
-    manager = new QNetworkAccessManager(this);
-
     QUrl url("https://tmc.mooc.fi/oauth/token");
 
     QUrlQuery params;
@@ -30,9 +28,25 @@ void TmcClient::authenticate(QString username, QString password)
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+    QNetworkReply *reply = manager.post(request, params.toString(QUrl::FullyEncoded).toUtf8());
 
-    manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        replyFinished(reply);
+    });
+}
+
+void TmcClient::getUserInfo()
+{
+    QUrl url("https://tmc.mooc.fi/api/v8/users/current");
+    QNetworkRequest request(url);
+    QString a = "Bearer ";
+    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+
+    QNetworkReply *reply = manager.get(request);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        qDebug() << reply->readAll();
+        reply->deleteLater();
+    });
 }
 
 void TmcClient::replyFinished(QNetworkReply *reply)
@@ -49,17 +63,9 @@ void TmcClient::replyFinished(QNetworkReply *reply)
 
         QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
         auto name = json.object();
-        QString token = name["access_token"].toString();
-        qDebug() << token;
-
-        QFile *file = new QFile("/tmp/downloadedTMC.txt");
-        if(file->open(QFile::Append))
-        {
-            file->write(reply->readAll());
-            file->flush();
-            file->close();
-        }
-        //delete file;
+        accessToken = name["access_token"].toString();
+        qDebug() << accessToken;
     }
     reply->deleteLater();
+    getUserInfo();
 }

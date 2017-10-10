@@ -105,6 +105,4 @@ void TestMyCodePlugin::Internal::TestMyCode::on_loginbutton_clicked()
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
     tmcClient.authenticate(username, password);
-
-
 }

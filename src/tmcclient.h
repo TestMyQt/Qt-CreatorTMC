@@ -19,6 +19,7 @@ class TmcClient : public QObject
 public:
     explicit TmcClient(QObject *parent = 0);
     void authenticate(QString username, QString password);
+    void getUserInfo();
 
 signals:
 
@@ -26,7 +27,7 @@ public slots:
     void replyFinished (QNetworkReply *reply);
 
 private:
-    QNetworkAccessManager *manager;
+    QNetworkAccessManager manager;
     QString accessToken;
 
 };
