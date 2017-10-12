@@ -1,5 +1,5 @@
-#ifndef AUTHENTICATION_H
-#define AUTHENTICATION_H
+#ifndef TMCCLIENT_H
+#define TMCCLIENT_H
 
 #include <QObject>
 #include <QNetworkAccessManager>
@@ -33,4 +33,4 @@ private:
 
 };
 
-#endif // AUTHENTICATION_H
+#endif // TMCCLIENT_H
