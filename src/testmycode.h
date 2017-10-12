@@ -5,6 +5,25 @@
 #include <extensionsystem/iplugin.h>
 #include <QWidget>
 
+#include <projectexplorer/project.h>
+#include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/session.h>
+#include <projectexplorer/target.h>
+
+#include <extensionsystem/iplugin.h>
+#include <utils/hostosinfo.h>
+#include <utils/fileutils.h>
+
+#include <QAction>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QObject>
+#include <QString>
+#include <QCoreApplication>
+#include <QProcessEnvironment>
+#include <QFileInfo>
+
 namespace TestMyCodePlugin {
 namespace Internal {
 
@@ -31,6 +50,17 @@ private:
     QWidget *loginWidget;
     void showLoginWidget();
     TmcClient tmcClient;
+    void runOnActiveProject();
+
+    void triggerAction();
+    void launchTmcCLI(const QString &workingDirectory);
+    bool tryLauchingTmcCLI(const QProcessEnvironment &env,
+                                    const QString &workingDirectory);
+    Utils::FileName tmcBinary() const;
+    QProcessEnvironment processEnvironment() const;
+    QStringList searchPathList() const;
+    void onCurrentProjectChanged(ProjectExplorer::Project *project);
+    QString readTMCOutput(const QString &testOutput);
 };
 
 } // namespace Internal
