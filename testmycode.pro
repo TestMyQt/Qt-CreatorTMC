@@ -1,5 +1,7 @@
 DEFINES += TESTMYCODE_LIBRARY
 
+QT += network widgets
+
 # TestMyCode files
 
 test {
@@ -57,6 +59,7 @@ QTC_LIB_DEPENDS += \
 
 QTC_PLUGIN_DEPENDS += \
     coreplugin
+    projectexplorer
 
 QTC_PLUGIN_RECOMMENDS += \
     # optional plugin dependencies. nothing here at this time
@@ -80,3 +83,9 @@ FORMS += \
     loginscreen.ui
 
 STATECHARTS +=
+
+HEADERS += \
+    src/tmcclient.h
+
+SOURCES += \
+    src/tmcclient.cpp

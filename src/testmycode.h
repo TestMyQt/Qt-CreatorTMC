@@ -1,6 +1,7 @@
 #pragma once
 #include <ui_loginscreen.h>
 #include "testmycode_global.h"
+#include "tmcclient.h"
 #include <extensionsystem/iplugin.h>
 #include <QWidget>
 
@@ -48,6 +49,7 @@ private:
     Ui::loginform *login;
     QWidget *loginWidget;
     void showLoginWidget();
+    TmcClient tmcClient;
     void runOnActiveProject();
 
     void triggerAction();

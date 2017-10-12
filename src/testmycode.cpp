@@ -1,5 +1,6 @@
 #include "testmycode.h"
 #include "testmycodeconstants.h"
+#include "tmcclient.h"
 
 #include <ui_loginscreen.h>
 
@@ -106,7 +107,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Signal-Slot for login window
     QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_cancelbutton_clicked()));
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_loginbutton_clicked()));
-
+    connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_cancelbutton_clicked);
     return true;
 }
 
@@ -216,6 +217,9 @@ void TestMyCode::on_cancelbutton_clicked()
 void TestMyCode::on_loginbutton_clicked()
 {
     // TODO: Authentication
+    QString username = login->usernameinput->text();
+    QString password = login->passwordinput->text();
+    tmcClient.authenticate(username, password);
 }
 
 } // namespace Internal
