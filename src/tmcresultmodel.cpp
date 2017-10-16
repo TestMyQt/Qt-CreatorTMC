@@ -3,8 +3,9 @@
 
 #include <utils/qtcassert.h>
 #include <QStandardItemModel>
+#include <QDebug>
 
-TmcResultModel::TmcResultModel(QObject *parent) : QAbstractItemModel(parent)
+TmcResultModel::TmcResultModel(QObject *parent) : QAbstractListModel(parent)
 {
 
 }
@@ -14,29 +15,18 @@ void TmcResultModel::addResult(const TmcTestResult &result)
     int i = m_results.count();
     beginInsertRows(QModelIndex(), i, i);
     m_results.insert(m_results.end(), result);
+    qDebug() << "adding " << result.name();
+    qDebug() << "result size " << m_results.count();
     endInsertRows();
 }
 
 void TmcResultModel::clearResults()
 {
-    int index = 0;
-    int start = 0;
-    while (index < m_results.count()) {
-        while (index < m_results.count()) {
-            ++start;
-            ++index;
-        }
-        if (index == m_results.count())
-            break;
-        while (index < m_results.count())
-            ++index;
 
-        beginRemoveRows(QModelIndex(), start, index - 1);
-        m_results.erase(m_results.begin() + start, m_results.begin() + index);
+    beginRemoveRows(QModelIndex(), 0, m_results.count() - 1);
+    m_results.erase(m_results.begin(), m_results.end());
+    endRemoveRows();
 
-        endRemoveRows();
-        index = start;
-    }
 }
 
 QModelIndex TmcResultModel::index(int row, int column, const QModelIndex &parent) const
@@ -67,8 +57,23 @@ QVariant TmcResultModel::data(const QModelIndex &index, int role) const
     int row = index.row();
     if (!index.isValid() || row < 0 || row >= m_results.count() || index.column() != 0)
         return QVariant();
+    if (role == Qt::DisplayRole) {
+        const TmcTestResult r = result(index);
 
-    return QVariant::fromValue(result(index));
+        if (r.isSuccessful()) {
+            QString points = QString(" ");
+            foreach (QString point, r.points()) {
+                points.append("[ ");
+                points.append(point);
+                points.append(" ] ");
+            }
+            return QVariant(QString("[%1]: %2, points awarded: %3").arg(r.name(), "PASSED", points));
+        }
+        return QVariant(QString("[%1]: %2").arg(r.name(), r.message()));
+
+    }
+
+    return QVariant();
 }
 
 TmcTestResult TmcResultModel::result(const QModelIndex &index) const

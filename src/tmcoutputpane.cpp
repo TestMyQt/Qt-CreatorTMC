@@ -31,7 +31,9 @@
 
 TmcOutputPane::TmcOutputPane(QObject *parent) :
     Core::IOutputPane(parent),
-    m_context(new Core::IContext(this))
+    m_context(new Core::IContext(this)),
+    m_outputWidget(nullptr),
+    m_runTMC(nullptr)
 {
     m_outputWidget = new QStackedWidget;
     QVBoxLayout *outputLayout = new QVBoxLayout;
@@ -44,18 +46,19 @@ TmcOutputPane::TmcOutputPane(QObject *parent) :
     pal.setColor(QPalette::WindowText,
                  Utils::creatorTheme()->color(Utils::Theme::InfoBarText));
 
-    createToolButtons();
-
-    m_model = new TmcResultModel(this);
     m_listView = new Utils::ListView;
+    m_model = new TmcResultModel(m_listView);
     m_listView->setModel(m_model);
     m_listView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     pal = m_listView->palette();
     pal.setColor(QPalette::Base, pal.window().color());
     m_listView->setPalette(pal);
+    m_listView->setVisible(true);
 
-    outputLayout->addWidget(m_listView);
+    m_outputWidget->addWidget(m_listView);
+
+    createToolButtons();
 
     connect(TMCRunner::instance(), &TMCRunner::testResultReady,
             this, &TmcOutputPane::addTestResults);
@@ -63,11 +66,11 @@ TmcOutputPane::TmcOutputPane(QObject *parent) :
 
 void TmcOutputPane::createToolButtons()
 {
-    m_runAll = new QToolButton(m_listView);
-    m_runAll->setIcon(Utils::Icons::RUN_SMALL_TOOLBAR.icon());
-    m_runAll->setToolTip(tr("Run TMC Tests"));
-    m_runAll->setEnabled(false);
-    connect(m_runAll, &QToolButton::clicked, this, &TmcOutputPane::onRunAllTriggered);
+    m_runTMC = new QToolButton(m_listView);
+    m_runTMC->setIcon(Utils::Icons::RUN_SMALL_TOOLBAR.icon());
+    m_runTMC->setToolTip(tr("Run TMC Tests"));
+    m_runTMC->setEnabled(true);
+    connect(m_runTMC, &QToolButton::clicked, this, &TmcOutputPane::onTMCTriggered);
 }
 
 static TmcOutputPane *s_instance = nullptr;
@@ -87,7 +90,7 @@ TmcOutputPane::~TmcOutputPane()
     s_instance = nullptr;
 }
 
-void TmcOutputPane::onRunAllTriggered()
+void TmcOutputPane::onTMCTriggered()
 {
     TMCRunner *runner = TMCRunner::instance();
     runner->runOnActiveProject();
@@ -95,17 +98,16 @@ void TmcOutputPane::onRunAllTriggered()
 
 void TmcOutputPane:: addTestResults(const QList<TmcTestResult> &results) {
     foreach (TmcTestResult r, results) {
-        qDebug() << r.name() << r.isSuccessful() << r.message();
         m_model->addResult(r);
     }
 
+    //popup();
     flash();
     navigateStateChanged();
 }
 
 void TmcOutputPane::clearContents()
 {
-    qDebug() << "contents cleared";
     m_model->clearResults();
 }
 
@@ -121,7 +123,7 @@ QWidget *TmcOutputPane::outputWidget(QWidget *parent)
 
 QList<QWidget *> TmcOutputPane::toolBarWidgets() const
 {
-    return { m_runAll };
+    return { m_runTMC };
 }
 
 QString TmcOutputPane::displayName() const
@@ -162,12 +164,12 @@ bool TmcOutputPane::canNavigate() const
 
 bool TmcOutputPane::canNext() const
 {
-    return true;
+    return false;
 }
 
 bool TmcOutputPane::canPrevious() const
 {
-    return true;
+    return false;
 }
 
 void TmcOutputPane::goToNext()
@@ -178,7 +180,3 @@ void TmcOutputPane::goToPrev()
 {
 }
 
-void TmcOutputPane::updateSummaryLabel()
-{
-    m_summaryLabel->setText(tr("tmc test results"));
-}
