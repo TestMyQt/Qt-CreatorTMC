@@ -12,11 +12,21 @@ test {
         test/testmycode_tests.cpp
 } else {
 
-SOURCES += src/testmycode.cpp
+SOURCES += src/testmycode.cpp \
+           src/tmcclient.cpp \
+           src/tmcoutputpane.cpp \
+           src/tmcrunner.cpp \
+           src/tmctestresult.cpp \
+           src/tmcresultmodel.cpp
 
 HEADERS += src/testmycode.h \
         src/testmycode_global.h \
-        src/testmycodeconstants.h
+        src/testmycodeconstants.h \
+        src/tmcclient.h \
+        src/tmcoutputpane.h \
+        src/tmcrunner.h \
+        src/tmctestresult.h \
+        src/tmcresultmodel.h
 
 # Qt Creator linking
 
@@ -82,10 +92,3 @@ message("Plugin output path: $$DESTDIR")
 FORMS += \
     loginscreen.ui
 
-STATECHARTS +=
-
-HEADERS += \
-    src/tmcclient.h
-
-SOURCES += \
-    src/tmcclient.cpp

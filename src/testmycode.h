@@ -50,17 +50,9 @@ private:
     QWidget *loginWidget;
     void showLoginWidget();
     TmcClient tmcClient;
-    void runOnActiveProject();
+    void runTMC();
 
     void triggerAction();
-    void launchTmcCLI(const QString &workingDirectory);
-    bool tryLauchingTmcCLI(const QProcessEnvironment &env,
-                                    const QString &workingDirectory);
-    Utils::FileName tmcBinary() const;
-    QProcessEnvironment processEnvironment() const;
-    QStringList searchPathList() const;
-    void onCurrentProjectChanged(ProjectExplorer::Project *project);
-    QString readTMCOutput(const QString &testOutput);
 };
 
 } // namespace Internal
