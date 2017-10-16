@@ -101,7 +101,8 @@ void TmcOutputPane:: addTestResults(const QList<TmcTestResult> &results) {
         m_model->addResult(r);
     }
 
-    //popup();
+    // Focus on the results pane
+    popup(IOutputPane::Flag(WithFocus));
     flash();
     navigateStateChanged();
 }

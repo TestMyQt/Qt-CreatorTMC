@@ -8,8 +8,5 @@ const char LOGIN_ACTION_ID[] = "TestMyCodePlugin.Action.Login";
 
 const char MENU_ID[] = "TestMyCodePlugin.Menu";
 
-const char TASK_INDEX[] = "TestMyCodePlugin.Task.Index";
-
-
 } // namespace TestMyCodePlugin
 } // namespace Constants
