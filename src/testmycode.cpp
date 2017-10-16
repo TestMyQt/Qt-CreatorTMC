@@ -109,6 +109,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     QSettings settings("TestMyQt", "TMC");
     login->usernameinput->setText(settings.value("username", "").toString());
     login->passwordinput->setText(settings.value("password", "").toString());
+    if (settings.value("savePasswordChecked").toString() == "true")
+        login->savepasswordbox->setChecked("true");
+    settings.deleteLater();
     // Signal-Slot for login window
     QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_cancelbutton_clicked()));
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_loginbutton_clicked()));

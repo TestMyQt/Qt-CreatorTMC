@@ -19,8 +19,13 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
 
     QSettings settings("TestMyQt", "TMC");
     settings.setValue("username", username);
-    if (savePassword)
+    if (savePassword) {
         settings.setValue("password", password);
+        settings.setValue("savePasswordChecked", "true");
+    } else {
+        settings.setValue("password", "");
+        settings.setValue("savePasswordChecked", "false");
+    }
     settings.deleteLater();
 
     QUrl url("https://tmc.mooc.fi/oauth/token");
@@ -63,8 +68,8 @@ void TmcClient::replyFinished(QNetworkReply *reply)
         qDebug() << "Error at replyfinished";
         QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
         QSettings settings("TestMyQt", "TMC");
-        settings.remove("username");
-        settings.remove("password");
+        settings.setValue("username", "");
+        settings.setValue("password", "");
         settings.deleteLater();
     } else {
         qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
