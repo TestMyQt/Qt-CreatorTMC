@@ -12,6 +12,8 @@
 #include <QObject>
 #include <QProcess>
 
+using namespace TestMyCode;
+
 namespace ProjectExplorer {
 class Project;
 }

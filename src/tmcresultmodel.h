@@ -2,17 +2,19 @@
 #define TMCRESULTMODEL_H
 
 #include <QAbstractItemModel>
+#include <QAbstractListModel>
 
 #include <QIcon>
 
 #include "tmctestresult.h"
 
-class TmcResultModel : public QAbstractItemModel
+using namespace TestMyCode;
+
+class TmcResultModel : public QAbstractListModel
 {
     Q_OBJECT
-
 public:
-    explicit TmcResultModel(QObject *parent);
+    explicit TmcResultModel(QObject *parent = nullptr);
 
     // QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;

@@ -5,6 +5,8 @@
 #include <QList>
 #include <QString>
 
+namespace TestMyCode {
+
 class TmcTestResult
 {
 public:
@@ -33,7 +35,8 @@ private:
     QString m_exception;
 
 };
+}
 
-Q_DECLARE_METATYPE(TmcTestResult)
+Q_DECLARE_METATYPE(TestMyCode::TmcTestResult)
 #endif // TMCTESTRESULT_H
 

@@ -53,31 +53,17 @@ public:
 private:
     explicit TmcOutputPane(QObject *parent = 0);
 
-    void onRunAllTriggered();
-    void onRunSelectedTriggered();
-    void enableAllFilter();
-    void filterMenuTriggered(QAction *action);
+    void onTMCTriggered();
 
-    void initializeFilterMenu();
-    void updateSummaryLabel();
     void createToolButtons();
-    void onTestRunStarted();
-    void onTestRunFinished();
-    void onScrollBarRangeChanged(int, int max);
     void updateRunActions();
-    void onCustomContextMenuRequested(const QPoint &pos);
-    void onCopyItemTriggered(const QModelIndex &idx);
-    void onCopyWholeTriggered();
-    void onSaveWholeTriggered();
-    void toggleOutputStyle();
 
+    Core::IContext *m_context;
     QStackedWidget *m_outputWidget;
-    QFrame *m_summaryWidget;
-    QLabel *m_summaryLabel;
+    QWidget *m_resultWidget;
     Utils::ListView *m_listView;
     TmcResultModel *m_model;
-    Core::IContext *m_context;
-    QToolButton *m_runAll;
+    QToolButton *m_runTMC;
     bool m_wasVisibleBefore = false;
 };
 
