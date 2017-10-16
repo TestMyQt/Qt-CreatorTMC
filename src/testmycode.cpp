@@ -45,6 +45,8 @@
 #include <QFileInfo>
 #include <QByteArray>
 
+#include <QSettings>
+
 #include <QtPlugin>
 #include <extensionsystem/pluginmanager.h>
 
@@ -104,6 +106,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     loginWidget = new QWidget;
     login = new Ui::loginform;
     login->setupUi(loginWidget);
+    QSettings settings("TestMyQt", "TMC");
+    login->usernameinput->setText(settings.value("username", "").toString());
+    login->passwordinput->setText(settings.value("password", "").toString());
     // Signal-Slot for login window
     QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_cancelbutton_clicked()));
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_loginbutton_clicked()));
