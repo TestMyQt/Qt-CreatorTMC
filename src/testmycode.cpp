@@ -219,7 +219,8 @@ void TestMyCode::on_loginbutton_clicked()
     // TODO: Authentication
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
-    tmcClient.authenticate(username, password);
+    bool savePassword = login->savepasswordbox->isChecked();
+    tmcClient.authenticate(username, password, savePassword);
 }
 
 } // namespace Internal

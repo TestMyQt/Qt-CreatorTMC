@@ -3,18 +3,25 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QMessageBox>
+#include <QSettings>
 
 TmcClient::TmcClient(QObject *parent ) : QObject(parent)
 {
 }
 
-void TmcClient::authenticate(QString username, QString password)
+void TmcClient::authenticate(QString username, QString password, bool savePassword)
 {
     QString client_id = "8355b4a75a4191edfedeae7b074571278fd4987d4234c01569678b9ad11f526d";
     QString client_secret = "c2b1176a6189ceaa16cd51f805ef20ea6c993d36fdb76aa873ac35471d2df4f1";
     QString username_ = username;
     QString password_ = password;
     QString grant_type = "password";
+
+    QSettings settings("TestMyQt", "TMC");
+    settings.setValue("username", username);
+    if (savePassword)
+        settings.setValue("password", password);
+    settings.deleteLater();
 
     QUrl url("https://tmc.mooc.fi/oauth/token");
 
@@ -55,6 +62,10 @@ void TmcClient::replyFinished(QNetworkReply *reply)
     if (reply->error()) {
         qDebug() << "Error at replyfinished";
         QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
+        QSettings settings("TestMyQt", "TMC");
+        settings.remove("username");
+        settings.remove("password");
+        settings.deleteLater();
     } else {
         qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
         qDebug() << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();;
