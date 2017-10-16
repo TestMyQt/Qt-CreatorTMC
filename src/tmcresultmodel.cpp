@@ -15,8 +15,6 @@ void TmcResultModel::addResult(const TmcTestResult &result)
     int i = m_results.count();
     beginInsertRows(QModelIndex(), i, i);
     m_results.insert(m_results.end(), result);
-    qDebug() << "adding " << result.name();
-    qDebug() << "result size " << m_results.count();
     endInsertRows();
 }
 

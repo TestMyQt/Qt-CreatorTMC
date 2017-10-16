@@ -12,11 +12,7 @@
 QT_BEGIN_NAMESPACE
 class QAction;
 class QFrame;
-class QKeyEvent;
-class QLabel;
 class QModelIndex;
-class QMenu;
-class QPlainTextEdit;
 class QStackedWidget;
 class QToolButton;
 QT_END_NAMESPACE
