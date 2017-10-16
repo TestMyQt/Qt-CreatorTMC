@@ -12,13 +12,12 @@
 #include <QUrlQuery>
 
 
-
 class TmcClient : public QObject
 {
     Q_OBJECT
 public:
     explicit TmcClient(QObject *parent = 0);
-    void authenticate(QString username, QString password);
+    void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
 
 signals:
