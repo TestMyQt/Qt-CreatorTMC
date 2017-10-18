@@ -1,5 +1,6 @@
 #pragma once
 #include <ui_loginscreen.h>
+#include <ui_downloadscreen.h>
 #include "testmycode_global.h"
 #include "tmcclient.h"
 #include <extensionsystem/iplugin.h>
@@ -41,18 +42,27 @@ public:
     ShutdownFlag aboutToShutdown();
 
 private slots:
-    void on_cancelbutton_clicked();
-    void on_loginbutton_clicked();
+    // Loginform
+    void on_login_cancelbutton_clicked();
+    void on_login_loginbutton_clicked();
+    // Downloadform
+    void on_download_cancelbutton_clicked();
+    void on_download_okbutton_clicked();
 
 private:
     // Loginform
     Ui::loginform *login;
     QWidget *loginWidget;
     void showLoginWidget();
+
+    // Downloadform
+    Ui::downloadform *downloadform;
+    QWidget *downloadWidget;
+    void showDownloadWidget();
+
+    // tmcClient
     TmcClient tmcClient;
     void runTMC();
-
-    void triggerAction();
 };
 
 } // namespace Internal

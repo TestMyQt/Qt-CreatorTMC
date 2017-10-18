@@ -90,5 +90,6 @@ message("Plugin output path: $$DESTDIR")
 }
 
 FORMS += \
-    loginscreen.ui
+    loginscreen.ui \
+    downloadscreen.ui
 
