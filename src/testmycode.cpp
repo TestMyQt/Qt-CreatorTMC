@@ -161,7 +161,6 @@ void TestMyCode::on_login_cancelbutton_clicked()
 
 void TestMyCode::on_login_loginbutton_clicked()
 {
-    // TODO: Authentication
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
     bool savePassword = login->savepasswordbox->isChecked();

@@ -19,6 +19,7 @@ public:
     explicit TmcClient(QObject *parent = 0);
     void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
+    void getExerciseList(QString courseId);
 
 signals:
     void loginFinished();

@@ -48,6 +48,20 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
     });
 }
 
+void TmcClient::getExerciseList(QString courseId)
+{
+    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + courseId);
+    QNetworkRequest request(url);
+    QString a = "Bearer ";
+    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+
+    QNetworkReply *reply = manager.get(request);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        qDebug() << reply->readAll();
+        reply->deleteLater();
+    });
+}
+
 void TmcClient::getUserInfo()
 {
     QUrl url("https://tmc.mooc.fi/api/v8/users/current");
@@ -87,4 +101,5 @@ void TmcClient::replyFinished(QNetworkReply *reply)
     }
     reply->deleteLater();
     getUserInfo();
+    getExerciseList("18");
 }
