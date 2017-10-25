@@ -5,6 +5,7 @@
 #include "tmcrunner.h"
 
 #include <ui_loginscreen.h>
+#include <ui_downloadscreen.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -67,12 +68,17 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto loginAction = new QAction(tr("Login"), this);
     Core::Command *loginCmd = Core::ActionManager::registerAction(loginAction, Constants::LOGIN_ACTION_ID,
                                                              Core::Context(Core::Constants::C_GLOBAL));
+
+    auto downloadAction = new QAction(tr("Download"), this);
+    Core::Command *downloadCmd = Core::ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
+                                                                     Core::Context(Core::Constants::C_GLOBAL));
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
-
+    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+D")));
     connect(loginAction, &QAction::triggered, this, &TestMyCode::showLoginWidget);
     connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
+    connect(downloadAction, &QAction::triggered, this, &TestMyCode::showDownloadWidget);
 
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
 
@@ -80,6 +86,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
     menu->addAction(tmcCmd);
     menu->addAction(loginCmd);
+    menu->addAction(downloadCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
     auto tools_menu = Core::ActionManager::actionContainer(Core::Constants::M_WINDOW);
@@ -87,20 +94,33 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     addAutoReleasedObject(TmcOutputPane::instance());
 
+    // Initialize download window
+    downloadWidget = new QWidget;
+    downloadform = new Ui::downloadform;
+    downloadform->setupUi(downloadWidget);
+
     // Initialize login window
     loginWidget = new QWidget;
     login = new Ui::loginform;
     login->setupUi(loginWidget);
+
+    // Create settings
     QSettings settings("TestMyQt", "TMC");
     login->usernameinput->setText(settings.value("username", "").toString());
     login->passwordinput->setText(settings.value("password", "").toString());
     if (settings.value("savePasswordChecked").toString() == "true")
         login->savepasswordbox->setChecked("true");
     settings.deleteLater();
+
     // Signal-Slot for login window
-    QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_cancelbutton_clicked()));
-    QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_loginbutton_clicked()));
-    connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_cancelbutton_clicked);
+    QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_cancelbutton_clicked()));
+    QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_loginbutton_clicked()));
+    connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
+
+    // Signal-Slot for download window
+    QObject::connect(downloadform->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_cancelbutton_clicked()));
+    QObject::connect(downloadform->okbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_okbutton_clicked()));
+
     return true;
 }
 
@@ -124,23 +144,39 @@ void TestMyCode::showLoginWidget()
     loginWidget->show();
 }
 
+void TestMyCode::showDownloadWidget()
+{
+    downloadWidget->show();
+}
+
 void TestMyCode::runTMC() {
     TMCRunner *runner = TMCRunner::instance();
     runner->runOnActiveProject();
 }
 
-void TestMyCode::on_cancelbutton_clicked()
+void TestMyCode::on_login_cancelbutton_clicked()
 {
     loginWidget->close();
 }
 
-void TestMyCode::on_loginbutton_clicked()
+void TestMyCode::on_login_loginbutton_clicked()
 {
     // TODO: Authentication
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
     bool savePassword = login->savepasswordbox->isChecked();
     tmcClient.authenticate(username, password, savePassword);
+}
+
+void TestMyCodePlugin::Internal::TestMyCode::on_download_cancelbutton_clicked()
+{
+    downloadWidget->close();
+}
+
+void TestMyCodePlugin::Internal::TestMyCode::on_download_okbutton_clicked()
+{
+    // TODO: Download selected items from the menu
+
 }
 
 } // namespace Internal
