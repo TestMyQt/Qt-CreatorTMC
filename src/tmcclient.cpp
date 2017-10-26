@@ -2,6 +2,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonArray>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -44,7 +45,7 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
     QNetworkReply *reply = manager.post(request, params.toString(QUrl::FullyEncoded).toUtf8());
 
     connect(reply, &QNetworkReply::finished, this, [=](){
-        replyFinished(reply);
+        authenticationFinished(reply);
     });
 }
 
@@ -57,8 +58,7 @@ void TmcClient::getExerciseList(QString courseId)
 
     QNetworkReply *reply = manager.get(request);
     connect(reply, &QNetworkReply::finished, this, [=](){
-        qDebug() << reply->readAll();
-        reply->deleteLater();
+        exerciseListReplyFinished(reply);
     });
 }
 
@@ -76,10 +76,10 @@ void TmcClient::getUserInfo()
     });
 }
 
-void TmcClient::replyFinished(QNetworkReply *reply)
+void TmcClient::authenticationFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
-        qDebug() << "Error at replyfinished";
+        qDebug() << "Error at Authentication finished";
         QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
         QSettings settings("TestMyQt", "TMC");
         settings.setValue("username", "");
@@ -102,4 +102,29 @@ void TmcClient::replyFinished(QNetworkReply *reply)
     reply->deleteLater();
     getUserInfo();
     getExerciseList("18");
+}
+
+void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        qDebug() << "Error at Exercise list reply finished";
+        QMessageBox::critical(NULL, "TMC", "Failed to Download exercise list", QMessageBox::Ok);
+    } else {
+        // Absolutely nothing works, tralalalalal
+        qDebug() << "Exercise List:";
+        QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+        qDebug() << json;
+        QJsonObject jObj = json.object();
+        QJsonValue jVal = jObj.value("");
+        qDebug() << jVal.toString();
+
+        qDebug() << jObj.size();
+        QJsonArray jArray = jVal.toArray();
+        qDebug() << jArray.size();
+        for (const QJsonValue& val : jArray) {
+            QJsonObject loopObj = val.toObject();
+            qDebug() << loopObj["id"].toString();
+        }
+    }
+    reply->deleteLater();
 }

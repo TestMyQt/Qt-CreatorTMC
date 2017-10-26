@@ -25,7 +25,8 @@ signals:
     void loginFinished();
 
 public slots:
-    void replyFinished (QNetworkReply *reply);
+    void authenticationFinished (QNetworkReply *reply);
+    void exerciseListReplyFinished (QNetworkReply *reply);
 
 private:
     QNetworkAccessManager manager;
