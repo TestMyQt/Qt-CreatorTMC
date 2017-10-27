@@ -162,6 +162,7 @@ void TestMyCode::refreshDownloadList()
 {
     QList<Exercise> * exercises = tmcClient.getCourse()->getExercises();
     // Create item on-the-run
+    downloadform->exerciselist->clear();
     for(int i = 0; i < exercises->count(); i++) {
         QListWidgetItem* item = new QListWidgetItem(exercises->at(i).getName(), downloadform->exerciselist);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
