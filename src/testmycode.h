@@ -63,6 +63,7 @@ private:
     // tmcClient
     TmcClient tmcClient;
     void runTMC();
+    void getCourse();
 };
 
 } // namespace Internal

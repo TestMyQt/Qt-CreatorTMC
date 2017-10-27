@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include "exercise.h"
+#include "course.h"
 
 TmcClient::TmcClient(QObject *parent ) : QObject(parent)
 {
@@ -50,9 +51,10 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
     });
 }
 
-void TmcClient::getExerciseList(QString courseId)
+void TmcClient::getExerciseList(Course *course)
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + courseId);
+    m_course = course;
+    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + QString::number(course->getId()));
     QNetworkRequest request(url);
     QString a = "Bearer ";
     request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
@@ -101,8 +103,6 @@ void TmcClient::authenticationFinished(QNetworkReply *reply)
         emit loginFinished();
     }
     reply->deleteLater();
-    getUserInfo();
-    getExerciseList("18");
 }
 
 void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
@@ -115,14 +115,17 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
         QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
 
         QJsonObject jsonObj = json.object();
-        QJsonObject course = jsonObj["course"].toObject();
-        QJsonArray exercises = course["exercises"].toArray();
+        QJsonObject jsonCourse = jsonObj["course"].toObject();
+        QJsonArray exercises = jsonCourse["exercises"].toArray();
         for (int i = 0; exercises.size() > i; i++) {
             QJsonObject exercise = exercises[i].toObject();
             // qDebug() << exercise["name"].toString();
 
             Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
+            m_course->addExercise(ex);
             qDebug() << ex.getId() << ex.getName();
+            qDebug() << m_course->getExercise(ex.getId()).getName();
+
         }
 
     }

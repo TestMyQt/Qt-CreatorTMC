@@ -3,6 +3,7 @@
 #include "tmcclient.h"
 #include "tmcoutputpane.h"
 #include "tmcrunner.h"
+#include "course.h"
 
 #include <ui_loginscreen.h>
 #include <ui_downloadscreen.h>
@@ -146,12 +147,20 @@ void TestMyCode::showLoginWidget()
 
 void TestMyCode::showDownloadWidget()
 {
+    getCourse();
     downloadWidget->show();
 }
 
 void TestMyCode::runTMC() {
     TMCRunner *runner = TMCRunner::instance();
     runner->runOnActiveProject();
+}
+
+void TestMyCode::getCourse() {
+    tmcClient.getUserInfo();
+    Course* course = new Course();
+    course->setId(18);
+    tmcClient.getExerciseList(course);
 }
 
 void TestMyCode::on_login_cancelbutton_clicked()
