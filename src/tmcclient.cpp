@@ -51,7 +51,7 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
 
 void TmcClient::getExerciseList(QString courseId)
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + courseId);
+    QUrl url("https://tmc.mooc.fi/api/v8/courses/" + courseId + "/exercises");
     QNetworkRequest request(url);
     QString a = "Bearer ";
     request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
@@ -110,20 +110,13 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
         qDebug() << "Error at Exercise list reply finished";
         QMessageBox::critical(NULL, "TMC", "Failed to Download exercise list", QMessageBox::Ok);
     } else {
-        // Absolutely nothing works, tralalalalal
         qDebug() << "Exercise List:";
         QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
-        qDebug() << json;
-        QJsonObject jObj = json.object();
-        QJsonValue jVal = jObj.value("");
-        qDebug() << jVal.toString();
-
-        qDebug() << jObj.size();
-        QJsonArray jArray = jVal.toArray();
-        qDebug() << jArray.size();
-        for (const QJsonValue& val : jArray) {
-            QJsonObject loopObj = val.toObject();
-            qDebug() << loopObj["id"].toString();
+        QJsonArray exercises = json.array();
+        qDebug() << exercises.size();
+        for (int i = 0; exercises.size() > i; i++) {
+            QJsonObject exercise = exercises[i].toObject();
+            qDebug() << exercise["id"].toInt();
         }
     }
     reply->deleteLater();

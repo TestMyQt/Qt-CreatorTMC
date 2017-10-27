@@ -167,12 +167,12 @@ void TestMyCode::on_login_loginbutton_clicked()
     tmcClient.authenticate(username, password, savePassword);
 }
 
-void TestMyCodePlugin::Internal::TestMyCode::on_download_cancelbutton_clicked()
+void TestMyCode::on_download_cancelbutton_clicked()
 {
     downloadWidget->close();
 }
 
-void TestMyCodePlugin::Internal::TestMyCode::on_download_okbutton_clicked()
+void TestMyCode::on_download_okbutton_clicked()
 {
     // TODO: Download selected items from the menu
 
