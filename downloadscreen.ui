@@ -22,48 +22,7 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="2">
-    <widget class="QListWidget" name="exerciselist">
-     <item>
-      <property name="text">
-       <string>Exercise A</string>
-      </property>
-      <property name="checkState">
-       <enum>Unchecked</enum>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Exercise B</string>
-      </property>
-      <property name="checkState">
-       <enum>Unchecked</enum>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Exercise C</string>
-      </property>
-      <property name="checkState">
-       <enum>Unchecked</enum>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Exercise D</string>
-      </property>
-      <property name="checkState">
-       <enum>Unchecked</enum>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Exercise E</string>
-      </property>
-      <property name="checkState">
-       <enum>Unchecked</enum>
-      </property>
-     </item>
-    </widget>
+    <widget class="QListWidget" name="exerciselist"/>
    </item>
    <item row="2" column="0">
     <widget class="QPushButton" name="okbutton">

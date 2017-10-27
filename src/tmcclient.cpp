@@ -51,7 +51,7 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
 
 void TmcClient::getExerciseList(QString courseId)
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/courses/" + courseId + "/exercises");
+    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + courseId);
     QNetworkRequest request(url);
     QString a = "Bearer ";
     request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
@@ -112,12 +112,15 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
     } else {
         qDebug() << "Exercise List:";
         QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
-        QJsonArray exercises = json.array();
-        qDebug() << exercises.size();
+
+        QJsonObject jsonObj = json.object();
+        QJsonObject course = jsonObj["course"].toObject();
+        QJsonArray exercises = course["exercises"].toArray();
         for (int i = 0; exercises.size() > i; i++) {
             QJsonObject exercise = exercises[i].toObject();
-            qDebug() << exercise["id"].toInt();
+            qDebug() << exercise["name"].toString();
         }
+
     }
     reply->deleteLater();
 }
