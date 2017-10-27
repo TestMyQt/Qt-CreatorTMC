@@ -6,19 +6,19 @@ Exercise::Exercise(int id, QString name)
     this->name = name;
 }
 
-Exercise::getId() {
+int Exercise::getId() {
     return this->id;
 }
 
-Exercise::getName() {
+QString Exercise::getName() const{
     return this->name;
 }
 
-Exercise::setId(int id) {
+void Exercise::setId(int id) {
     this->id = id;
 }
 
-Exercise::setName(QString name) {
+void Exercise::setName(QString name) {
     this->name = name;
 }
 

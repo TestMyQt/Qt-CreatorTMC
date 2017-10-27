@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QSettings>
+#include "exercise.h"
 
 TmcClient::TmcClient(QObject *parent ) : QObject(parent)
 {
