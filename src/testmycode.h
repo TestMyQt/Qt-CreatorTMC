@@ -48,6 +48,7 @@ private slots:
     // Downloadform
     void on_download_cancelbutton_clicked();
     void on_download_okbutton_clicked();
+    void refreshDownloadList();
 
 private:
     // Loginform

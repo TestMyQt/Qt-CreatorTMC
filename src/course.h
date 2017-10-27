@@ -14,7 +14,7 @@ public:
     QString getTitle() const;
     Exercise getExercise(int id);
     void addExercise(Exercise e);
-
+    QList<Exercise> * getExercises();
 private:
     int id;
     QString title;

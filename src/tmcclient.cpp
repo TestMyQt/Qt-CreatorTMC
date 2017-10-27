@@ -51,6 +51,11 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
     });
 }
 
+Course * TmcClient::getCourse()
+{
+    return m_course;
+}
+
 void TmcClient::getExerciseList(Course *course)
 {
     m_course = course;
@@ -126,8 +131,11 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
             qDebug() << ex.getId() << ex.getName();
             qDebug() << m_course->getExercise(ex.getId()).getName();
 
-        }
 
+
+        }
+        emit exerciseListReady();
     }
+
     reply->deleteLater();
 }

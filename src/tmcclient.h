@@ -22,9 +22,10 @@ public:
     void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
     void getExerciseList(Course* course);
-
+    Course * getCourse();
 signals:
     void loginFinished();
+    void exerciseListReady();
 
 public slots:
     void authenticationFinished (QNetworkReply *reply);

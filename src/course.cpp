@@ -5,6 +5,11 @@ Course::Course()
 
 }
 
+QList<Exercise> * Course::getExercises()
+{
+    return &this->exercises;
+}
+
 void Course::setId(int id) {
     this->id = id;
 }
