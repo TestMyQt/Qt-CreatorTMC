@@ -94,8 +94,10 @@ FORMS += \
     downloadscreen.ui
 
 HEADERS += \
-    src/exercise.h
+    src/exercise.h \
+    src/course.h
 
 SOURCES += \
-    src/exercise.cpp
+    src/exercise.cpp \
+    src/course.cpp
 
