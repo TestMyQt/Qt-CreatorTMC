@@ -119,7 +119,10 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
         QJsonArray exercises = course["exercises"].toArray();
         for (int i = 0; exercises.size() > i; i++) {
             QJsonObject exercise = exercises[i].toObject();
-            qDebug() << exercise["name"].toString();
+            // qDebug() << exercise["name"].toString();
+
+            Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
+            qDebug() << ex.getId() << ex.getName();
         }
 
     }

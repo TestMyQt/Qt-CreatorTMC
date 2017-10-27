@@ -175,7 +175,6 @@ void TestMyCode::on_download_cancelbutton_clicked()
 void TestMyCode::on_download_okbutton_clicked()
 {
     // TODO: Download selected items from the menu
-
 }
 
 } // namespace Internal
