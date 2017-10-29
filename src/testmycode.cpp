@@ -3,6 +3,7 @@
 #include "tmcclient.h"
 #include "tmcoutputpane.h"
 #include "tmcrunner.h"
+#include "course.h"
 
 #include <ui_loginscreen.h>
 #include <ui_downloadscreen.h>
@@ -30,6 +31,7 @@
 #include <QByteArray>
 
 #include <QSettings>
+#include <QList>
 
 #include <QtPlugin>
 #include <extensionsystem/pluginmanager.h>
@@ -116,6 +118,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_cancelbutton_clicked()));
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_loginbutton_clicked()));
     connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
+    connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
 
     // Signal-Slot for download window
     QObject::connect(downloadform->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_cancelbutton_clicked()));
@@ -146,12 +149,34 @@ void TestMyCode::showLoginWidget()
 
 void TestMyCode::showDownloadWidget()
 {
+    getCourse();
     downloadWidget->show();
 }
 
 void TestMyCode::runTMC() {
     TMCRunner *runner = TMCRunner::instance();
     runner->runOnActiveProject();
+}
+
+void TestMyCode::refreshDownloadList()
+{
+    QList<Exercise> * exercises = tmcClient.getCourse()->getExercises();
+    // Create item on-the-run
+    downloadform->exerciselist->clear();
+    for(int i = 0; i < exercises->count(); i++) {
+        QListWidgetItem* item = new QListWidgetItem(exercises->at(i).getName(), downloadform->exerciselist);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+        item->setCheckState(Qt::Unchecked);
+    }
+
+
+}
+
+void TestMyCode::getCourse() {
+    tmcClient.getUserInfo();
+    Course* course = new Course();
+    course->setId(18);
+    tmcClient.getExerciseList(course);
 }
 
 void TestMyCode::on_login_cancelbutton_clicked()
@@ -161,22 +186,27 @@ void TestMyCode::on_login_cancelbutton_clicked()
 
 void TestMyCode::on_login_loginbutton_clicked()
 {
-    // TODO: Authentication
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
     bool savePassword = login->savepasswordbox->isChecked();
     tmcClient.authenticate(username, password, savePassword);
 }
 
-void TestMyCodePlugin::Internal::TestMyCode::on_download_cancelbutton_clicked()
+void TestMyCode::on_download_cancelbutton_clicked()
 {
     downloadWidget->close();
 }
 
-void TestMyCodePlugin::Internal::TestMyCode::on_download_okbutton_clicked()
+void TestMyCode::on_download_okbutton_clicked()
 {
     // TODO: Download selected items from the menu
-
+    qDebug() << "There are " <<downloadform->exerciselist->count() << "exercises to be loaded.";
+    for (int idx = 0; idx < downloadform->exerciselist->count(); idx++) {
+        if (downloadform->exerciselist->item(idx)->checkState() == Qt::Checked)
+        {
+            qDebug() << "Downloading exercise" << downloadform->exerciselist->item(idx)->text();
+        }
+    }
 }
 
 } // namespace Internal

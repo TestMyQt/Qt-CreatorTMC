@@ -2,8 +2,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonArray>
 #include <QMessageBox>
 #include <QSettings>
+#include "exercise.h"
+#include "course.h"
 
 TmcClient::TmcClient(QObject *parent ) : QObject(parent)
 {
@@ -44,7 +47,26 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
     QNetworkReply *reply = manager.post(request, params.toString(QUrl::FullyEncoded).toUtf8());
 
     connect(reply, &QNetworkReply::finished, this, [=](){
-        replyFinished(reply);
+        authenticationFinished(reply);
+    });
+}
+
+Course * TmcClient::getCourse()
+{
+    return m_course;
+}
+
+void TmcClient::getExerciseList(Course *course)
+{
+    m_course = course;
+    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + QString::number(course->getId()));
+    QNetworkRequest request(url);
+    QString a = "Bearer ";
+    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+
+    QNetworkReply *reply = manager.get(request);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        exerciseListReplyFinished(reply);
     });
 }
 
@@ -62,10 +84,10 @@ void TmcClient::getUserInfo()
     });
 }
 
-void TmcClient::replyFinished(QNetworkReply *reply)
+void TmcClient::authenticationFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
-        qDebug() << "Error at replyfinished";
+        qDebug() << "Error at Authentication finished";
         QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
         QSettings settings("TestMyQt", "TMC");
         settings.setValue("username", "");
@@ -86,5 +108,34 @@ void TmcClient::replyFinished(QNetworkReply *reply)
         emit loginFinished();
     }
     reply->deleteLater();
-    getUserInfo();
+}
+
+void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        qDebug() << "Error at Exercise list reply finished";
+        QMessageBox::critical(NULL, "TMC", "Failed to Download exercise list", QMessageBox::Ok);
+    } else {
+        qDebug() << "Exercise List:";
+        QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+
+        QJsonObject jsonObj = json.object();
+        QJsonObject jsonCourse = jsonObj["course"].toObject();
+        QJsonArray exercises = jsonCourse["exercises"].toArray();
+        for (int i = 0; exercises.size() > i; i++) {
+            QJsonObject exercise = exercises[i].toObject();
+            // qDebug() << exercise["name"].toString();
+
+            Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
+            m_course->addExercise(ex);
+            qDebug() << ex.getId() << ex.getName();
+            qDebug() << m_course->getExercise(ex.getId()).getName();
+
+
+
+        }
+        emit exerciseListReady();
+    }
+
+    reply->deleteLater();
 }

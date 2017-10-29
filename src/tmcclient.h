@@ -11,6 +11,8 @@
 #include <QDebug>
 #include <QUrlQuery>
 
+#include "course.h"
+
 
 class TmcClient : public QObject
 {
@@ -19,16 +21,20 @@ public:
     explicit TmcClient(QObject *parent = 0);
     void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
-
+    void getExerciseList(Course* course);
+    Course * getCourse();
 signals:
     void loginFinished();
+    void exerciseListReady();
 
 public slots:
-    void replyFinished (QNetworkReply *reply);
+    void authenticationFinished (QNetworkReply *reply);
+    void exerciseListReplyFinished (QNetworkReply *reply);
 
 private:
     QNetworkAccessManager manager;
     QString accessToken;
+    Course *m_course;
 
 };
 

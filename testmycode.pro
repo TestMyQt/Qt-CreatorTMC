@@ -93,3 +93,11 @@ FORMS += \
     loginscreen.ui \
     downloadscreen.ui
 
+HEADERS += \
+    src/exercise.h \
+    src/course.h
+
+SOURCES += \
+    src/exercise.cpp \
+    src/course.cpp
+
