@@ -2,6 +2,9 @@ DEFINES += TESTMYCODE_LIBRARY
 
 QT += network widgets
 
+# Zip support
+LIBS += -lquazip5 -lz
+
 # TestMyCode files
 
 test {

@@ -56,6 +56,19 @@ Course * TmcClient::getCourse()
     return m_course;
 }
 
+void TmcClient::getExerciseZip(Exercise *ex)
+{
+    QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
+    QNetworkRequest request(url);
+    QString a = "Bearer ";
+    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+
+    QNetworkReply *reply = manager.get(request);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        exerciseZipReplyFinished(reply);
+    });
+}
+
 void TmcClient::getExerciseList(Course *course)
 {
     m_course = course;
@@ -137,5 +150,19 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
         emit exerciseListReady();
     }
 
+    reply->deleteLater();
+}
+
+void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        qDebug() << "Error at exerciseListReplyFinished";
+        qDebug() << reply->error();
+        QMessageBox::critical(NULL, "TMC", tr("Received %1").arg(reply->size()), QMessageBox::Ok);
+    } else {
+        emit exerciseZipReady(reply->readAll());
+    }
+
+    reply->close();
     reply->deleteLater();
 }
