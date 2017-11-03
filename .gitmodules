@@ -1,0 +1,6 @@
+[submodule "3rdparty/quazip"]
+	path = 3rdparty/quazip
+	url = https://github.com/TestMyQt/quazip
+[submodule "3rdparty/zlib/zlib"]
+	path = 3rdparty/zlib/zlib
+	url = https://github.com/madler/zlib.git

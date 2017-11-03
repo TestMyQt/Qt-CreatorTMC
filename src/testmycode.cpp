@@ -9,7 +9,7 @@
 #include <ui_downloadscreen.h>
 #include <QBuffer>
 
-#include "quazip/JlCompress.h"
+#include <quazip/JlCompress.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -226,13 +226,14 @@ void TestMyCode::on_download_okbutton_clicked()
     if (!dialog.exec())
         return;
 
-    QStringList saveDirectory = dialog.selectedFiles();
+    QString saveDirectory = dialog.selectedFiles().at(0);
+
     for (int idx = 0; idx < downloadform->exerciselist->count(); idx++) {
         if (downloadform->exerciselist->item(idx)->checkState() == Qt::Checked)
         {
             qDebug() << "Downloading exercise" << downloadform->exerciselist->item(idx)->text();
-            // TODO: modify Excercise class to handle constness properly
-            Exercise ex = const_cast<Exercise&>(tmcClient.getCourse()->getExercises()->at(idx));
+            Exercise ex = tmcClient.getCourse()->getExercises()->at(idx);
+            ex.setLocation(saveDirectory);
             tmcClient.getExerciseZip(&ex);
         }
     }

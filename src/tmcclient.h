@@ -22,7 +22,7 @@ public:
     void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
     void getExerciseList(Course* course);
-    void getExerciseZip(Exercise* ex);
+    void getExerciseZip(Exercise *ex);
     Course * getCourse();
 signals:
     void loginFinished();
