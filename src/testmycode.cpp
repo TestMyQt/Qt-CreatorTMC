@@ -202,26 +202,36 @@ void TestMyCode::on_download_cancelbutton_clicked()
     downloadWidget->close();
 }
 
-void TestMyCode::on_download_okbutton_clicked()
+QString TestMyCode::askSaveLocation()
 {
-    // TODO: Download selected items from the menu
-    qDebug() << "There are " <<downloadform->exerciselist->count() << "exercises to be loaded.";
     QFileDialog dialog(downloadWidget);
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
     if (!dialog.exec())
-        return;
+        return QString();
 
     QString saveDirectory = dialog.selectedFiles().at(0);
+    return saveDirectory;
+}
 
-    for (int idx = 0; idx < downloadform->exerciselist->count(); idx++) {
-        if (downloadform->exerciselist->item(idx)->checkState() == Qt::Checked)
+void TestMyCode::on_download_okbutton_clicked()
+{
+    // TODO: Download selected items from the menu
+    auto exerciseList = downloadform->exerciselist;
+    qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
+
+    QString saveDirectory = askSaveLocation();
+    if (saveDirectory == "")
+        return;
+
+    for (int idx = 0; idx < exerciseList->count(); idx++) {
+        if (exerciseList->item(idx)->checkState() == Qt::Checked)
         {
-            qDebug() << "Downloading exercise" << downloadform->exerciselist->item(idx)->text();
-            Exercise ex = tmcClient.getCourse()->getExercises()->at(idx);
-            ex.setLocation(saveDirectory);
-            tmcClient.getExerciseZip(&ex);
+            qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
+            Exercise *ex = &((*tmcClient.getCourse()->getExercises())[idx]);
+            ex->setLocation(saveDirectory);
+            tmcClient.getExerciseZip(ex);
         }
     }
 }

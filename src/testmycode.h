@@ -66,6 +66,7 @@ private:
     void runTMC();
     void getCourse();
     void openProject(Exercise *ex);
+    QString askSaveLocation();
 };
 
 } // namespace Internal

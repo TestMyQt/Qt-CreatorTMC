@@ -177,7 +177,6 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
             qDebug() << fileInfo.name;
         }
 
-        qDebug() << ex->getLocation();
         JlCompress::extractDir(&storageBuff, ex->getLocation());
         emit exerciseZipReady(ex);
     }
