@@ -65,7 +65,7 @@ private:
     TmcClient tmcClient;
     void runTMC();
     void getCourse();
-    void handleZipData(QByteArray zipData);
+    void openProject(Exercise *ex);
 };
 
 } // namespace Internal

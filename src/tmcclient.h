@@ -27,12 +27,12 @@ public:
 signals:
     void loginFinished();
     void exerciseListReady();
-    void exerciseZipReady(QByteArray data);
+    void exerciseZipReady(Exercise *ex);
 
 public slots:
     void authenticationFinished (QNetworkReply *reply);
     void exerciseListReplyFinished (QNetworkReply *reply);
-    void exerciseZipReplyFinished (QNetworkReply *reply);
+    void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
 
 private:
     QNetworkAccessManager manager;

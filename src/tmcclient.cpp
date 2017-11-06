@@ -5,6 +5,9 @@
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QSettings>
+#include <QBuffer>
+
+#include <quazip/JlCompress.h>
 
 #include "exercise.h"
 #include "course.h"
@@ -66,7 +69,7 @@ void TmcClient::getExerciseZip(Exercise *ex)
 
     QNetworkReply *reply = manager.get(request);
     connect(reply, &QNetworkReply::finished, this, [=](){
-        exerciseZipReplyFinished(reply);
+        exerciseZipReplyFinished(reply, ex);
     });
 }
 
@@ -146,6 +149,7 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
             qDebug() << ex.getId() << ex.getName();
             qDebug() << m_course->getExercise(ex.getId()).getName();
             qDebug() << exercise["checksum"].toString();
+
         }
         emit exerciseListReady();
     }
@@ -153,16 +157,31 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply)
+void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
     if (reply->error()) {
         qDebug() << "Error at exerciseListReplyFinished";
         qDebug() << reply->error();
         QMessageBox::critical(NULL, "TMC", tr("Received %1").arg(reply->size()), QMessageBox::Ok);
     } else {
-        QByteArray zip = reply->readAll();
-        emit exerciseZipReady(zip);
+        QBuffer storageBuff;
+        storageBuff.setData(reply->readAll());
+        QuaZip zip(&storageBuff);
+        if (!zip.open(QuaZip::mdUnzip))
+            qDebug() << "Error opening zip file!";
+        QuaZipFile file(&zip);
+
+        for (bool f = zip.goToFirstFile(); f; f = zip.goToNextFile()) {
+            QuaZipFileInfo fileInfo;
+            file.getFileInfo(&fileInfo);
+            qDebug() << fileInfo.name;
+        }
+
+        qDebug() << ex->getLocation();
+        JlCompress::extractDir(&storageBuff, ex->getLocation());
+        emit exerciseZipReady(ex);
     }
+
 
     reply->close();
     reply->deleteLater();
