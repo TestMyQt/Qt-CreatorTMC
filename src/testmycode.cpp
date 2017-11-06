@@ -217,6 +217,8 @@ QString TestMyCode::askSaveLocation()
 
 void TestMyCode::on_download_okbutton_clicked()
 {
+    downloadPanel = new DownloadPanel();
+
     // TODO: Download selected items from the menu
     auto exerciseList = downloadform->exerciselist;
     qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
@@ -232,8 +234,12 @@ void TestMyCode::on_download_okbutton_clicked()
             Exercise *ex = &((*tmcClient.getCourse()->getExercises())[idx]);
             ex->setLocation(saveDirectory);
             tmcClient.getExerciseZip(ex);
+            downloadPanel->addLabelToDownloadPanel( ex->getName() );
+            downloadPanel->addProgressBarToDownloadPanel();
         }
     }
+
+    downloadPanel->show();
 }
 
 } // namespace Internal
