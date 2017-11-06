@@ -16,9 +16,9 @@ public:
     void addExercise(Exercise e);
     QList<Exercise> * getExercises();
 private:
-    int id;
-    QString title;
-    QList<Exercise> exercises;
+    int m_id;
+    QString m_title;
+    QList<Exercise> m_exercises;
 };
 
 #endif // COURSE_H

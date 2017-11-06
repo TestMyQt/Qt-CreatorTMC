@@ -2,38 +2,38 @@
 
 Exercise::Exercise(int id, QString name)
 {
-    this->id = id;
-    this->name = name;
+    m_id = id;
+    m_name = name;
 }
 
 int Exercise::getId() const {
-    return this->id;
+    return m_id;
 }
 
 QString Exercise::getName() const {
-    return this->name;
+    return m_name;
 }
 
 QString Exercise::getLocation() const {
-    return this->location;
+    return m_location;
 }
 
-QString Exercise::getChecksum() {
-    return this->checksum;
+QString Exercise::getChecksum() const {
+    return m_checksum;
 }
 
 void Exercise::setId(int id) {
-    this->id = id;
+    m_id = id;
 }
 
 void Exercise::setName(QString name) {
-    this->name = name;
+    m_name = name;
 }
 
 void Exercise::setLocation(QString location) {
-    this->location = location;
+    m_location = location;
 }
 
 void Exercise::setChecksum(QString checksum) {
-    this->checksum = checksum;
+    m_checksum = checksum;
 }
