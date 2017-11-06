@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QSettings>
+
 #include "exercise.h"
 #include "course.h"
 
@@ -140,12 +141,11 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
             // qDebug() << exercise["name"].toString();
 
             Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
+            ex.setChecksum(exercise["checksum"].toString());
             m_course->addExercise(ex);
             qDebug() << ex.getId() << ex.getName();
             qDebug() << m_course->getExercise(ex.getId()).getName();
-
-
-
+            qDebug() << exercise["checksum"].toString();
         }
         emit exerciseListReady();
     }
@@ -160,7 +160,8 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply)
         qDebug() << reply->error();
         QMessageBox::critical(NULL, "TMC", tr("Received %1").arg(reply->size()), QMessageBox::Ok);
     } else {
-        emit exerciseZipReady(reply->readAll());
+        QByteArray zip = reply->readAll();
+        emit exerciseZipReady(zip);
     }
 
     reply->close();

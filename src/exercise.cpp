@@ -18,6 +18,10 @@ QString Exercise::getLocation() const {
     return this->location;
 }
 
+QString Exercise::getChecksum() {
+    return this->checksum;
+}
+
 void Exercise::setId(int id) {
     this->id = id;
 }
@@ -28,4 +32,8 @@ void Exercise::setName(QString name) {
 
 void Exercise::setLocation(QString location) {
     this->location = location;
+}
+
+void Exercise::setChecksum(QString checksum) {
+    this->checksum = checksum;
 }
