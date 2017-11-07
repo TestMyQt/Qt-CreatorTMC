@@ -12,7 +12,7 @@
 #include <QUrlQuery>
 
 #include "course.h"
-
+#include "downloadpanel.h"
 
 class TmcClient : public QObject
 {
@@ -22,7 +22,7 @@ public:
     void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
     void getExerciseList(Course* course);
-    void getExerciseZip(Exercise *ex);
+    void getExerciseZip(Exercise *ex, DownloadPanel *downloadPanel);
     Course * getCourse();
 signals:
     void loginFinished();

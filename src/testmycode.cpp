@@ -233,12 +233,14 @@ void TestMyCode::on_download_okbutton_clicked()
             qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
             Exercise *ex = &((*tmcClient.getCourse()->getExercises())[idx]);
             ex->setLocation(saveDirectory);
-            tmcClient.getExerciseZip(ex);
-            downloadPanel->addLabelToDownloadPanel( ex->getName() );
-            downloadPanel->addProgressBarToDownloadPanel();
+            downloadPanel->addWidgetsToDownloadPanel( ex->getName() );
+            // downloadPanel->addLabelToDownloadPanel( ex->getName() );
+            // downloadPanel->addProgressBarToDownloadPanel();
+            tmcClient.getExerciseZip( ex, downloadPanel );
         }
     }
 
+    downloadPanel->sanityCheck();
     downloadPanel->show();
 }
 

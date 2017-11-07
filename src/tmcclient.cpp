@@ -60,7 +60,7 @@ Course * TmcClient::getCourse()
     return m_course;
 }
 
-void TmcClient::getExerciseZip(Exercise *ex)
+void TmcClient::getExerciseZip(Exercise *ex, DownloadPanel *downloadPanel)
 {
     QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
     QNetworkRequest request(url);
@@ -71,6 +71,22 @@ void TmcClient::getExerciseZip(Exercise *ex)
     connect(reply, &QNetworkReply::finished, this, [=](){
         exerciseZipReplyFinished(reply, ex);
     });
+
+    connect( reply, &QNetworkReply::downloadProgress,
+        downloadPanel, &DownloadPanel::networkReplyProgress );
+    connect( reply, &QNetworkReply::finished,
+        downloadPanel, &DownloadPanel::httpFinished );
+
+    downloadPanel->addReplyToList( reply );
+
+    /*
+        connect( replies[ i ], &QNetworkReply::finished,
+            this, &DownloadPanel::httpFinished );
+        connect( replies[ i ], &QIODevice::readyRead,
+            this, &DownloadPanel::httpReadyRead );
+        connect( replies[ i ], &QNetworkReply::downloadProgress,
+            this, &DownloadPanel::networkReplyProgress );
+     */
 }
 
 void TmcClient::getExerciseList(Course *course)

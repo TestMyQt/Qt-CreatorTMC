@@ -3,10 +3,12 @@
 
 #include "downloadpanel.h"
 
+static const int AVERAGE_DOWNLOAD_SIZE = 1400000;
+
 DownloadPanel::DownloadPanel( QWidget *parent ) : QWidget( parent )
 {
     layout = new QGridLayout;
-    nextGridLayoutRow = 0;
+    numberOfProgressBars = 0;
 
     setLayout( layout );
     setWindowTitle( "Download Panel" );
@@ -17,130 +19,37 @@ DownloadPanel::~DownloadPanel()
 
 }
 
-void DownloadPanel::addLabelToDownloadPanel( QString labelText )
+void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
 {
-    layout->addWidget( new QLabel( labelText ), nextGridLayoutRow, 0 );
-    ++nextGridLayoutRow;
-}
+    // Add the label
+    layout->addWidget( new QLabel( downloadName ),
+        2 * numberOfProgressBars, 0 );
 
-void DownloadPanel::addProgressBarToDownloadPanel()
-{
+    // Add the progress bar
     QProgressBar *bar = new QProgressBar;
-    progressBars << bar;
     bar->setMinimum( 0 );
-    layout->addWidget( bar, nextGridLayoutRow, 0 );
-    ++nextGridLayoutRow;
+    layout->addWidget( bar, 2 * numberOfProgressBars + 1, 0 );
+    progressBars.append( bar );
+
+    // Add the button
+    QPushButton *button = new QPushButton( "❎" );
+    button->setMaximumHeight( 20 );
+    button->setMaximumWidth( 20 );
+    layout->addWidget( button, 2 * numberOfProgressBars + 1, 1 );
+    connect( button, SIGNAL( clicked() ), this, SLOT( cancelDownload() ) );
+    downloadCancelButtons.append( button );
+
+    ++numberOfProgressBars;
 }
 
 void DownloadPanel::addReplyToList( QNetworkReply *reply )
 {
-    replies << reply;
+    replies.append( reply );
 }
 
-/*
-
-DownloadPanel::DownloadPanel(
-    QList<QUrl *> downloadURLs, QDir downloadDir, QWidget *parent )
-    :
-    QWidget( parent ), downloadURLs( downloadURLs ),
-    downloadDir( downloadDir )
+QNetworkReply *DownloadPanel::getRepliesListItem( int index )
 {
-    removeUselessURLs();
-
-    layout = new QGridLayout;
-
-    for( int i = 0; i < this->downloadURLs.size(); i++ ) {
-        progressBarLabels << new QLabel( this->downloadURLs[ i ]->toString() );
-        layout->addWidget( progressBarLabels[ i ], 2 * i, 0 );
-
-        progressBars << new QProgressBar;
-        progressBars[ i ]->setMinimum( 0 );
-        layout->addWidget( progressBars[ i ], 2 * i + 1, 0 );
-
-        downloadCancelButtons << new QPushButton( "❎" );
-        downloadCancelButtons[ i ]->setMaximumHeight( 25 );
-        downloadCancelButtons[ i ]->setMaximumWidth( 25 );
-        layout->addWidget( downloadCancelButtons[ i ], 2 * i + 1, 1 );
-
-        connect( downloadCancelButtons[ i ], SIGNAL( clicked() ),
-            this, SLOT( cancelDownload() ) );
-    }
-
-    if( !this->downloadURLs.size() ) {
-        qDebug() << "No files to download; closing Download Panel window";
-        QTimer::singleShot( 10, this, SLOT( close() ) );
-    }
-
-    this->setLayout( layout );
-    this->setWindowTitle( "Download Panel" );
-
-    run();
-}
-
-void DownloadPanel::run()
-{
-    createDownloadDirAsNeeded();
-    prepareFiles();
-    startRequests();
-}
-
-void DownloadPanel::createDownloadDirAsNeeded()
-{
-    if( !downloadDir.exists() ) {
-        qDebug() << "INFO: Download directory" << downloadDir.absolutePath() <<
-            "does not exist. Creating the directory.";
-
-        if( !downloadDir.mkpath( downloadDir.absolutePath() ) ) {
-            qDebug() << "ABORTING: Attempt to create the directory" <<
-                downloadDir.absolutePath() << "failed";
-            abort();
-        }
-    }
-}
-
-void DownloadPanel::prepareFiles()
-{
-    for( int i = 0; i < downloadURLs.size(); i++ ) {
-        QString fileName = downloadURLs[ i ]->fileName();
-
-        // It has already been established that the file name is not
-        // an empty string
-        fileName.prepend( downloadDir.path() + '/' );
-
-        if( QFile::exists( fileName ) )
-            QFile::remove( fileName );
-
-        downloadFiles << openFileForWriting( fileName );
-        if( !downloadFiles[ i ] ) {
-            qDebug() << "ABORTING: Could not open file"
-                << downloadFiles[ i ]->fileName() << "for writing";
-            abort();
-        }
-    }
-}
-
-QFile *DownloadPanel::openFileForWriting( const QString &fileName )
-{
-    QScopedPointer<QFile> filePtr( new QFile( fileName ) );
-    if( !filePtr->open( QIODevice::WriteOnly ) ) {
-        return Q_NULLPTR;
-    }
-    return filePtr.take();
-}
-
-void DownloadPanel::startRequests()
-{
-    for( int i = 0; i < downloadURLs.size(); i++ ) {
-        QUrl url = *downloadURLs[ i ];
-        QNetworkReply *reply = manager.get( QNetworkRequest( url ) );
-        replies << reply;
-        connect( replies[ i ], &QNetworkReply::finished,
-            this, &DownloadPanel::httpFinished );
-        connect( replies[ i ], &QIODevice::readyRead,
-            this, &DownloadPanel::httpReadyRead );
-        connect( replies[ i ], &QNetworkReply::downloadProgress,
-            this, &DownloadPanel::networkReplyProgress );
-    }
+    return replies.at( index );
 }
 
 #define FIND_SENDER_INDEX \
@@ -148,66 +57,46 @@ int senderIndex = -1; \
 for( int i = 0; i < replies.size(); i++ ) \
     if( replies[ i ] == QObject::sender() ) { \
         senderIndex = i; \
-        break; \
-    } \
-if( senderIndex == -1 ) { \
-    qDebug() << "ABORTING: A problem occurred in finding the sender index"; \
-    abort(); }
+        break; }
+
+void DownloadPanel::networkReplyProgress(
+    qint64 bytesReceived, qint64 bytesTotal )
+{
+    FIND_SENDER_INDEX
+
+    progressBars[ senderIndex ]->setMaximum(
+        bytesTotal != -1 ? bytesTotal : AVERAGE_DOWNLOAD_SIZE );
+    progressBars[ senderIndex ]->setValue( bytesReceived );
+}
 
 void DownloadPanel::httpFinished()
 {
     FIND_SENDER_INDEX
 
-    QFile *file = downloadFiles[ senderIndex ];
-    // qDebug() << "Completed download of file" << file->fileName();
-
-    file->close();
-    delete file;
-    downloadFiles[ senderIndex ] = Q_NULLPTR;
-
-    replies[ senderIndex ]->deleteLater();
-    replies[ senderIndex ] = Q_NULLPTR;
-
     // Grey out the cancel button of the download
     downloadCancelButtons[ senderIndex ]->setEnabled( false );
 
+    replies[ senderIndex ] = Q_NULLPTR;
     closeWindowIfAllDownloadsComplete();
 }
 
-void DownloadPanel::httpReadyRead()
+void DownloadPanel::sanityCheck()
 {
-    FIND_SENDER_INDEX
-
-    if( downloadFiles[ senderIndex ] ) {
-        downloadFiles[ senderIndex ]->write( replies[ senderIndex ]->readAll() );
-    }
-    else {
-        qDebug() << "ABORTING: No file available for downloaded data";
-        abort();
+    if( progressBars.size() != replies.size() ) {
+        qDebug() << "WARNING: Problem in DownloadPanel object: "
+            "progressBars.size() != replies.size()";
     }
 }
 
-void DownloadPanel::networkReplyProgress( qint64 bytesReceived, qint64 bytesTotal )
+void DownloadPanel::closeWindowIfAllDownloadsComplete()
 {
-    FIND_SENDER_INDEX
-
-    progressBars[ senderIndex ]->setMaximum( bytesTotal );
-    progressBars[ senderIndex ]->setValue( bytesReceived );
-}
-
-void DownloadPanel::removeUselessURLs()
-{
-    bool anElementWasRemoved;
-    for( int i = 0; i < downloadURLs.size(); i += ( anElementWasRemoved ? 0 : 1 ) ) {
-        anElementWasRemoved = false;
-
-        if( downloadURLs[ i ]->fileName().isEmpty() ) {
-            qDebug() << "WARNING: Removing URL that lacks the file name part:" <<
-                downloadURLs[ i ]->toString();
-            downloadURLs.removeAt( i );
-            anElementWasRemoved = true;
+    for( int i = 0; i < replies.size(); i++ ) {
+        if( replies[ i ] ) { // Not a null pointer
+            return;
         }
     }
+
+    QTimer::singleShot( 1000, this, SLOT( close() ) );
 }
 
 void DownloadPanel::cancelDownload()
@@ -218,16 +107,3 @@ void DownloadPanel::cancelDownload()
         }
     }
 }
-
-void DownloadPanel::closeWindowIfAllDownloadsComplete()
-{
-    for( int i = 0; i < downloadFiles.size(); i++ ) {
-        if( downloadFiles[ i ] ) {
-            return;
-        }
-    }
-
-    QTimer::singleShot( 1000, this, SLOT( close() ) );
-}
-
-*/
