@@ -19,6 +19,7 @@ public:
     QNetworkReply *getRepliesListItem( int index );
     void sanityCheck();
     void addWidgetsToDownloadPanel( QString downloadName );
+    void addInfoLabel();
 
 public slots:
     void networkReplyProgress( qint64 bytesReceived, qint64 bytesTotal );
@@ -32,6 +33,9 @@ private:
     QList<QNetworkReply *> replies;
     int numberOfProgressBars;
     QList<QPushButton *> downloadCancelButtons;
+    bool doneAddingWidgets;
+    QList<QLabel *> progressBarLabels;
+    QLabel *infoLabel;
 };
 
 #endif // DOWNLOADPANEL_H

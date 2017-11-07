@@ -78,15 +78,6 @@ void TmcClient::getExerciseZip(Exercise *ex, DownloadPanel *downloadPanel)
         downloadPanel, &DownloadPanel::httpFinished );
 
     downloadPanel->addReplyToList( reply );
-
-    /*
-        connect( replies[ i ], &QNetworkReply::finished,
-            this, &DownloadPanel::httpFinished );
-        connect( replies[ i ], &QIODevice::readyRead,
-            this, &DownloadPanel::httpReadyRead );
-        connect( replies[ i ], &QNetworkReply::downloadProgress,
-            this, &DownloadPanel::networkReplyProgress );
-     */
 }
 
 void TmcClient::getExerciseList(Course *course)
@@ -175,11 +166,7 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
 
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
-    if (reply->error()) {
-        qDebug() << "Error at exerciseListReplyFinished";
-        qDebug() << reply->error();
-        QMessageBox::critical(NULL, "TMC", tr("Received %1").arg(reply->size()), QMessageBox::Ok);
-    } else {
+    if( !reply->error() ) { // No errors
         QBuffer storageBuff;
         storageBuff.setData(reply->readAll());
         QuaZip zip(&storageBuff);
@@ -196,7 +183,17 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
         JlCompress::extractDir(&storageBuff, ex->getLocation());
         emit exerciseZipReady(ex);
     }
-
+    // One of the downloads was cancelled by the user
+    else if( reply->error() == QNetworkReply::OperationCanceledError ) {
+        qDebug() << "Cancelled download:" << reply->url();
+    }
+    // Some other error occured
+    else {
+        qDebug() << "Error at exerciseListReplyFinished";
+        qDebug() << reply->error();
+        QMessageBox::critical( NULL, "TMC",
+            tr("Received %1").arg(reply->size()), QMessageBox::Ok);
+    }
 
     reply->close();
     reply->deleteLater();

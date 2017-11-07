@@ -217,15 +217,14 @@ QString TestMyCode::askSaveLocation()
 
 void TestMyCode::on_download_okbutton_clicked()
 {
-    downloadPanel = new DownloadPanel();
-
-    // TODO: Download selected items from the menu
     auto exerciseList = downloadform->exerciselist;
     qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
 
     QString saveDirectory = askSaveLocation();
     if (saveDirectory == "")
         return;
+
+    downloadPanel = new DownloadPanel();
 
     for (int idx = 0; idx < exerciseList->count(); idx++) {
         if (exerciseList->item(idx)->checkState() == Qt::Checked)
@@ -234,13 +233,12 @@ void TestMyCode::on_download_okbutton_clicked()
             Exercise *ex = &((*tmcClient.getCourse()->getExercises())[idx]);
             ex->setLocation(saveDirectory);
             downloadPanel->addWidgetsToDownloadPanel( ex->getName() );
-            // downloadPanel->addLabelToDownloadPanel( ex->getName() );
-            // downloadPanel->addProgressBarToDownloadPanel();
             tmcClient.getExerciseZip( ex, downloadPanel );
         }
     }
 
-    downloadPanel->sanityCheck();
+    downloadPanel->addInfoLabel();
+    downloadPanel->sanityCheck(); // Should be removed at some point
     downloadPanel->show();
 }
 
