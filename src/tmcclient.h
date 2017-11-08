@@ -22,14 +22,17 @@ public:
     void authenticate(QString username, QString password, bool savePassword);
     void getUserInfo();
     void getExerciseList(Course* course);
+    void getExerciseZip(Exercise *ex);
     Course * getCourse();
 signals:
     void loginFinished();
     void exerciseListReady();
+    void exerciseZipReady(Exercise *ex);
 
 public slots:
     void authenticationFinished (QNetworkReply *reply);
     void exerciseListReplyFinished (QNetworkReply *reply);
+    void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
 
 private:
     QNetworkAccessManager manager;

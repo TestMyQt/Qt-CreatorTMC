@@ -5,6 +5,10 @@
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QSettings>
+#include <QBuffer>
+
+#include <quazip/JlCompress.h>
+
 #include "exercise.h"
 #include "course.h"
 
@@ -54,6 +58,19 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
 Course * TmcClient::getCourse()
 {
     return m_course;
+}
+
+void TmcClient::getExerciseZip(Exercise *ex)
+{
+    QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
+    QNetworkRequest request(url);
+    QString a = "Bearer ";
+    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+
+    QNetworkReply *reply = manager.get(request);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        exerciseZipReplyFinished(reply, ex);
+    });
 }
 
 void TmcClient::getExerciseList(Course *course)
@@ -127,15 +144,44 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
             // qDebug() << exercise["name"].toString();
 
             Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
+            ex.setChecksum(exercise["checksum"].toString());
             m_course->addExercise(ex);
             qDebug() << ex.getId() << ex.getName();
             qDebug() << m_course->getExercise(ex.getId()).getName();
-
-
+            qDebug() << exercise["checksum"].toString();
 
         }
         emit exerciseListReady();
     }
 
+    reply->deleteLater();
+}
+
+void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
+{
+    if (reply->error()) {
+        qDebug() << "Error at exerciseListReplyFinished";
+        qDebug() << reply->error();
+        QMessageBox::critical(NULL, "TMC", tr("Received %1").arg(reply->size()), QMessageBox::Ok);
+    } else {
+        QBuffer storageBuff;
+        storageBuff.setData(reply->readAll());
+        QuaZip zip(&storageBuff);
+        if (!zip.open(QuaZip::mdUnzip))
+            qDebug() << "Error opening zip file!";
+        QuaZipFile file(&zip);
+
+        for (bool f = zip.goToFirstFile(); f; f = zip.goToNextFile()) {
+            QuaZipFileInfo fileInfo;
+            file.getFileInfo(&fileInfo);
+            qDebug() << fileInfo.name;
+        }
+
+        JlCompress::extractDir(&storageBuff, ex->getLocation());
+        emit exerciseZipReady(ex);
+    }
+
+
+    reply->close();
     reply->deleteLater();
 }

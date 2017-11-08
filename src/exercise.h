@@ -9,12 +9,18 @@ public:
     Exercise(int id, QString name);
     void setId(int id);
     void setName(QString name);
-    int getId();
+    void setLocation(QString location);
+    void setChecksum(QString checksum);
+    int getId() const;
     QString getName() const;
+    QString getLocation() const;
+    QString getChecksum() const;
 
 private:
-    int id;
-    QString name;
+    int m_id;
+    QString m_name;
+    QString m_location;
+    QString m_checksum;
 };
 
 #endif // EXERCISE_H

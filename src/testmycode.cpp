@@ -28,6 +28,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QFileDialog>
 #include <QByteArray>
 
 #include <QSettings>
@@ -119,6 +120,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_loginbutton_clicked()));
     connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
     connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
+    connect(&tmcClient, &TmcClient::exerciseZipReady, this, &TestMyCode::openProject);
 
     // Signal-Slot for download window
     QObject::connect(downloadform->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_cancelbutton_clicked()));
@@ -169,7 +171,10 @@ void TestMyCode::refreshDownloadList()
         item->setCheckState(Qt::Unchecked);
     }
 
+}
 
+void TestMyCode::openProject(Exercise *ex) {
+    Q_UNUSED(ex)
 }
 
 void TestMyCode::getCourse() {
@@ -197,14 +202,36 @@ void TestMyCode::on_download_cancelbutton_clicked()
     downloadWidget->close();
 }
 
+QString TestMyCode::askSaveLocation()
+{
+    QFileDialog dialog(downloadWidget);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+
+    if (!dialog.exec())
+        return QString();
+
+    QString saveDirectory = dialog.selectedFiles().at(0);
+    return saveDirectory;
+}
+
 void TestMyCode::on_download_okbutton_clicked()
 {
     // TODO: Download selected items from the menu
-    qDebug() << "There are " <<downloadform->exerciselist->count() << "exercises to be loaded.";
-    for (int idx = 0; idx < downloadform->exerciselist->count(); idx++) {
-        if (downloadform->exerciselist->item(idx)->checkState() == Qt::Checked)
+    auto exerciseList = downloadform->exerciselist;
+    qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
+
+    QString saveDirectory = askSaveLocation();
+    if (saveDirectory == "")
+        return;
+
+    for (int idx = 0; idx < exerciseList->count(); idx++) {
+        if (exerciseList->item(idx)->checkState() == Qt::Checked)
         {
-            qDebug() << "Downloading exercise" << downloadform->exerciselist->item(idx)->text();
+            qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
+            Exercise *ex = &((*tmcClient.getCourse()->getExercises())[idx]);
+            ex->setLocation(saveDirectory);
+            tmcClient.getExerciseZip(ex);
         }
     }
 }
