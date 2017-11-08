@@ -61,6 +61,8 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
     // Add the progress bar
     QProgressBar *bar = new QProgressBar;
     bar->setMinimum( 0 );
+    bar->setMaximum( AVERAGE_DOWNLOAD_SIZE );
+    bar->setValue( 0 );
     layout->addWidget( bar, 2 * numberOfProgressBars + 1, 0 );
     progressBars.append( bar );
 
@@ -146,6 +148,7 @@ void DownloadPanel::cancelDownload()
             infoLabel->setText( "Cancelled download of\n" +
                 progressBarLabels[ i ]->text() );
             progressBarLabels[ i ]->setText( "(cancelled)" );
+            // TODO: Output the values of the min and max
         }
     }
 }
