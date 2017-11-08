@@ -36,7 +36,8 @@ HEADERS += testmycode.h \
         tmctestresult.h \
         tmcresultmodel.h \
         exercise.h \
-        course.h
+        course.h \
+        downloadpanel.h
 
 SOURCES += testmycode.cpp \
         tmcclient.cpp \
@@ -45,7 +46,8 @@ SOURCES += testmycode.cpp \
         tmctestresult.cpp \
         tmcresultmodel.cpp \
         exercise.cpp \
-        course.cpp
+        course.cpp \
+        downloadpanel.cpp
 
 FORMS += \
     ../loginscreen.ui \

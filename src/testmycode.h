@@ -3,6 +3,8 @@
 #include <ui_downloadscreen.h>
 #include "testmycode_global.h"
 #include "tmcclient.h"
+#include "downloadpanel.h"
+
 #include <extensionsystem/iplugin.h>
 #include <QWidget>
 
@@ -67,6 +69,8 @@ private:
     void getCourse();
     void openProject(Exercise *ex);
     QString askSaveLocation();
+    // ...
+    DownloadPanel *downloadPanel;
 };
 
 } // namespace Internal
