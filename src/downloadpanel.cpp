@@ -3,8 +3,13 @@
 
 #include "downloadpanel.h"
 
-#define TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS 7500
-static const int AVERAGE_DOWNLOAD_SIZE = 1400000;
+#define TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS 3000
+// Perhaps with a different font the height of the widgets could be reduced
+// to less than 15.
+#define FIXED_WIDGET_HEIGHT 15
+// The server doesn't seem to reveal the sizes of the files being downloaded,
+// so the following crude estimate is needed.
+static const int AVERAGE_DOWNLOAD_SIZE = 1500000;
 
 DownloadPanel::DownloadPanel( QWidget *parent ) : QWidget( parent )
 {
@@ -32,14 +37,16 @@ void DownloadPanel::addInfoLabel()
 
     // Just to create a bit of empty space between the info label and the
     // last progress bar
+    /*
     QLabel *blankLabel = new QLabel;
-    blankLabel->setFixedHeight( 15 );
+    blankLabel->setFixedHeight( FIXED_WIDGET_HEIGHT );
     layout->addWidget( blankLabel, 2 * numberOfProgressBars, 0 );
+    */
 
     infoLabel = new QLabel( "Downloading files..." );
     infoLabel->setAlignment( Qt::AlignCenter );
-    infoLabel->setStyleSheet( "background: yellow" );
-    infoLabel->setFixedHeight( 50 );
+    // infoLabel->setStyleSheet( "background: white" );
+    infoLabel->setFixedHeight( 35 );
     layout->addWidget( infoLabel, 2 * numberOfProgressBars + 1, 0 );
 
     doneAddingWidgets = true;
@@ -55,6 +62,7 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
 
     // Add the label
     QLabel *label = new QLabel( downloadName );
+    label->setFixedHeight( FIXED_WIDGET_HEIGHT );
     layout->addWidget( label, 2 * numberOfProgressBars, 0 );
     progressBarLabels.append( label );
 
@@ -63,13 +71,14 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
     bar->setMinimum( 0 );
     bar->setMaximum( AVERAGE_DOWNLOAD_SIZE );
     bar->setValue( 0 );
+    bar->setFixedHeight( FIXED_WIDGET_HEIGHT );
     layout->addWidget( bar, 2 * numberOfProgressBars + 1, 0 );
     progressBars.append( bar );
 
     // Add the button
     QPushButton *button = new QPushButton( "❎" );
-    button->setMaximumHeight( 15 );
-    button->setMaximumWidth( 15 );
+    button->setFixedHeight( FIXED_WIDGET_HEIGHT );
+    button->setFixedWidth( FIXED_WIDGET_HEIGHT );
     layout->addWidget( button, 2 * numberOfProgressBars + 1, 1 );
     connect( button, SIGNAL( clicked() ), this, SLOT( cancelDownload() ) );
     downloadCancelButtons.append( button );
@@ -131,8 +140,7 @@ void DownloadPanel::closeWindowIfAllDownloadsComplete()
         }
     }
 
-    infoLabel->setText(
-        "Done!\n(window should close in a moment)" );
+    infoLabel->setText( "Done!" );
     QTimer::singleShot( TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS,
         this, SLOT( close() ) );
 }
@@ -144,11 +152,16 @@ void DownloadPanel::cancelDownload()
             downloadCancelButtons[ i ]->setEnabled( false );
             replies[ i ]->abort();
             progressBars[ i ]->setValue( 0 );
+            // Without the following statement the progress bar of a cancelled
+            // download that has not yet started will look different from one
+            // that has already started
+            progressBars[ i ]->setMaximum( -1 );
             progressBars[ i ]->setTextVisible( false );
             infoLabel->setText( "Cancelled download of\n" +
                 progressBarLabels[ i ]->text() );
             progressBarLabels[ i ]->setText( "(cancelled)" );
-            // TODO: Output the values of the min and max
         }
     }
+
+    closeWindowIfAllDownloadsComplete();
 }
