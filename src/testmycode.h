@@ -69,7 +69,6 @@ private:
     void getCourse();
     void openProject(Exercise *ex);
     QString askSaveLocation();
-
     // ...
     DownloadPanel *downloadPanel;
 };
