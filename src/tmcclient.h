@@ -24,10 +24,14 @@ public:
     void getExerciseList(Course* course);
     void getExerciseZip(Exercise *ex, DownloadPanel *downloadPanel);
     Course * getCourse();
+    void loadAccessToken();
+
 signals:
     void loginFinished();
     void exerciseListReady();
     void exerciseZipReady(Exercise *ex);
+    void accessTokenNotValid();
+    void closeDownloadWindow();
 
 public slots:
     void authenticationFinished (QNetworkReply *reply);
@@ -38,6 +42,7 @@ private:
     QNetworkAccessManager manager;
     QString accessToken;
     Course *m_course;
+    bool checkRequestStatus(QNetworkReply *reply);
 
 };
 

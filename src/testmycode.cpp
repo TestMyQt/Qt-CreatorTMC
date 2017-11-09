@@ -115,6 +115,12 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
         login->savepasswordbox->setChecked("true");
     settings.deleteLater();
 
+    // Load access token
+    tmcClient.loadAccessToken();
+
+    // Signal-Slot to popup login window in case of non-valid access token
+    connect(&tmcClient, &TmcClient::accessTokenNotValid, this, &TestMyCode::showLoginWidget);
+
     // Signal-Slot for login window
     QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_cancelbutton_clicked()));
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_loginbutton_clicked()));
@@ -125,6 +131,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Signal-Slot for download window
     QObject::connect(downloadform->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_cancelbutton_clicked()));
     QObject::connect(downloadform->okbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_okbutton_clicked()));
+    connect(&tmcClient, &TmcClient::closeDownloadWindow, this, [=](){
+        downloadWidget->close();
+    });
 
     return true;
 }

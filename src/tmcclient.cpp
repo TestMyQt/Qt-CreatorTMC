@@ -55,6 +55,25 @@ void TmcClient::authenticate(QString username, QString password, bool savePasswo
     });
 }
 
+void TmcClient::loadAccessToken()
+{
+    QSettings settings("TestMyQt", "TMC");
+    accessToken = settings.value("accessToken", "").toString();
+    settings.deleteLater();
+}
+
+bool TmcClient::checkRequestStatus(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 403) {
+            emit accessTokenNotValid();
+            return 0;
+        }
+        return 0;
+    }
+    return 1;
+}
+
 Course * TmcClient::getCourse()
 {
     return m_course;
@@ -112,6 +131,7 @@ void TmcClient::authenticationFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
         qDebug() << "Error at Authentication finished";
+        accessToken = ""; // for debugging purposes, mainly
         QMessageBox::critical(NULL, "TMC", "Login failed", QMessageBox::Ok);
         QSettings settings("TestMyQt", "TMC");
         settings.setValue("username", "");
@@ -129,6 +149,10 @@ void TmcClient::authenticationFinished(QNetworkReply *reply)
         accessToken = name["access_token"].toString();
         qDebug() << accessToken;
 
+        QSettings settings("TestMyQt", "TMC");
+        settings.setValue("accessToken", accessToken);
+        settings.deleteLater();
+
         emit loginFinished();
     }
     reply->deleteLater();
@@ -136,8 +160,9 @@ void TmcClient::authenticationFinished(QNetworkReply *reply)
 
 void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Exercise list reply finished";
+        emit closeDownloadWindow();
         QMessageBox::critical(NULL, "TMC", "Failed to Download exercise list", QMessageBox::Ok);
     } else {
         qDebug() << "Exercise List:";
@@ -166,7 +191,7 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
 
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
-    if( !reply->error() ) { // No errors
+    if( checkRequestStatus(reply) ) { // No errors
         QBuffer storageBuff;
         storageBuff.setData(reply->readAll());
         QuaZip zip(&storageBuff);
@@ -182,6 +207,7 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 
         JlCompress::extractDir(&storageBuff, ex->getLocation());
         emit exerciseZipReady(ex);
+        emit closeDownloadWindow();
     }
     // One of the downloads was cancelled by the user
     else if( reply->error() == QNetworkReply::OperationCanceledError ) {
