@@ -15,6 +15,8 @@ public:
     Exercise getExercise(int id);
     void addExercise(Exercise e);
     QList<Exercise> * getExercises();
+    void saveSettings();
+    void loadSettings(QString title);
 private:
     int m_id;
     QString m_title;
