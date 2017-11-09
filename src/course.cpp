@@ -18,18 +18,18 @@ void Course::setId(int id)
     m_id = id;
 }
 
-void Course::setTitle(QString title)
+void Course::setName(QString name)
 {
-    m_title = title;
+    m_name = name;
 }
 
 int Course::getId() {
     return m_id;
 }
 
-QString Course::getTitle() const
+QString Course::getName() const
 {
-    return m_title;
+    return m_name;
 }
 
 Exercise Course::getExercise(int id)
@@ -50,16 +50,16 @@ void Course::addExercise(Exercise e)
 void Course::saveSettings()
 {
     QSettings settings("TestMyQt", "Exercises");
-    settings.beginGroup(m_title);
+    settings.beginGroup(m_name);
         settings.setValue("id", m_id);
     settings.endGroup();
     settings.deleteLater();
 }
 
-void Course::loadSettings(QString title)
+void Course::loadSettings(QString name)
 {
     QSettings settings("TestMyQt", "Exercises");
-    settings.beginGroup(title);
+    settings.beginGroup(name);
     setId(settings.value("id").toInt());
         QStringList exerciseList = settings.childGroups();
         foreach (QString exercise, exerciseList) {

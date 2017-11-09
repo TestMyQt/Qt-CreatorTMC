@@ -170,18 +170,18 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
 
         QJsonObject jsonObj = json.object();
         QJsonObject jsonCourse = jsonObj["course"].toObject();
+        m_course->setName(jsonCourse["name"].toString());
         QJsonArray exercises = jsonCourse["exercises"].toArray();
+        m_course->saveSettings();
         for (int i = 0; exercises.size() > i; i++) {
             QJsonObject exercise = exercises[i].toObject();
-            // qDebug() << exercise["name"].toString();
-
             Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
             ex.setChecksum(exercise["checksum"].toString());
             m_course->addExercise(ex);
+            ex.saveSettings(m_course->getName());
             qDebug() << ex.getId() << ex.getName();
             qDebug() << m_course->getExercise(ex.getId()).getName();
             qDebug() << exercise["checksum"].toString();
-
         }
         emit exerciseListReady();
     }
@@ -205,6 +205,9 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
             qDebug() << fileInfo.name;
         }
 
+        // TODO:
+        // Location of the extraction needs to be
+        // WorkingDirectory/CourseName/ExerciseName/
         JlCompress::extractDir(&storageBuff, ex->getLocation());
         emit exerciseZipReady(ex);
         emit closeDownloadWindow();
