@@ -176,9 +176,14 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
     if (reply->error()) {
-        qDebug() << "Error at exerciseListReplyFinished";
-        emit TMCError(QString("Zip download error %1: %2")
-                      .arg(reply->errorString(), reply->error()));
+        // One of the downloads was cancelled by the user
+        if( reply->error() == QNetworkReply::OperationCanceledError ) {
+            qDebug() << "Cancelled download:" << reply->url();
+        } else {
+            qDebug() << "Error at exerciseListReplyFinished";
+            emit TMCError(QString("Zip download error %1: %2")
+                          .arg(reply->errorString(), reply->error()));
+        }
         reply->close();
         reply->deleteLater();
         return;
