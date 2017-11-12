@@ -2,7 +2,6 @@ DEFINES += TESTMYCODE_LIBRARY
 QT += network widgets
 
 CONFIG += c++11
-
 DEFINES += QUAZIP_STATIC
 
 win32:CONFIG(release, debug|release) {
@@ -22,40 +21,40 @@ win32:CONFIG(release, debug|release) {
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/debug/libz.a
 
 } else:unix {
+    LIBS += -L$$OUT_PWD/../lib/tmcclient/ -ltmcclient
+    LIBS += -L$$OUT_PWD/../3rdparty/quazip/quazip/ -lquazip
+    LIBS += -L$$OUT_PWD/../3rdparty/zlib/ -lz
 
-    LIBS += -Wl,-Bstatic,--start-group -L$$OUT_PWD/../3rdparty/quazip/quazip/ -lquazip -Wl,-Bdynamic,--end-group
-    LIBS += -Wl,-Bstatic,--start-group -L$$OUT_PWD/../3rdparty/zlib/ -lz -Wl,-Bdynamic,--end-group
-
+    PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/libtmcclient.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/quazip/quazip/libquazip.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/libz.a
 
 }
 
-INCLUDEPATH += $$PWD/../3rdparty/quazip/ $$PWD/../3rdparty/zlib/zlib/
-DEPENDPATH += $$PWD/../3rdparty/quazip/ $$PWD/../3rdparty/zlib/zlib/
+INCLUDEPATH += $$PWD/../3rdparty/quazip/ \
+               $$PWD/../3rdparty/zlib/zlib/ \
+               $$PWD/../lib/tmcclient/
+
+DEPENDPATH += $$PWD/../3rdparty/quazip/ \
+              $$PWD/../3rdparty/zlib/zlib/ \
+              $$PWD/../lib/tmcclient/
 
 # TestMyCode files
 
 HEADERS += testmycode.h \
         testmycode_global.h \
         testmycodeconstants.h \
-        tmcclient.h \
         tmcoutputpane.h \
         tmcrunner.h \
         tmctestresult.h \
         tmcresultmodel.h \
-        exercise.h \
-        course.h \
         downloadpanel.h
 
 SOURCES += testmycode.cpp \
-        tmcclient.cpp \
         tmcoutputpane.cpp \
         tmcrunner.cpp \
         tmctestresult.cpp \
         tmcresultmodel.cpp \
-        exercise.cpp \
-        course.cpp \
         downloadpanel.cpp
 
 FORMS += \
@@ -119,5 +118,4 @@ isEmpty(BUILD_OUTPUT_PATH) : BUILD_OUTPUT_PATH = $$(BUILD_OUTPUT_PATH)
     DESTDIR = $$BUILD_OUTPUT_PATH
     message("Plugin output path set to: $$DESTDIR")
 }
-
 message("Plugin output path: $$DESTDIR")

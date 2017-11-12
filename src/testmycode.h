@@ -65,9 +65,11 @@ private:
 
     // tmcClient
     TmcClient tmcClient;
+    Course *m_activeCourse;
     void runTMC();
-    void getCourse();
+    void setDefaultCourse();
     void openProject(Exercise *ex);
+    void displayTMCError(QString errorText);
     QString askSaveLocation();
     // ...
     DownloadPanel *downloadPanel;
