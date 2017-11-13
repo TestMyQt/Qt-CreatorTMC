@@ -77,11 +77,8 @@ QNetworkReply* TmcClient::doGet(QUrl url)
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 {
     QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
-    QNetworkRequest request(url);
-    QString a = "Bearer ";
-    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+    QNetworkReply *reply = doGet(url);
 
-    QNetworkReply *reply = manager->get(request);
     connect(reply, &QNetworkReply::finished, this, [=](){
         exerciseZipReplyFinished(reply, ex);
     });
