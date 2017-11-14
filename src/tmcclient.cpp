@@ -185,7 +185,6 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply)
         }
         emit exerciseListReady();
     }
-
     reply->deleteLater();
 }
 
@@ -208,6 +207,8 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
         // TODO:
         // Location of the extraction needs to be
         // WorkingDirectory/CourseName/ExerciseName/
+        // This should be done when the working directory
+        // is set on the Settings pane.
         JlCompress::extractDir(&storageBuff, ex->getLocation());
         emit exerciseZipReady(ex);
         emit closeDownloadWindow();

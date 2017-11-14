@@ -49,6 +49,9 @@ void Course::addExercise(Exercise e)
 
 void Course::saveSettings()
 {
+    QSettings tmcSettings("TestMyQt", "TMC");
+    tmcSettings.setValue("currentProject", m_name);
+    tmcSettings.deleteLater();
     QSettings settings("TestMyQt", "Exercises");
     settings.beginGroup(m_name);
         settings.setValue("id", m_id);

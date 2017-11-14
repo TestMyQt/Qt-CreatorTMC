@@ -179,7 +179,6 @@ void TestMyCode::refreshDownloadList()
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
         item->setCheckState(Qt::Checked);
     }
-
 }
 
 void TestMyCode::openProject(Exercise *ex) {
@@ -211,6 +210,8 @@ void TestMyCode::on_download_cancelbutton_clicked()
     downloadWidget->close();
 }
 
+// Once the Settings widget is done, save location should
+// only be asked there, not after every download.
 QString TestMyCode::askSaveLocation()
 {
     QFileDialog dialog(downloadWidget);
