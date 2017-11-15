@@ -10,7 +10,7 @@ src.depends = lib/tmcclient 3rdparty
 
 test {
     message(Configuring test build)
-    SUBDIRS += test
+    SUBDIRS += lib/tmcclient/test
     test.depends += 3rdparty
     test.depends += lib/tmcclient
 }
