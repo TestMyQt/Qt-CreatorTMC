@@ -3,12 +3,10 @@ QT -= gui
 QT += network
 QT += testlib
 QT += core
-CONFIG += console
+CONFIG += c++11 console testcase
 CONFIG -= app_bundle
 DEPENDPATH += .
 INCLUDEPATH += .
-
-CONFIG += c++11
 
 INCLUDEPATH += $$PWD/../../tmcclient/
 DEPENDPATH += $$PWD/../../tmcclient/
