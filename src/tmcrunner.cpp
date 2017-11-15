@@ -79,7 +79,7 @@ void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
     arguments << "--outputPath" << testOutput;
     QMessageBox::information(Core::ICore::mainWindow(), tr("launching"), tr("%1").arg(arguments.join(QString(" "))));
     // TODO: make work in windows
-    const Utils::FileName java = Utils::FileName().fromString("/usr/bin/java");
+    const Utils::FileName java = Utils::FileName().fromString("java");
 
     Utils::ShellCommand command(dir, env);
 
