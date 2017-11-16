@@ -10,3 +10,6 @@ include(zlib.pri) # include files
 
 QMAKE_CFLAGS_WARN_ON -= -Wall # Optional - disable warnings when compiling this library
 QMAKE_CXXFLAGS_WARN_ON -= -Wall # Optional - disable warnings when compiling this library
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../zlib/release/ -lz
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../zlib/debug/ -lz

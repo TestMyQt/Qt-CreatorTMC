@@ -31,7 +31,7 @@ script:
   - echo "Executing qmake..."
   - qmake ${PROJECT_PRO_FILE} -r ${QMAKE_PARAMS}
   - make
-  - ./test/test
+  - make check
 
 notifications:
     slack: qt-creator-tmc:vy5LHrlSP5ZUFAxX6YqvotQY

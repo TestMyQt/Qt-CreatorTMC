@@ -1,5 +1,7 @@
 TEMPLATE = subdirs
 
-SUBDIRS = quazip zlib
+SUBDIRS += \
+        quazip \
+        zlib
 
 quazip.depends = zlib

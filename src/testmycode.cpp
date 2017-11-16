@@ -127,6 +127,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
     connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
     connect(&tmcClient, &TmcClient::exerciseZipReady, this, &TestMyCode::openProject);
+    connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
+
 
     // Signal-Slot for download window
     QObject::connect(downloadform->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_cancelbutton_clicked()));
@@ -134,6 +136,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(&tmcClient, &TmcClient::closeDownloadWindow, this, [=](){
         downloadWidget->close();
     });
+
+    QNetworkAccessManager *m = new QNetworkAccessManager;
+    tmcClient.setNetworkManager(m);
 
     return true;
 }
@@ -160,18 +165,19 @@ void TestMyCode::showLoginWidget()
 
 void TestMyCode::showDownloadWidget()
 {
-    getCourse();
+    setDefaultCourse();
     downloadWidget->show();
 }
 
-void TestMyCode::runTMC() {
+void TestMyCode::runTMC()
+{
     TMCRunner *runner = TMCRunner::instance();
     runner->runOnActiveProject();
 }
 
 void TestMyCode::refreshDownloadList()
 {
-    QList<Exercise> * exercises = tmcClient.getCourse()->getExercises();
+    QList<Exercise> * exercises = m_activeCourse->getExercises();
     // Create item on-the-run
     downloadform->exerciselist->clear();
     for(int i = 0; i < exercises->count(); i++) {
@@ -181,14 +187,22 @@ void TestMyCode::refreshDownloadList()
     }
 }
 
-void TestMyCode::openProject(Exercise *ex) {
+void TestMyCode::openProject(Exercise *ex)
+{
     Q_UNUSED(ex)
 }
 
-void TestMyCode::getCourse() {
+void TestMyCode::displayTMCError(QString errorText)
+{
+    QMessageBox::critical(NULL, "TMC", errorText, QMessageBox::Ok);
+}
+
+void TestMyCode::setDefaultCourse()
+{
     tmcClient.getUserInfo();
     Course* course = new Course();
     course->setId(18);
+    m_activeCourse = course;
     tmcClient.getExerciseList(course);
 }
 
@@ -240,10 +254,17 @@ void TestMyCode::on_download_okbutton_clicked()
         if (exerciseList->item(idx)->checkState() == Qt::Checked)
         {
             qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
-            Exercise *ex = &((*tmcClient.getCourse()->getExercises())[idx]);
+            Exercise *ex = &((*m_activeCourse->getExercises())[idx]);
             ex->setLocation(saveDirectory);
             downloadPanel->addWidgetsToDownloadPanel( ex->getName() );
-            tmcClient.getExerciseZip( ex, downloadPanel );
+            QNetworkReply* reply = tmcClient.getExerciseZip(ex);
+
+            connect( reply, &QNetworkReply::downloadProgress,
+                downloadPanel, &DownloadPanel::networkReplyProgress );
+            connect( reply, &QNetworkReply::finished,
+                downloadPanel, &DownloadPanel::httpFinished );
+
+            downloadPanel->addReplyToList( reply );
         }
     }
 
