@@ -1,0 +1,34 @@
+# QDoc is a tool that constantly evolves to suit our needs,
+# and there are some compatibility issues between old and new
+# practices. For that reason, any QDoc configuration file needs to
+# include compat.qdocconf.
+# include(compat.qdocconf)
+# include(/opt/Qt5.9.1/Docs/Qt-5.9.1/global/compat.qdocconf)
+
+# The outputdir variable specifies the directory
+# where QDoc will put the generated documentation.
+outputdir = ./doc/html
+
+# The headerdirs variable specifies the directories
+# containing the header files associated
+# with the .cpp source files used in the documentation.
+headerdirs  = ./src
+
+# The sourcedirs variable specifies the
+# directories containing the .cpp or .qdoc
+# files used in the documentation.
+sourcedirs  = ./src
+
+# The exampledirs variable specifies the directories containing
+# the source code of the example files.
+# exampledirs = .
+
+# The imagedirs variable specifies the
+# directories containing the images used in the documentation.
+imagedirs = ./doc/images
+
+# ...
+sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
+headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
+examples.fileextensions = "*.cpp *.h *.js *.xq *.svg *.xml *.ui *.qhp *.qhcp *.qml"
+examples.imageextensions = "*.png *.jpeg *.jpg *.gif *.mng"
