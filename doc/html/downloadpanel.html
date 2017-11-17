@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- downloadpanel.cpp -->
+  <title>DownloadPanel Class | TestMyQt/QtCreatorTMC</title>
+</head>
+<body>
+<li>DownloadPanel</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">DownloadPanel Class</h1>
+<!-- $$$DownloadPanel-brief -->
+<p>The <code>DownloadPanel</code> class is a top-level <a href="http://doc.qt.io/qt-5/qwidget.html">QWidget</a> (a window) that is used to display the download progress of TMC exercises. <a href="#details">More...</a></p>
+<!-- @@@DownloadPanel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;DownloadPanel&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="downloadpanel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#DownloadPanel">DownloadPanel</a></b>(QWidget *<i>parent</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#dtor.DownloadPanel">~DownloadPanel</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#addInfoLabel">addInfoLabel</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#addReplyToList">addReplyToList</a></b>(QNetworkReply *<i>reply</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#addWidgetsToDownloadPanel">addWidgetsToDownloadPanel</a></b>(QString <i>downloadName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNetworkReply *</td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#getRepliesListItem">getRepliesListItem</a></b>(int <i>index</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#sanityCheck">sanityCheck</a></b>()</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#cancelDownload">cancelDownload</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#httpFinished">httpFinished</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="downloadpanel.html#networkReplyProgress">networkReplyProgress</a></b>(qint64 <i>bytesReceived</i>, qint64 <i>bytesTotal</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$DownloadPanel-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <code>DownloadPanel</code> class is a top-level <a href="http://doc.qt.io/qt-5/qwidget.html">QWidget</a> (a window) that is used to display the download progress of TMC exercises.</p>
+<p class="centerAlign"><img src="images/ss_DownloadPanel.png" alt="&quot;Screenshot: DownloadPanel window&quot;" /></p><p>Each of the TMC exercises is packed and transferred as a separate zip archive. It's therefore typical to have multiple concurrent downloads. The <code>DownloadPanel</code> window displays a separate <a href="http://doc.qt.io/qt-5/qprogressbar.html">QProgressBar</a> for each of them.</p>
+<p>Class <code>DownloadPanel</code> doesn't have any data transfer functionality of its own. It just gives a visual indication of the downloads initiated by <code>TmcClient::getExerciseZip()</code>.</p>
+<p><b>Note: </b>A slight problem with the progress bars is their inaccuracy. This is due to the signal <code>QNetworkReply::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)</code>. Each time it is emitted for an incomplete download the value of <i>bytesTotal</i> is -1 rather than the true download size. Whenever <i>bytesTotal</i> is -1 a progress bar has to resort to using the crude approximation <code>AVERAGE_DOWNLOAD_SIZE</code>.</p></div>
+<!-- @@@DownloadPanel -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$DownloadPanel[overload1]$$$DownloadPanelQWidget* -->
+<h3 class="fn" id="DownloadPanel"><a name="DownloadPanel"></a>DownloadPanel::<span class="name">DownloadPanel</span>(<span class="type">QWidget</span> *<i>parent</i> = 0)</h3>
+<p>Default constructs an instance of DownloadPanel.</p><!-- @@@DownloadPanel -->
+<!-- $$$~DownloadPanel[overload1]$$$~DownloadPanel -->
+<h3 class="fn" id="dtor.DownloadPanel"><a name="dtor.DownloadPanel"></a>DownloadPanel::<span class="name">~DownloadPanel</span>()</h3>
+<p>Destroys the instance of DownloadPanel.</p><!-- @@@~DownloadPanel -->
+<!-- $$$addInfoLabel[overload1]$$$addInfoLabel -->
+<h3 class="fn" id="addInfoLabel"><a name="addInfoLabel"></a><span class="type">void</span> DownloadPanel::<span class="name">addInfoLabel</span>()</h3>
+<p>Adds an info or status label to the bottom of the <code>DownloadPanel</code> window. The info label is used for displaying short messages to the user. The function should only be called once after adding the rest of the widgets.</p>
+<!-- @@@addInfoLabel -->
+<!-- $$$addReplyToList[overload1]$$$addReplyToListQNetworkReply* -->
+<h3 class="fn" id="addReplyToList"><a name="addReplyToList"></a><span class="type">void</span> DownloadPanel::<span class="name">addReplyToList</span>(<span class="type">QNetworkReply</span> *<i>reply</i>)</h3>
+<p>Adds <i>reply</i> to the <code>replies</code> list of type <code>QList&lt;QNetworkReply *&gt;</code>. There's also the list <code>progressBars</code> which is of the same size as <code>replies</code>. Each element in <code>replies</code> corresponds to the element at the same index in <code>progressBars</code>.</p>
+<!-- @@@addReplyToList -->
+<!-- $$$addWidgetsToDownloadPanel[overload1]$$$addWidgetsToDownloadPanelQString -->
+<h3 class="fn" id="addWidgetsToDownloadPanel"><a name="addWidgetsToDownloadPanel"></a><span class="type">void</span> DownloadPanel::<span class="name">addWidgetsToDownloadPanel</span>(<span class="type">QString</span> <i>downloadName</i>)</h3>
+<!-- @@@addWidgetsToDownloadPanel -->
+<!-- $$$cancelDownload[overload1]$$$cancelDownload -->
+<h3 class="fn" id="cancelDownload"><a name="cancelDownload"></a><code>[slot] </code><span class="type">void</span> DownloadPanel::<span class="name">cancelDownload</span>()</h3>
+<!-- @@@cancelDownload -->
+<!-- $$$getRepliesListItem[overload1]$$$getRepliesListItemint -->
+<h3 class="fn" id="getRepliesListItem"><a name="getRepliesListItem"></a><span class="type">QNetworkReply</span> *DownloadPanel::<span class="name">getRepliesListItem</span>(<span class="type">int</span> <i>index</i>)</h3>
+<!-- @@@getRepliesListItem -->
+<!-- $$$httpFinished[overload1]$$$httpFinished -->
+<h3 class="fn" id="httpFinished"><a name="httpFinished"></a><code>[slot] </code><span class="type">void</span> DownloadPanel::<span class="name">httpFinished</span>()</h3>
+<!-- @@@httpFinished -->
+<!-- $$$networkReplyProgress[overload1]$$$networkReplyProgressqint64qint64 -->
+<h3 class="fn" id="networkReplyProgress"><a name="networkReplyProgress"></a><code>[slot] </code><span class="type">void</span> DownloadPanel::<span class="name">networkReplyProgress</span>(<span class="type">qint64</span> <i>bytesReceived</i>, <span class="type">qint64</span> <i>bytesTotal</i>)</h3>
+<!-- @@@networkReplyProgress -->
+<!-- $$$sanityCheck[overload1]$$$sanityCheck -->
+<h3 class="fn" id="sanityCheck"><a name="sanityCheck"></a><span class="type">void</span> DownloadPanel::<span class="name">sanityCheck</span>()</h3>
+<!-- @@@sanityCheck -->
+</div>
+</body>
+</html>

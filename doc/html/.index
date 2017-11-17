@@ -2,7 +2,7 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="" title="" version="" project="">
     <namespace threadsafety="unspecified" name="" status="active" access="public">
-        <class threadsafety="unspecified" name="DownloadPanel" href="downloadpanel.html" status="internal" access="private" location="downloadpanel.h" filepath="/home/henrik/TestMyQt/Qt-CreatorTMC/src/downloadpanel.h" lineno="11">
+        <class threadsafety="unspecified" name="DownloadPanel" href="downloadpanel.html" status="active" access="public" location="downloadpanel.h" filepath="/home/henrik/TestMyQt/Qt-CreatorTMC/src/downloadpanel.h" lineno="11" brief="A brief summary on the class">
             <function threadsafety="unspecified" name="DownloadPanel" fullname="DownloadPanel::DownloadPanel" href="downloadpanel.html#DownloadPanel" status="active" access="public" location="downloadpanel.h" filepath="/home/henrik/TestMyQt/Qt-CreatorTMC/src/downloadpanel.h" lineno="16" virtual="non" meta="constructor" const="false" static="false" overload="false" delete="false" default="false" final="false" override="false" type="" signature="DownloadPanel(QWidget *parent)">
                 <parameter left="QWidget *" right="" name="parent" default="0"/>
             </function>

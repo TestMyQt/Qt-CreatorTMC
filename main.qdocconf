@@ -1,3 +1,6 @@
+project = TestMyQt/QtCreatorTMC
+# description = (add some description here)
+
 # QDoc is a tool that constantly evolves to suit our needs,
 # and there are some compatibility issues between old and new
 # practices. For that reason, any QDoc configuration file needs to

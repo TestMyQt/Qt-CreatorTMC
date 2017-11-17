@@ -1,3 +1,30 @@
+/*!
+    \class DownloadPanel
+    \inmodule src
+    \brief The \c DownloadPanel class is a top-level \l
+    {http://doc.qt.io/qt-5/qwidget.html} {QWidget} (a window) that is
+    used to display the download progress of TMC exercises.
+
+    \image ss_DownloadPanel.png "Screenshot: DownloadPanel window"
+
+    Each of the TMC exercises is packed and transferred as a separate zip
+    archive. It's therefore typical to have multiple concurrent downloads.
+    The \c DownloadPanel window displays a separate \l
+    {http://doc.qt.io/qt-5/qprogressbar.html} {QProgressBar} for each
+    of them.
+
+    Class \c DownloadPanel doesn't have any data transfer functionality of its own.
+    It just gives a visual indication of the downloads initiated by
+    \c TmcClient::getExerciseZip().
+
+    \note A slight problem with the progress bars is their inaccuracy. This is
+    due to the signal \c QNetworkReply::downloadProgress(qint64 bytesReceived,
+    qint64 bytesTotal). Each time it is emitted for an incomplete download
+    the value of \a bytesTotal is -1 rather than the true download size. Whenever
+    \a bytesTotal is -1 a progress bar has to resort to using the crude
+    approximation \c AVERAGE_DOWNLOAD_SIZE.
+*/
+
 #include <QDebug>
 #include <QTimer>
 
@@ -26,7 +53,11 @@ DownloadPanel::~DownloadPanel()
 
 }
 
-// Should only be called once after adding the rest of the widgets
+/*!
+    Adds an info or status label to the bottom of the \c DownloadPanel window.
+    The info label is used for displaying short messages to the user. The
+    function should only be called once after adding the rest of the widgets.
+ */
 void DownloadPanel::addInfoLabel()
 {
     if( doneAddingWidgets ) {
@@ -86,6 +117,12 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
     ++numberOfProgressBars;
 }
 
+/*!
+    Adds \a reply to the \c replies list of type \c {QList<QNetworkReply *>}.
+    There's also the list \c progressBars which is of the same size as
+    \c replies. Each element in \c replies corresponds to the element at the
+    same index in \c progressBars.
+ */
 void DownloadPanel::addReplyToList( QNetworkReply *reply )
 {
     replies.append( reply );
