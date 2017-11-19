@@ -1,14 +1,3 @@
-/*
-    \class TestMyCode
-    \brief A brief summary on the class.
-
-    This is a paragraph.
-
-    This also is a paragraph.
-
-    \note This is a note, not a damn paragraph.
-*/
-
 #include "testmycode.h"
 #include "testmycodeconstants.h"
 #include "tmcclient.h"

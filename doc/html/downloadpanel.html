@@ -23,7 +23,7 @@
 <p>The <code>DownloadPanel</code> class is a top-level <a href="http://doc.qt.io/qt-5/qwidget.html">QWidget</a> (a window) that is used to display the download progress of TMC exercises. <a href="#details">More...</a></p>
 <!-- @@@DownloadPanel -->
 <div class="table"><table class="alignedsummary">
-<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;DownloadPanel&gt;</span>
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;downloadpanel.h&gt;</span>
 </td></tr></table></div><ul>
 <li><a href="downloadpanel-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -51,7 +51,7 @@
 <h2 id="details">Detailed Description</h2>
 <p>The <code>DownloadPanel</code> class is a top-level <a href="http://doc.qt.io/qt-5/qwidget.html">QWidget</a> (a window) that is used to display the download progress of TMC exercises.</p>
 <p class="centerAlign"><img src="images/ss_DownloadPanel.png" alt="&quot;Screenshot: DownloadPanel window&quot;" /></p><p>Each of the TMC exercises is packed and transferred as a separate zip archive. It's therefore typical to have multiple concurrent downloads. The <code>DownloadPanel</code> window displays a separate <a href="http://doc.qt.io/qt-5/qprogressbar.html">QProgressBar</a> for each of them.</p>
-<p>Class <code>DownloadPanel</code> doesn't have any data transfer functionality of its own. It just gives a visual indication of the downloads initiated by <code>TmcClient::getExerciseZip()</code>.</p>
+<p>Class <code>DownloadPanel</code> doesn't have any data transfer functionality of its own. It just gives a visual indication of the downloads initiated by <code>TestMyCode::on_download_okbutton_clicked()</code>.</p>
 <p><b>Note: </b>A slight problem with the progress bars is their inaccuracy. This is due to the signal <code>QNetworkReply::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)</code>. Each time it is emitted for an incomplete download the value of <i>bytesTotal</i> is -1 rather than the true download size. Whenever <i>bytesTotal</i> is -1 a progress bar has to resort to using the crude approximation <code>AVERAGE_DOWNLOAD_SIZE</code>.</p></div>
 <!-- @@@DownloadPanel -->
 <div class="func">
@@ -68,25 +68,31 @@
 <!-- @@@addInfoLabel -->
 <!-- $$$addReplyToList[overload1]$$$addReplyToListQNetworkReply* -->
 <h3 class="fn" id="addReplyToList"><a name="addReplyToList"></a><span class="type">void</span> DownloadPanel::<span class="name">addReplyToList</span>(<span class="type">QNetworkReply</span> *<i>reply</i>)</h3>
-<p>Adds <i>reply</i> to the <code>replies</code> list of type <code>QList&lt;QNetworkReply *&gt;</code>. There's also the list <code>progressBars</code> which is of the same size as <code>replies</code>. Each element in <code>replies</code> corresponds to the element at the same index in <code>progressBars</code>.</p>
+<p>Appends <i>reply</i> to the end of list <code>replies</code> of type <code>QList&lt;QNetworkReply *&gt;</code>. There's also the <code>QList</code> instance variable <code>progressBars</code> which is of the same size as <code>replies</code>. Each element in <code>replies</code> corresponds to the element at the same index in <code>progressBars</code>.</p>
 <!-- @@@addReplyToList -->
 <!-- $$$addWidgetsToDownloadPanel[overload1]$$$addWidgetsToDownloadPanelQString -->
 <h3 class="fn" id="addWidgetsToDownloadPanel"><a name="addWidgetsToDownloadPanel"></a><span class="type">void</span> DownloadPanel::<span class="name">addWidgetsToDownloadPanel</span>(<span class="type">QString</span> <i>downloadName</i>)</h3>
+<p>Adds three widgets to the <code>DownloadPanel</code> window which have to do with a particular download. The widgets are a <code>QLabel</code> for naming the download, a <code>QPushButton</code> for cancelling the download and a <code>QProgressBar</code> for displaying the progress. The parameter <i>downloadName</i> is displayed in the <code>QLabel</code>.</p>
 <!-- @@@addWidgetsToDownloadPanel -->
 <!-- $$$cancelDownload[overload1]$$$cancelDownload -->
 <h3 class="fn" id="cancelDownload"><a name="cancelDownload"></a><code>[slot] </code><span class="type">void</span> DownloadPanel::<span class="name">cancelDownload</span>()</h3>
+<p>Each of the download cancel buttons in the <code>DownloadPanel</code> window are connected to this slot.</p>
 <!-- @@@cancelDownload -->
 <!-- $$$getRepliesListItem[overload1]$$$getRepliesListItemint -->
 <h3 class="fn" id="getRepliesListItem"><a name="getRepliesListItem"></a><span class="type">QNetworkReply</span> *DownloadPanel::<span class="name">getRepliesListItem</span>(<span class="type">int</span> <i>index</i>)</h3>
+<p>Returns the <code>QNetworkReply</code> pointer specified by the <i>index</i> parameter. The pointer is an element in the <code>QList</code> instance variable <code>replies</code>.</p>
 <!-- @@@getRepliesListItem -->
 <!-- $$$httpFinished[overload1]$$$httpFinished -->
 <h3 class="fn" id="httpFinished"><a name="httpFinished"></a><code>[slot] </code><span class="type">void</span> DownloadPanel::<span class="name">httpFinished</span>()</h3>
+<p>The signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html#finished">QNetworkReply::finished</a> is connected to this slot in <code>TestMyCode::on_download_okbutton_clicked()</code>.</p>
 <!-- @@@httpFinished -->
 <!-- $$$networkReplyProgress[overload1]$$$networkReplyProgressqint64qint64 -->
 <h3 class="fn" id="networkReplyProgress"><a name="networkReplyProgress"></a><code>[slot] </code><span class="type">void</span> DownloadPanel::<span class="name">networkReplyProgress</span>(<span class="type">qint64</span> <i>bytesReceived</i>, <span class="type">qint64</span> <i>bytesTotal</i>)</h3>
+<p>The signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html#downloadProgress">QNetworkReply::downloadProgress</a> is connected to this slot in <code>TestMyCode::on_download_okbutton_clicked()</code>. <i>bytesReceived</i> indicates the number of bytes received thus far by the <code>QNetworkReply</code> object that emitted the signal. <i>bytesTotal</i> is the total size of the download. If the value of <i>bytesTotal</i> is -1, the total download size is unknown.</p>
 <!-- @@@networkReplyProgress -->
 <!-- $$$sanityCheck[overload1]$$$sanityCheck -->
 <h3 class="fn" id="sanityCheck"><a name="sanityCheck"></a><span class="type">void</span> DownloadPanel::<span class="name">sanityCheck</span>()</h3>
+<p>There's a one-to-one correspondence between the items of the <code>QLists</code> <code>progressBars</code> and <code>replies</code>. It follows that the sizes of the lists are the same. If this is not the case, the function issues a <a href="http://doc.qt.io/qt-5/qtglobal.html#qDebug">qDebug</a> warning.</p>
 <!-- @@@sanityCheck -->
 </div>
 </body>
