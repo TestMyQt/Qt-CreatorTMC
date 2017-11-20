@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- course.cpp -->
+  <title>Course Class | TestMyQt/QtCreatorTMC</title>
+</head>
+<body>
+<li>Course</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Course Class</h1>
+<!-- $$$Course-brief -->
+<p>Class <a href="course.html">Course</a> is a simple representation of a TMC course that includes the course's exercises as a collection of Exercise objects. <a href="#details">More...</a></p>
+<!-- @@@Course -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;tmcclient.h&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="course-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="course.html#Course">Course</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="course.html#addExercise">addExercise</a></b>(Exercise <i>e</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> Exercise </td><td class="memItemRight bottomAlign"><b><a href="course.html#getExercise">getExercise</a></b>(int <i>id</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QList&lt;Exercise&gt; *</td><td class="memItemRight bottomAlign"><b><a href="course.html#getExercises">getExercises</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="course.html#getId">getId</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QString </td><td class="memItemRight bottomAlign"><b><a href="course.html#getTitle">getTitle</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="course.html#setId">setId</a></b>(int <i>id</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="course.html#setTitle">setTitle</a></b>(QString <i>title</i>)</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$Course-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Class <a href="course.html">Course</a> is a simple representation of a TMC course that includes the course's exercises as a collection of Exercise objects.</p>
+</div>
+<!-- @@@Course -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$Course[overload1]$$$Course -->
+<h3 class="fn" id="Course"><a name="Course"></a>Course::<span class="name">Course</span>()</h3>
+<p>Default constructs an instance of Course.</p><!-- @@@Course -->
+<!-- $$$addExercise[overload1]$$$addExerciseExercise -->
+<h3 class="fn" id="addExercise"><a name="addExercise"></a><span class="type">void</span> Course::<span class="name">addExercise</span>(<span class="type">Exercise</span> <i>e</i>)</h3>
+<!-- @@@addExercise -->
+<!-- $$$getExercise[overload1]$$$getExerciseint -->
+<h3 class="fn" id="getExercise"><a name="getExercise"></a><span class="type">Exercise</span> Course::<span class="name">getExercise</span>(<span class="type">int</span> <i>id</i>)</h3>
+<p>Returns the Exercise object specified by <i>id</i>. If no such Exercise object is found, a &quot;blank&quot; Exercise object is returned (rather than null).</p>
+<!-- @@@getExercise -->
+<!-- $$$getExercises[overload1]$$$getExercises -->
+<h3 class="fn" id="getExercises"><a name="getExercises"></a><span class="type">QList</span>&lt;<span class="type">Exercise</span>&gt; *Course::<span class="name">getExercises</span>()</h3>
+<p>Returns a pointer to the collection of the Exercise objects that represent the whole set of the course's exercises.</p>
+<!-- @@@getExercises -->
+<!-- $$$getId[overload1]$$$getId -->
+<h3 class="fn" id="getId"><a name="getId"></a><span class="type">int</span> Course::<span class="name">getId</span>()</h3>
+<p>Getter function for the course ID.</p>
+<!-- @@@getId -->
+<!-- $$$getTitle[overload1]$$$getTitle -->
+<h3 class="fn" id="getTitle"><a name="getTitle"></a><span class="type">QString</span> Course::<span class="name">getTitle</span>() const</h3>
+<p>Getter function for the course title.</p>
+<!-- @@@getTitle -->
+<!-- $$$setId[overload1]$$$setIdint -->
+<h3 class="fn" id="setId"><a name="setId"></a><span class="type">void</span> Course::<span class="name">setId</span>(<span class="type">int</span> <i>id</i>)</h3>
+<p>Sets the course ID.</p>
+<!-- @@@setId -->
+<!-- $$$setTitle[overload1]$$$setTitleQString -->
+<h3 class="fn" id="setTitle"><a name="setTitle"></a><span class="type">void</span> Course::<span class="name">setTitle</span>(<span class="type">QString</span> <i>title</i>)</h3>
+<p>Sets the course title.</p>
+<!-- @@@setTitle -->
+</div>
+</body>
+</html>
