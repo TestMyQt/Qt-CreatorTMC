@@ -15,12 +15,12 @@ outputdir = ./doc/html
 # The headerdirs variable specifies the directories
 # containing the header files associated
 # with the .cpp source files used in the documentation.
-headerdirs  = ./src
+headerdirs  = ./src ./lib/tmcclient
 
 # The sourcedirs variable specifies the
 # directories containing the .cpp or .qdoc
 # files used in the documentation.
-sourcedirs  = ./src
+sourcedirs  = ./src ./lib/tmcclient
 
 # The exampledirs variable specifies the directories containing
 # the source code of the example files.

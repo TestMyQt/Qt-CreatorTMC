@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- tmcclient.cpp -->
+  <title>TmcClient Class | TestMyQt/QtCreatorTMC</title>
+</head>
+<body>
+<li>TmcClient</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-slots">Public Slots</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">TmcClient Class</h1>
+<!-- $$$TmcClient-brief -->
+<p>Class <a href="tmcclient.html">TmcClient</a> is the primary means of communication with the TMC server. <a href="#details">More...</a></p>
+<!-- @@@TmcClient -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;tmcclient.h&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="tmcclient-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#TmcClient">TmcClient</a></b>(QObject *<i>parent</i> = 0)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#authenticate">authenticate</a></b>(QString <i>username</i>, QString <i>password</i>, bool <i>savePassword</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#getExerciseList">getExerciseList</a></b>(Course *<i>course</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QNetworkReply *</td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#getExerciseZip">getExerciseZip</a></b>(Exercise *<i>ex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#getUserInfo">getUserInfo</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#setNetworkManager">setNetworkManager</a></b>(QNetworkAccessManager *<i>m</i>)</td></tr>
+</table></div>
+<a name="public-slots"></a>
+<h2 id="public-slots">Public Slots</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#authenticationFinished">authenticationFinished</a></b>(QNetworkReply *<i>reply</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#exerciseListReplyFinished">exerciseListReplyFinished</a></b>(QNetworkReply *<i>reply</i>, Course *<i>course</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#exerciseZipReplyFinished">exerciseZipReplyFinished</a></b>(QNetworkReply *<i>reply</i>, Exercise *<i>ex</i>)</td></tr>
+</table></div>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#TMCError">TMCError</a></b>(QString <i>errorString</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#exerciseListReady">exerciseListReady</a></b>(Course *<i>course</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#exerciseZipReady">exerciseZipReady</a></b>(Exercise *<i>ex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="tmcclient.html#loginFinished">loginFinished</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$TmcClient-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Class <a href="tmcclient.html">TmcClient</a> is the primary means of communication with the TMC server.</p>
+</div>
+<!-- @@@TmcClient -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$TmcClient[overload1]$$$TmcClientQObject* -->
+<h3 class="fn" id="TmcClient"><a name="TmcClient"></a>TmcClient::<span class="name">TmcClient</span>(<span class="type">QObject</span> *<i>parent</i> = 0)</h3>
+<p>Default constructs an instance of TmcClient.</p><!-- @@@TmcClient -->
+<!-- $$$TMCError[overload1]$$$TMCErrorQString -->
+<h3 class="fn" id="TMCError"><a name="TMCError"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">TMCError</span>(<span class="type">QString</span> <i>errorString</i>)</h3>
+<p>The signal is the error reporting mechanism of class <a href="tmcclient.html">TmcClient</a>. The <i>errorString</i> contains a human-readable error message.</p>
+<!-- @@@TMCError -->
+<!-- $$$authenticate[overload1]$$$authenticateQStringQStringbool -->
+<h3 class="fn" id="authenticate"><a name="authenticate"></a><span class="type">void</span> TmcClient::<span class="name">authenticate</span>(<span class="type">QString</span> <i>username</i>, <span class="type">QString</span> <i>password</i>, <span class="type">bool</span> <i>savePassword</i>)</h3>
+<p>This is the function that gets called when the user clicks the <code>Log in</code> button in the <code>TMC Login</code> dialog. The values for the parameters <i>username</i>, <i>password</i> and <i>savePassword</i> are obtained from the <code>TMC Login</code> dialog.</p>
+<!-- @@@authenticate -->
+<!-- $$$authenticationFinished[overload1]$$$authenticationFinishedQNetworkReply* -->
+<h3 class="fn" id="authenticationFinished"><a name="authenticationFinished"></a><code>[slot] </code><span class="type">void</span> TmcClient::<span class="name">authenticationFinished</span>(<span class="type">QNetworkReply</span> *<i>reply</i>)</h3>
+<p>The primary purpose of the slot is to extract the access token from the parameter <i>reply</i> and save it in a member variable for future use. The slot is called when the <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply</a> object created in <a href="tmcclient.html#authenticate">authenticate()</a> emits the signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html#finished">QNetworkReply::finished</a>. If an error occurred during authentication, the slot emits the signal <a href="tmcclient.html#TMCError">TmcClient::TMCError</a>.</p>
+<!-- @@@authenticationFinished -->
+<!-- $$$exerciseListReady[overload1]$$$exerciseListReadyCourse* -->
+<h3 class="fn" id="exerciseListReady"><a name="exerciseListReady"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">exerciseListReady</span>(<span class="type">Course</span> *<i>course</i>)</h3>
+<p>Emitted by <a href="tmcclient.html#exerciseListReplyFinished">exerciseListReplyFinished()</a> after the exercise list returned by the TMC server has been successfully processed. The exercise list can be obtained from the Course object parameter <i>course</i> using getExercises().</p>
+<!-- @@@exerciseListReady -->
+<!-- $$$exerciseListReplyFinished[overload1]$$$exerciseListReplyFinishedQNetworkReply*Course* -->
+<h3 class="fn" id="exerciseListReplyFinished"><a name="exerciseListReplyFinished"></a><code>[slot] </code><span class="type">void</span> TmcClient::<span class="name">exerciseListReplyFinished</span>(<span class="type">QNetworkReply</span> *<i>reply</i>, <span class="type">Course</span> *<i>course</i>)</h3>
+<p>By the time the slot is called the <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply</a> object pointed to by <i>reply</i> should contain a particular TMC course's exercise list as a JSON document. Assuming there has been no errors during the download phase, the JSON document is processed and each of the exercises are added to the Course object pointed to by <i>course</i> with a call to Course::addExercise().</p>
+<!-- @@@exerciseListReplyFinished -->
+<!-- $$$exerciseZipReady[overload1]$$$exerciseZipReadyExercise* -->
+<h3 class="fn" id="exerciseZipReady"><a name="exerciseZipReady"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">exerciseZipReady</span>(<span class="type">Exercise</span> *<i>ex</i>)</h3>
+<p>Emitted by <a href="tmcclient.html#exerciseZipReplyFinished">exerciseZipReplyFinished()</a> after successfully extracting the downloaded exercise zip archive to the appropriate directory. Parameter <i>ex</i> identifies the Exercise object the signal was emitted for.</p>
+<!-- @@@exerciseZipReady -->
+<!-- $$$exerciseZipReplyFinished[overload1]$$$exerciseZipReplyFinishedQNetworkReply*Exercise* -->
+<h3 class="fn" id="exerciseZipReplyFinished"><a name="exerciseZipReplyFinished"></a><code>[slot] </code><span class="type">void</span> TmcClient::<span class="name">exerciseZipReplyFinished</span>(<span class="type">QNetworkReply</span> *<i>reply</i>, <span class="type">Exercise</span> *<i>ex</i>)</h3>
+<p>The primary purpose of the function is to extract a successfully downloaded zip archive to an appropriate target directory. <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply</a> <i>reply</i> contains the zip archive data and <i>ex</i> identifies the relevant Exercise object.</p>
+<!-- @@@exerciseZipReplyFinished -->
+<!-- $$$getExerciseList[overload1]$$$getExerciseListCourse* -->
+<h3 class="fn" id="getExerciseList"><a name="getExerciseList"></a><span class="type">void</span> TmcClient::<span class="name">getExerciseList</span>(<span class="type">Course</span> *<i>course</i>)</h3>
+<p>Creates a <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply</a> object for downloading the exercise list associated with the Course parameter <i>course</i> and connects the object's signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html#finished">QNetworkReply::finished</a> to slot <a href="tmcclient.html#exerciseListReplyFinished">exerciseListReplyFinished()</a>.</p>
+<!-- @@@getExerciseList -->
+<!-- $$$getExerciseZip[overload1]$$$getExerciseZipExercise* -->
+<h3 class="fn" id="getExerciseZip"><a name="getExerciseZip"></a><span class="type">QNetworkReply</span> *TmcClient::<span class="name">getExerciseZip</span>(<span class="type">Exercise</span> *<i>ex</i>)</h3>
+<p>Downloads the TMC exercise specified by the Exercise parameter <i>ex</i>. The exercise is delivered from the TMC server as zip archive data. Signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply::finished</a> is connected to slot <a href="tmcclient.html#exerciseZipReplyFinished">exerciseZipReplyFinished()</a> which means that extraction of the files in the zip archive will begin automatically after the download completes.</p>
+<!-- @@@getExerciseZip -->
+<!-- $$$getUserInfo[overload1]$$$getUserInfo -->
+<h3 class="fn" id="getUserInfo"><a name="getUserInfo"></a><span class="type">void</span> TmcClient::<span class="name">getUserInfo</span>()</h3>
+<p>Retrieves information about the currently logged in user from the TMC server. The information is delivered as a JSON document. The information includes..&#x2e; TODO: continue from here</p>
+<!-- @@@getUserInfo -->
+<!-- $$$loginFinished[overload1]$$$loginFinished -->
+<h3 class="fn" id="loginFinished"><a name="loginFinished"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">loginFinished</span>()</h3>
+<!-- @@@loginFinished -->
+<!-- $$$setNetworkManager[overload1]$$$setNetworkManagerQNetworkAccessManager* -->
+<h3 class="fn" id="setNetworkManager"><a name="setNetworkManager"></a><span class="type">void</span> TmcClient::<span class="name">setNetworkManager</span>(<span class="type">QNetworkAccessManager</span> *<i>m</i>)</h3>
+<p>The QtCreatorTMC plugin uses a single <a href="http://doc.qt.io/qt-5/qnetworkaccessmanager.html">QNetworkAccessManager</a> object for managing network communications. The object is initialized in TestMyCode::initialize(). setNetworkManager() is called from initialize() with the address of the <code>QNetworkAccessManager</code> object as the value for parameter <i>m</i>.</p>
+<!-- @@@setNetworkManager -->
+</div>
+</body>
+</html>
