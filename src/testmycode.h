@@ -6,26 +6,9 @@
 #include "downloadpanel.h"
 
 #include <extensionsystem/iplugin.h>
-#include <QWidget>
 
-#include <projectexplorer/project.h>
-#include <projectexplorer/projectexplorer.h>
-#include <projectexplorer/session.h>
-#include <projectexplorer/target.h>
-
-#include <extensionsystem/iplugin.h>
-#include <utils/hostosinfo.h>
-#include <utils/fileutils.h>
-
-#include <QAction>
-#include <QMessageBox>
-#include <QMainWindow>
-#include <QMenu>
 #include <QObject>
 #include <QString>
-#include <QCoreApplication>
-#include <QProcessEnvironment>
-#include <QFileInfo>
 
 namespace TestMyCodePlugin {
 namespace Internal {
@@ -45,11 +28,11 @@ public:
 
 private slots:
     // Loginform
-    void on_login_cancelbutton_clicked();
-    void on_login_loginbutton_clicked();
+    void onLoginCancelClicked();
+    void onLoginClicked();
     // Downloadform
-    void on_download_cancelbutton_clicked();
-    void on_download_okbutton_clicked();
+    void onDownloadCancelClicked();
+    void onDownloadOkClicked();
     void refreshDownloadList();
 
 private:
@@ -71,6 +54,10 @@ private:
     void openProject(Exercise *ex);
     void displayTMCError(QString errorText);
     QString askSaveLocation();
+    void clearCredentials();
+    void handleLoginResponse(QString accessToken);
+    void handleAuthResponse(QString clientId, QString clientSecret);
+
     // ...
     DownloadPanel *downloadPanel;
 };
