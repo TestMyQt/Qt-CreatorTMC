@@ -82,7 +82,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
-    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+D")));
+    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+D")));
     logoutCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+L")));
 
     // Connect to trigger to a function
@@ -118,11 +118,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     // Create settings
     QSettings settings("TestMyQt", "TMC");
-
     tmcClient.setAccessToken(settings.value("accessToken", "").toString());
     tmcClient.setClientId(settings.value("clientId", "").toString());
     tmcClient.setClientSecret(settings.value("clientSecret", "").toString());
-
     login->usernameinput->setText(settings.value("username", "").toString());
     login->passwordinput->setText(settings.value("password", "").toString());
     if (settings.value("savePasswordChecked").toString() == "true")
@@ -278,14 +276,9 @@ void TestMyCode::clearCredentials()
     QSettings settings("TestMyQt", "TMC");
     settings.setValue("username", "");
     settings.setValue("password", "");
-
-    settings.setValue("clientId", "");
-    settings.setValue("clientSecret", "");
     settings.setValue("accessToken", "");
     settings.deleteLater();
     tmcClient.setAccessToken("");
-    tmcClient.setClientId("");
-    tmcClient.setClientSecret("");
 }
 
 void TestMyCode::onDownloadCancelClicked()
