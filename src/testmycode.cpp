@@ -7,6 +7,7 @@
 
 #include <ui_loginscreen.h>
 #include <ui_downloadscreen.h>
+#include <ui_settings.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -72,6 +73,10 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Core::Command *loginCmd = Core::ActionManager::registerAction(loginAction, Constants::LOGIN_ACTION_ID,
                                                              Core::Context(Core::Constants::C_GLOBAL));
 
+    auto settingsAction = new QAction(tr("Settings"), this);
+    Core::Command *settingsCmd = Core::ActionManager::registerAction(settingsAction, Constants::SETTINGS_ACTION_ID,
+                                                                     Core::Context(Core::Constants::C_GLOBAL));
+
     auto downloadAction = new QAction(tr("Download"), this);
     Core::Command *downloadCmd = Core::ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
                                                                      Core::Context(Core::Constants::C_GLOBAL));
@@ -82,12 +87,14 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
-    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+D")));
+    settingsCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+S")));
+    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
     logoutCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+L")));
 
     // Connect to trigger to a function
     connect(loginAction, &QAction::triggered, this, &TestMyCode::showLoginWidget);
     connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
+    connect(settingsAction, &QAction::triggered, this, &TestMyCode::showSettingsWindow);
     connect(downloadAction, &QAction::triggered, this, &TestMyCode::showDownloadWidget);
     connect(logoutAction, &QAction::triggered, this, &TestMyCode::clearCredentials);
 
@@ -96,6 +103,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->menu()->setTitle(tr("TestMyCode"));
     Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
     menu->addAction(tmcCmd);
+    menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
     menu->addAction(downloadCmd);
     menu->addAction(logoutCmd);
@@ -105,6 +113,11 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Core::ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
 
     addAutoReleasedObject(TmcOutputPane::instance());
+
+    // Initialize settings window
+    settingsWidget = new QWidget;
+    settingsWindow = new Ui::settingsForm;
+    settingsWindow->setupUi(settingsWidget);
 
     // Initialize download window
     downloadWidget = new QWidget;
@@ -186,6 +199,18 @@ void TestMyCode::showDownloadWidget()
     downloadWidget->show();
 }
 
+void TestMyCode::showSettingsWindow()
+{
+    QSettings settings("TestMyQt", "TMC");
+    settingsWindow->usernamefield->setText(settings.value("username", "").toString());
+    settingsWindow->passwordfield->setText(settings.value("password", "").toString());
+    settingsWindow->serveraddressfield->setText(settings.value("serverAddress", "").toString());
+    if (settings.value("savePasswordChecked", "") == "true")
+        settingsWindow->savepasswordcheckbox->setCheckState(Qt::Checked);
+    settings.deleteLater();
+    settingsWidget->show();
+}
+
 void TestMyCode::runTMC()
 {
     TMCRunner *runner = TMCRunner::instance();
@@ -232,6 +257,7 @@ void TestMyCode::onLoginClicked()
 {
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
+
     bool savePassword = login->savepasswordbox->isChecked();
 
     tmcClient.authenticate(username, password);

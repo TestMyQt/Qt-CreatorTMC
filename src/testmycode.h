@@ -1,6 +1,7 @@
 #pragma once
 #include <ui_loginscreen.h>
 #include <ui_downloadscreen.h>
+#include <ui_settings.h>
 #include "testmycode_global.h"
 #include "tmcclient.h"
 #include "downloadpanel.h"
@@ -36,6 +37,11 @@ private slots:
     void refreshDownloadList();
 
 private:
+    // SettingsWindow
+    Ui::settingsForm *settingsWindow;
+    QWidget *settingsWidget;
+    void showSettingsWindow();
+
     // Loginform
     Ui::loginform *login;
     QWidget *loginWidget;
