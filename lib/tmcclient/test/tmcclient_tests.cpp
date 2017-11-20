@@ -16,6 +16,7 @@ private slots:
     void testCourseList();
     void testSuccessfulLogin();
     void testUnsuccessfulLogin();
+    void testAuthorization();
 
 private:
     TestNetworkAccessManager *testmanager;
@@ -110,40 +111,67 @@ void TmcClientTest::testCourseList()
 
 void TmcClientTest::testSuccessfulLogin()
 {
-    content += QString("{ \"access_token\": \"token\",");
-    content += QString("\"created_at\": 1510207179,");
-    content += QString("\"scope\": \"public\",");
-    content += QString("\"token_type\": \"bearer\" }");
+    content = QString("{ \"access_token\": \"token\","
+                       "\"created_at\": 1510207179,"
+                       "\"scope\": \"public\","
+                       "\"token_type\": \"bearer\" }");
+
     TestNetworkReply *reply = new TestNetworkReply;
     reply->setStatusOK();
     reply->setContentType("text/json");
     testmanager->setReply(reply);
-    QSignalSpy login(&tmcClient, &TmcClient::loginFinished);
+    QSignalSpy login(&tmcClient, &TmcClient::authenticationFinished);
     QSignalSpy error(&tmcClient, &TmcClient::TMCError);
-    tmcClient.authenticate("testiCredentials", "?", false);
+    tmcClient.setClientId("clientId");
+    tmcClient.setClientSecret("clientSecret");
+    tmcClient.authenticate("testiCredentials", "?");
     reply->setContent(content);
 
-    QVERIFY2(login.count() == 1, "loginFinished");
+    QVERIFY2(login.count() == 1, "authenticationFinished");
     QVERIFY2(error.count() == 0, "TMCError");
+
+    QList<QVariant> arguments = login.takeFirst();
+    QVERIFY2(arguments.at(0).toString() == "token", "token");
 }
 
 void TmcClientTest::testUnsuccessfulLogin()
 {
-    content += QString("{ \"access_token\": \"token\",");
-    content += QString("\"created_at\": 1510207179,");
-    content += QString("\"scope\": \"public\",");
-    content += QString("\"token_type\": \"bearer\" }");
     TestNetworkReply *reply = new TestNetworkReply;
     reply->setStatusUnauthorized();
     reply->setContentType("text/json");
     testmanager->setReply(reply);
-    QSignalSpy login(&tmcClient, &TmcClient::loginFinished);
+    QSignalSpy login(&tmcClient, &TmcClient::authenticationFinished);
     QSignalSpy error(&tmcClient, &TmcClient::TMCError);
-    tmcClient.authenticate("testiCredentials", "?", false);
-    reply->setContent(content);
+    tmcClient.setClientId("clientId");
+    tmcClient.setClientSecret("clientSecret");
+    tmcClient.authenticate("testiCredentials", "?");
+    reply->setContent(QString(""));
 
-    QVERIFY2(login.count() == 0, "loginFinished");
+    QVERIFY2(login.count() == 1, "authenticationFinished");
     QVERIFY2(error.count() == 1, "TMCError");
+
+    QList<QVariant> arguments = login.takeFirst();
+    QVERIFY2(arguments.at(0).toString() == "", "token");
+}
+
+void TmcClientTest::testAuthorization()
+{
+    TestNetworkReply *reply = new TestNetworkReply;
+    reply->setStatusUnauthorized();
+    reply->setContentType("text/json");
+    testmanager->setReply(reply);
+    QSignalSpy login(&tmcClient, &TmcClient::authenticationFinished);
+    QSignalSpy error(&tmcClient, &TmcClient::TMCError);
+    tmcClient.setClientId("");
+    tmcClient.setClientSecret("");
+    tmcClient.authenticate("testiCredentials", "?");
+    reply->setContent(QString(""));
+
+    QVERIFY2(login.count() == 1, "authenticationFinished");
+    QVERIFY2(error.count() == 1, "TMCError");
+
+    QList<QVariant> arguments = login.takeFirst();
+    QVERIFY2(arguments.at(0).toString() == "", "token");
 }
 
 QTEST_MAIN(TmcClientTest)
