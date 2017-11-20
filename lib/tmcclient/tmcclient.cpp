@@ -64,11 +64,11 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
     if (reply->error()) {
         if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 403) {
             emit accessTokenNotValid();
-            return "false";
+            return false;
         }
-        return "false";
+        return false;
     }
-    return "true";
+    return true;
 }
 
 void TmcClient::authorize()
