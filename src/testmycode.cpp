@@ -118,7 +118,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Signal-Slot for login window
     QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_cancelbutton_clicked()));
     QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_loginbutton_clicked()));
-    connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
+    connect(&tmcClient, &TmcClient::authorizationFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
     connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
     connect(&tmcClient, &TmcClient::exerciseZipReady, this, &TestMyCode::openProject);
     connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
@@ -208,7 +208,7 @@ void TestMyCode::on_login_loginbutton_clicked()
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
     bool savePassword = login->savepasswordbox->isChecked();
-    tmcClient.authenticate(username, password, savePassword);
+    tmcClient.authenticate(username, password);
 }
 
 void TestMyCode::on_download_cancelbutton_clicked()
