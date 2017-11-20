@@ -76,6 +76,7 @@ void TmcClient::authenticate(QString username, QString password)
         emit TMCError(QString("Login failed: "
                               "no client id/secret available"));
         emit authenticationFinished("");
+        return;
     }
 
     QUrl url("https://tmc.mooc.fi/oauth/token");
