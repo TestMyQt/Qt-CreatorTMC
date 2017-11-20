@@ -19,22 +19,31 @@ public:
     explicit TmcClient(QObject *parent = 0);
 
     void setNetworkManager(QNetworkAccessManager *m);
-    void authenticate(QString username, QString password, bool savePassword);
+    void setAccessToken(QString token);
+    void setClientId(QString id);
+    void setClientSecret(QString secret);
+
+    void authorize();
+    void authenticate(QString username, QString password);
     void getUserInfo();
-    void loadAccessToken();
     void getExerciseList(Course *course);
     QNetworkReply* getExerciseZip(Exercise *ex);
 
+    bool isAuthorized();
+    bool isAuthenticated();
+
 signals:
     void TMCError(QString errorString);
-    void loginFinished();
+    void authorizationFinished(QString clientId, QString clientSecret);
+    void authenticationFinished(QString accessToken);
     void exerciseListReady(Course *course);
     void exerciseZipReady(Exercise *ex);
     void accessTokenNotValid();
     void closeDownloadWindow();
 
-public slots:
-    void authenticationFinished (QNetworkReply *reply);
+private slots:
+    void authorizationReplyFinished (QNetworkReply *reply);
+    void authenticationReplyFinished (QNetworkReply *reply);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
     void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
 
@@ -43,6 +52,8 @@ private:
     QNetworkReply* doGet(QUrl url);
     QNetworkAccessManager *manager;
     QString accessToken;
+    QString clientId;
+    QString clientSecret;
     bool checkRequestStatus(QNetworkReply *reply);
 };
 

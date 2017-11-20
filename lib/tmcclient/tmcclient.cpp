@@ -3,7 +3,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-#include <QSettings>
 #include <QBuffer>
 
 #include <quazip/JlCompress.h>
@@ -15,48 +14,34 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
 
-void TmcClient::authenticate(QString username, QString password, bool savePassword)
-{
-    QString client_id = "8355b4a75a4191edfedeae7b074571278fd4987d4234c01569678b9ad11f526d";
-    QString client_secret = "c2b1176a6189ceaa16cd51f805ef20ea6c993d36fdb76aa873ac35471d2df4f1";
-    QString username_ = username;
-    QString password_ = password;
-    QString grant_type = "password";
-
-    QSettings settings("TestMyQt", "TMC");
-    settings.setValue("username", username);
-    if (savePassword) {
-        settings.setValue("password", password);
-        settings.setValue("savePasswordChecked", "true");
-    } else {
-        settings.setValue("password", "");
-        settings.setValue("savePasswordChecked", "false");
-    }
-    settings.deleteLater();
-
-    QUrl url("https://tmc.mooc.fi/oauth/token");
-
-    QUrlQuery params;
-    params.addQueryItem("client_id", client_id);
-    params.addQueryItem("client_secret", client_secret);
-    params.addQueryItem("username", username_);
-    params.addQueryItem("password", password_);
-    params.addQueryItem("grant_type", grant_type);
-
-    QNetworkRequest request(url);
-
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-    QNetworkReply *reply = manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
-
-    connect(reply, &QNetworkReply::finished, this, [=](){
-        authenticationFinished(reply);
-    });
-}
-
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
     manager = m;
+}
+
+void TmcClient::setAccessToken(QString token)
+{
+    accessToken = token;
+}
+
+void TmcClient::setClientId(QString id)
+{
+    clientId = id;
+}
+
+void TmcClient::setClientSecret(QString secret)
+{
+    clientSecret = secret;
+}
+
+bool TmcClient::isAuthorized()
+{
+    return !(clientId.isEmpty() || clientSecret.isEmpty());
+}
+
+bool TmcClient::isAuthenticated()
+{
+    return !accessToken.isEmpty();
 }
 
 QNetworkRequest TmcClient::buildRequest(QUrl url)
@@ -74,14 +59,6 @@ QNetworkReply* TmcClient::doGet(QUrl url)
     return reply;
 }
 
-
-void TmcClient::loadAccessToken()
-{
-    QSettings settings("TestMyQt", "TMC");
-    accessToken = settings.value("accessToken", "").toString();
-    settings.deleteLater();
-}
-
 bool TmcClient::checkRequestStatus(QNetworkReply *reply)
 {
     if (reply->error()) {
@@ -92,6 +69,47 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
         return "false";
     }
     return "true";
+}
+
+void TmcClient::authorize()
+{
+    QUrl url("https://tmc.mooc.fi/api/v8/application/qtcreator_plugin/credentials.json");
+    QNetworkReply *reply = doGet(url);
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        authorizationReplyFinished(reply);
+    });
+}
+
+void TmcClient::authenticate(QString username, QString password)
+{
+
+    if (!isAuthorized()) {
+        emit TMCError(QString("Login failed: "
+                              "no client id/secret available"));
+        emit authenticationFinished("");
+        return;
+    }
+
+    QUrl url("https://tmc.mooc.fi/oauth/token");
+
+    QString grantType = "password";
+    QUrlQuery params;
+    params.addQueryItem("client_id", clientId);
+    params.addQueryItem("client_secret", clientSecret);
+    params.addQueryItem("username", username);
+    params.addQueryItem("password", password);
+    params.addQueryItem("grant_type", grantType);
+
+    QNetworkRequest request(url);
+
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QNetworkReply *reply = manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        authenticationReplyFinished(reply);
+    });
 }
 
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
@@ -128,16 +146,28 @@ void TmcClient::getUserInfo()
     });
 }
 
-void TmcClient::authenticationFinished(QNetworkReply *reply)
+void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        emit TMCError(QString("Client authorization failed: %1: %2")
+                      .arg(reply->errorString(), reply->error()));
+        reply->deleteLater();
+        return;
+    }
+
+    QJsonObject json = QJsonDocument::fromJson(reply->readAll()).object();
+    setClientId(json["application_id"].toString());
+    setClientSecret(json["secret"].toString());
+
+    emit authorizationFinished(clientId, clientSecret);
+}
+
+void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
         emit TMCError(QString("Login failed: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        accessToken = "";
-        QSettings settings("TestMyQt", "TMC");
-        settings.setValue("username", "");
-        settings.setValue("password", "");
-        settings.deleteLater();
+        emit authenticationFinished("");
         reply->deleteLater();
         return;
     }
@@ -152,11 +182,8 @@ void TmcClient::authenticationFinished(QNetworkReply *reply)
     auto name = json.object();
     accessToken = name["access_token"].toString();
     qDebug() << accessToken;
-    QSettings settings("TestMyQt", "TMC");
-    settings.setValue("accessToken", accessToken);
-    settings.deleteLater();
 
-    emit loginFinished();
+    emit authenticationFinished(accessToken);
     reply->deleteLater();
 }
 
