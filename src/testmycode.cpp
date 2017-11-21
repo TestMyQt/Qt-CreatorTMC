@@ -75,21 +75,30 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto downloadAction = new QAction(tr("Download"), this);
     Core::Command *downloadCmd = Core::ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
                                                                      Core::Context(Core::Constants::C_GLOBAL));
+
+    auto logoutAction = new QAction(tr("Logout"), this);
+    Core::Command *logoutCmd = Core::ActionManager::registerAction(logoutAction, Constants::LOGOUT_ACTION_ID,
+                                                                     Core::Context(Core::Constants::C_GLOBAL));
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
     downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+D")));
+    logoutCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+L")));
+
+    // Connect to trigger to a function
     connect(loginAction, &QAction::triggered, this, &TestMyCode::showLoginWidget);
     connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
     connect(downloadAction, &QAction::triggered, this, &TestMyCode::showDownloadWidget);
+    connect(logoutAction, &QAction::triggered, this, &TestMyCode::clearCredentials);
 
+    // Create context menu with actions
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
-
     menu->menu()->setTitle(tr("TestMyCode"));
     Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
     menu->addAction(tmcCmd);
     menu->addAction(loginCmd);
     menu->addAction(downloadCmd);
+    menu->addAction(logoutCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
     auto tools_menu = Core::ActionManager::actionContainer(Core::Constants::M_WINDOW);
@@ -109,6 +118,11 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     // Create settings
     QSettings settings("TestMyQt", "TMC");
+
+    tmcClient.setAccessToken(settings.value("accessToken", "").toString());
+    tmcClient.setClientId(settings.value("clientId", "").toString());
+    tmcClient.setClientSecret(settings.value("clientSecret", "").toString());
+
     login->usernameinput->setText(settings.value("username", "").toString());
     login->passwordinput->setText(settings.value("password", "").toString());
     if (settings.value("savePasswordChecked").toString() == "true")
@@ -116,20 +130,28 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     settings.deleteLater();
 
     // Signal-Slot for login window
-    QObject::connect(login->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_cancelbutton_clicked()));
-    QObject::connect(login->loginbutton, SIGNAL(clicked(bool)), this, SLOT(on_login_loginbutton_clicked()));
-    connect(&tmcClient, &TmcClient::loginFinished, this, &TestMyCode::on_login_cancelbutton_clicked);
+    connect(login->cancelbutton, &QPushButton::clicked, this, &TestMyCode::onLoginCancelClicked);
+    connect(login->loginbutton, &QPushButton::clicked, this, &TestMyCode::onLoginClicked);
+
+    // TmcClient
+    connect(&tmcClient, &TmcClient::authorizationFinished, this, &TestMyCode::handleAuthResponse);
+    connect(&tmcClient, &TmcClient::authenticationFinished, this, &TestMyCode::handleLoginResponse);
     connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
     connect(&tmcClient, &TmcClient::exerciseZipReady, this, &TestMyCode::openProject);
     connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
 
-
     // Signal-Slot for download window
-    QObject::connect(downloadform->cancelbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_cancelbutton_clicked()));
-    QObject::connect(downloadform->okbutton, SIGNAL(clicked(bool)), this, SLOT(on_download_okbutton_clicked()));
+    connect(downloadform->cancelbutton, &QPushButton::clicked, this, &TestMyCode::onDownloadCancelClicked);
+    connect(downloadform->okbutton, &QPushButton::clicked, this, &TestMyCode::onDownloadOkClicked);
 
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);
+
+    // TODO: authorization happens at plugin creation time, but this could be done
+    // when a server is activated in preferences
+    if (!tmcClient.isAuthorized()) {
+        tmcClient.authorize();
+    }
 
     return true;
 }
@@ -186,7 +208,7 @@ void TestMyCode::openProject(Exercise *ex)
 
 void TestMyCode::displayTMCError(QString errorText)
 {
-    QMessageBox::critical(NULL, "TMC", errorText, QMessageBox::Ok);
+    QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
 }
 
 void TestMyCode::setDefaultCourse()
@@ -198,20 +220,70 @@ void TestMyCode::setDefaultCourse()
     tmcClient.getExerciseList(course);
 }
 
-void TestMyCode::on_login_cancelbutton_clicked()
+void TestMyCode::onLoginCancelClicked()
 {
     loginWidget->close();
 }
 
-void TestMyCode::on_login_loginbutton_clicked()
+void TestMyCode::onLoginClicked()
 {
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
     bool savePassword = login->savepasswordbox->isChecked();
-    tmcClient.authenticate(username, password, savePassword);
+
+    tmcClient.authenticate(username, password);
+
+    QSettings settings("TestMyQt", "TMC");
+    settings.setValue("username", username);
+    if (savePassword) {
+        settings.setValue("password", password);
+        settings.setValue("savePasswordChecked", "true");
+    } else {
+        settings.setValue("password", "");
+        settings.setValue("savePasswordChecked", "false");
+    }
+    settings.deleteLater();
 }
 
-void TestMyCode::on_download_cancelbutton_clicked()
+void TestMyCode::handleAuthResponse(QString clientId, QString clientSecret)
+{
+    QSettings settings("TestMyQt", "TMC");
+    settings.setValue("clientId", clientId);
+    settings.setValue("clientSecret", clientSecret);
+    settings.deleteLater();
+}
+
+void TestMyCode::handleLoginResponse(QString accessToken)
+{
+    QSettings settings("TestMyQt", "TMC");
+    // We did not receive any token, credentials were not valid
+    if (accessToken == "") {
+        settings.setValue("username", "");
+        settings.setValue("password", "");
+    } else {
+        settings.setValue("accessToken", accessToken);
+        loginWidget->close();
+    }
+
+    settings.deleteLater();
+}
+
+void TestMyCode::clearCredentials()
+{
+    QSettings settings("TestMyQt", "TMC");
+    settings.setValue("username", "");
+    settings.setValue("password", "");
+
+    settings.setValue("clientId", "");
+    settings.setValue("clientSecret", "");
+    settings.setValue("accessToken", "");
+    settings.deleteLater();
+    tmcClient.setAccessToken("");
+    tmcClient.setClientId("");
+    tmcClient.setClientSecret("");
+}
+
+void TestMyCode::onDownloadCancelClicked()
 {
     downloadWidget->close();
 }
@@ -229,7 +301,7 @@ QString TestMyCode::askSaveLocation()
     return saveDirectory;
 }
 
-void TestMyCode::on_download_okbutton_clicked()
+void TestMyCode::onDownloadOkClicked()
 {
     auto exerciseList = downloadform->exerciselist;
     qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
