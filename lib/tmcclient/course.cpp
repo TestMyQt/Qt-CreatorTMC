@@ -13,19 +13,19 @@ Course::Course()
 
 }
 
-/*! Returns a pointer to the collection of the \l Exercise objects that
-represent the whole set of the course's exercises. */
+/*! Returns a pointer to the \l Course object's internal \l Exercise
+collection. */
 QList<Exercise> * Course::getExercises()
 {
     return &m_exercises;
 }
 
-/*! Sets the course ID. */
+/*! Sets the course ID to \a id. */
 void Course::setId(int id) {
     m_id = id;
 }
 
-/*! Sets the course title. */
+/*! Sets the course title to \a title. */
 void Course::setTitle(QString title) {
     m_title = title;
 }
@@ -40,8 +40,8 @@ QString Course::getTitle() const {
     return m_title;
 }
 
-/*! Returns the Exercise object specified by \a id. If no such Exercise
-object is found, a "blank" Exercise object is returned (rather than null). */
+/*! Returns the \l Exercise object specified by \a id. If no such \l Exercise
+object is found, a "blank" \l Exercise object is returned (rather than null). */
 Exercise Course::getExercise(int id) {
     foreach (Exercise e, m_exercises) {
         if (e.getId() == id) {
@@ -51,6 +51,8 @@ Exercise Course::getExercise(int id) {
     return Exercise(-1, QString("null"));
 }
 
+/*! Adds parameter \a e to the \l Course object's internal \l Exercise
+collection. */
 void Course::addExercise(Exercise e) {
     m_exercises.append(e);
 }

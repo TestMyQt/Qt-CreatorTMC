@@ -2,7 +2,8 @@
     \class TmcClient
     \inmodule lib/tmcclient
     \inheaderfile tmcclient.h
-    \brief Class \l TmcClient is the primary means of communication with the TMC server.
+    \brief Class \l TmcClient is the primary means of communication with
+        the TMC server.
 */
 
 #include "tmcclient.h"
@@ -21,14 +22,13 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
 
-/*!
-    The QtCreatorTMC plugin uses a single \l
-    {http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
-    object for managing network communications. The object is initialized in
-    \l TestMyCode::initialize(). \l {TmcClient::} {setNetworkManager()} is called
-    from \l {TestMyCode::} {initialize()} with the address of the \c
-    QNetworkAccessManager object as the value for parameter \a m.
- */
+/*! The QtCreatorTMC plugin uses a single \l
+{http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
+object for managing network communications. The object is initialized in
+\l TestMyCode::initialize(). \c setNetworkManager() is called
+from \l {TestMyCode::} {initialize()} with the address of the \l
+{http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
+object as the value for parameter \a m. */
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
     manager = m;

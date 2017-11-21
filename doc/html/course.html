@@ -19,7 +19,7 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <h1 class="title">Course Class</h1>
 <!-- $$$Course-brief -->
-<p>Class <a href="course.html">Course</a> is a simple representation of a TMC course that includes the course's exercises as a collection of Exercise objects. <a href="#details">More...</a></p>
+<p>Class <a href="course.html">Course</a> is a simple representation of a TMC course that includes the course's exercises as a collection of <a href="exercise.html">Exercise</a> objects. <a href="#details">More...</a></p>
 <!-- @@@Course -->
 <div class="table"><table class="alignedsummary">
 <tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;tmcclient.h&gt;</span>
@@ -42,7 +42,7 @@
 <!-- $$$Course-description -->
 <div class="descr">
 <h2 id="details">Detailed Description</h2>
-<p>Class <a href="course.html">Course</a> is a simple representation of a TMC course that includes the course's exercises as a collection of Exercise objects.</p>
+<p>Class <a href="course.html">Course</a> is a simple representation of a TMC course that includes the course's exercises as a collection of <a href="exercise.html">Exercise</a> objects.</p>
 </div>
 <!-- @@@Course -->
 <div class="func">
@@ -51,15 +51,16 @@
 <h3 class="fn" id="Course"><a name="Course"></a>Course::<span class="name">Course</span>()</h3>
 <p>Default constructs an instance of Course.</p><!-- @@@Course -->
 <!-- $$$addExercise[overload1]$$$addExerciseExercise -->
-<h3 class="fn" id="addExercise"><a name="addExercise"></a><span class="type">void</span> Course::<span class="name">addExercise</span>(<span class="type">Exercise</span> <i>e</i>)</h3>
+<h3 class="fn" id="addExercise"><a name="addExercise"></a><span class="type">void</span> Course::<span class="name">addExercise</span>(<span class="type"><a href="exercise.html">Exercise</a></span> <i>e</i>)</h3>
+<p>Adds parameter <i>e</i> to the <a href="course.html">Course</a> object's internal <a href="exercise.html">Exercise</a> collection.</p>
 <!-- @@@addExercise -->
 <!-- $$$getExercise[overload1]$$$getExerciseint -->
-<h3 class="fn" id="getExercise"><a name="getExercise"></a><span class="type">Exercise</span> Course::<span class="name">getExercise</span>(<span class="type">int</span> <i>id</i>)</h3>
-<p>Returns the Exercise object specified by <i>id</i>. If no such Exercise object is found, a &quot;blank&quot; Exercise object is returned (rather than null).</p>
+<h3 class="fn" id="getExercise"><a name="getExercise"></a><span class="type"><a href="exercise.html">Exercise</a></span> Course::<span class="name">getExercise</span>(<span class="type">int</span> <i>id</i>)</h3>
+<p>Returns the <a href="exercise.html">Exercise</a> object specified by <i>id</i>. If no such <a href="exercise.html">Exercise</a> object is found, a &quot;blank&quot; <a href="exercise.html">Exercise</a> object is returned (rather than null).</p>
 <!-- @@@getExercise -->
 <!-- $$$getExercises[overload1]$$$getExercises -->
-<h3 class="fn" id="getExercises"><a name="getExercises"></a><span class="type">QList</span>&lt;<span class="type">Exercise</span>&gt; *Course::<span class="name">getExercises</span>()</h3>
-<p>Returns a pointer to the collection of the Exercise objects that represent the whole set of the course's exercises.</p>
+<h3 class="fn" id="getExercises"><a name="getExercises"></a><span class="type">QList</span>&lt;<span class="type"><a href="exercise.html">Exercise</a></span>&gt; *Course::<span class="name">getExercises</span>()</h3>
+<p>Returns a pointer to the <a href="course.html">Course</a> object's internal <a href="exercise.html">Exercise</a> collection.</p>
 <!-- @@@getExercises -->
 <!-- $$$getId[overload1]$$$getId -->
 <h3 class="fn" id="getId"><a name="getId"></a><span class="type">int</span> Course::<span class="name">getId</span>()</h3>
@@ -71,11 +72,11 @@
 <!-- @@@getTitle -->
 <!-- $$$setId[overload1]$$$setIdint -->
 <h3 class="fn" id="setId"><a name="setId"></a><span class="type">void</span> Course::<span class="name">setId</span>(<span class="type">int</span> <i>id</i>)</h3>
-<p>Sets the course ID.</p>
+<p>Sets the course ID to <i>id</i>.</p>
 <!-- @@@setId -->
 <!-- $$$setTitle[overload1]$$$setTitleQString -->
 <h3 class="fn" id="setTitle"><a name="setTitle"></a><span class="type">void</span> Course::<span class="name">setTitle</span>(<span class="type">QString</span> <i>title</i>)</h3>
-<p>Sets the course title.</p>
+<p>Sets the course title to <i>title</i>.</p>
 <!-- @@@setTitle -->
 </div>
 </body>

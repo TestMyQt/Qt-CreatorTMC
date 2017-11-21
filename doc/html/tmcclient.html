@@ -84,15 +84,15 @@
 <h3 class="fn" id="exerciseListReady"><a name="exerciseListReady"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">exerciseListReady</span>(<span class="type"><a href="course.html">Course</a></span> *<i>course</i>)</h3>
 <!-- @@@exerciseListReady -->
 <!-- $$$exerciseZipReady[overload1]$$$exerciseZipReadyExercise* -->
-<h3 class="fn" id="exerciseZipReady"><a name="exerciseZipReady"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">exerciseZipReady</span>(<span class="type">Exercise</span> *<i>ex</i>)</h3>
+<h3 class="fn" id="exerciseZipReady"><a name="exerciseZipReady"></a><code>[signal] </code><span class="type">void</span> TmcClient::<span class="name">exerciseZipReady</span>(<span class="type"><a href="exercise.html">Exercise</a></span> *<i>ex</i>)</h3>
 <!-- @@@exerciseZipReady -->
 <!-- $$$getExerciseList[overload1]$$$getExerciseListCourse* -->
 <h3 class="fn" id="getExerciseList"><a name="getExerciseList"></a><span class="type">void</span> TmcClient::<span class="name">getExerciseList</span>(<span class="type"><a href="course.html">Course</a></span> *<i>course</i>)</h3>
 <p>Creates a <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply</a> object for downloading the exercise list associated with the <a href="course.html">Course</a> parameter <i>course</i> and connects the object's signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html#finished">QNetworkReply::finished</a> to slot exerciseListReplyFinished().</p>
 <!-- @@@getExerciseList -->
 <!-- $$$getExerciseZip[overload1]$$$getExerciseZipExercise* -->
-<h3 class="fn" id="getExerciseZip"><a name="getExerciseZip"></a><span class="type">QNetworkReply</span> *TmcClient::<span class="name">getExerciseZip</span>(<span class="type">Exercise</span> *<i>ex</i>)</h3>
-<p>Downloads the TMC exercise specified by the Exercise parameter <i>ex</i>. The exercise is delivered from the TMC server as zip archive data. Signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply::finished</a> is connected to slot exerciseZipReplyFinished() which means that extraction of the files in the zip archive will begin automatically after the download completes.</p>
+<h3 class="fn" id="getExerciseZip"><a name="getExerciseZip"></a><span class="type">QNetworkReply</span> *TmcClient::<span class="name">getExerciseZip</span>(<span class="type"><a href="exercise.html">Exercise</a></span> *<i>ex</i>)</h3>
+<p>Downloads the TMC exercise specified by the <a href="exercise.html">Exercise</a> parameter <i>ex</i>. The exercise is delivered from the TMC server as zip archive data. Signal <a href="http://doc.qt.io/qt-5/qnetworkreply.html">QNetworkReply::finished</a> is connected to slot exerciseZipReplyFinished() which means that extraction of the files in the zip archive will begin automatically after the download completes.</p>
 <!-- @@@getExerciseZip -->
 <!-- $$$getUserInfo[overload1]$$$getUserInfo -->
 <h3 class="fn" id="getUserInfo"><a name="getUserInfo"></a><span class="type">void</span> TmcClient::<span class="name">getUserInfo</span>()</h3>
@@ -115,7 +115,7 @@
 <!-- @@@setClientSecret -->
 <!-- $$$setNetworkManager[overload1]$$$setNetworkManagerQNetworkAccessManager* -->
 <h3 class="fn" id="setNetworkManager"><a name="setNetworkManager"></a><span class="type">void</span> TmcClient::<span class="name">setNetworkManager</span>(<span class="type">QNetworkAccessManager</span> *<i>m</i>)</h3>
-<p>The QtCreatorTMC plugin uses a single <a href="http://doc.qt.io/qt-5/qnetworkaccessmanager.html">QNetworkAccessManager</a> object for managing network communications. The object is initialized in TestMyCode::initialize(). setNetworkManager() is called from initialize() with the address of the <code>QNetworkAccessManager</code> object as the value for parameter <i>m</i>.</p>
+<p>The QtCreatorTMC plugin uses a single <a href="http://doc.qt.io/qt-5/qnetworkaccessmanager.html">QNetworkAccessManager</a> object for managing network communications. The object is initialized in TestMyCode::initialize(). <code>setNetworkManager()</code> is called from initialize() with the address of the <a href="http://doc.qt.io/qt-5/qnetworkaccessmanager.html">QNetworkAccessManager</a> object as the value for parameter <i>m</i>.</p>
 <!-- @@@setNetworkManager -->
 </div>
 </body>
