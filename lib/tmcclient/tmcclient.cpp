@@ -1,3 +1,10 @@
+/*!
+    \class TmcClient
+    \inmodule lib/tmcclient
+    \inheaderfile tmcclient.h
+    \brief Class \l TmcClient is the primary means of communication with the TMC server.
+*/
+
 #include "tmcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -14,6 +21,14 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
 
+/*!
+    The QtCreatorTMC plugin uses a single \l
+    {http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
+    object for managing network communications. The object is initialized in
+    \l TestMyCode::initialize(). \l {TmcClient::} {setNetworkManager()} is called
+    from \l {TestMyCode::} {initialize()} with the address of the \c
+    QNetworkAccessManager object as the value for parameter \a m.
+ */
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
     manager = m;
@@ -69,6 +84,11 @@ void TmcClient::authorize()
     });
 }
 
+/*!
+    This is the function that gets called when the user clicks the \tt {Log in}
+    button in the \tt {TMC Login} dialog. The values for the parameters \a username,
+    \a password and \a savePassword are obtained from the \tt {TMC Login} dialog.
+ */
 void TmcClient::authenticate(QString username, QString password)
 {
 
@@ -100,6 +120,14 @@ void TmcClient::authenticate(QString username, QString password)
     });
 }
 
+/*!
+    Downloads the TMC exercise specified by the \l Exercise parameter \a ex.
+    The exercise is delivered from the TMC server as zip archive data. Signal
+    \l {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply::finished} is
+    connected to slot \l {TmcClient::} {exerciseZipReplyFinished()} which means
+    that extraction of the files in the zip archive will begin automatically
+    after the download completes.
+ */
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 {
     QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
@@ -112,7 +140,13 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
     return reply;
 }
 
-
+/*!
+    Creates a \l {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply}
+    object for downloading the exercise list associated with the \l Course
+    parameter \a course and connects the object's signal
+    \l {http://doc.qt.io/qt-5/qnetworkreply.html#finished}
+    {QNetworkReply::finished} to slot \l {TmcClient::} {exerciseListReplyFinished()}.
+ */
 void TmcClient::getExerciseList(Course *course)
 {
     QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + QString::number(course->getId()));
@@ -123,6 +157,11 @@ void TmcClient::getExerciseList(Course *course)
     });
 }
 
+/*!
+    Retrieves information about the currently logged in user from the TMC server.
+    The information is delivered as a JSON document. The information includes...
+    TODO: continue from here
+ */
 void TmcClient::getUserInfo()
 {
     QUrl url("https://tmc.mooc.fi/api/v8/users/current");
@@ -150,6 +189,16 @@ void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
     emit authorizationFinished(clientId, clientSecret);
 }
 
+/*!
+    The primary purpose of the slot is to extract the access token
+    from the parameter \a reply and save it in a member variable for
+    future use. The slot is called when the \l
+    {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} object created
+    in \l {TmcClient::} {authenticate()} emits the signal
+    \l {http://doc.qt.io/qt-5/qnetworkreply.html#finished}
+    {QNetworkReply::finished}. If an error occurred during authentication,
+    the slot emits the signal \l TmcClient::TMCError.
+ */
 void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
@@ -175,6 +224,14 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
+/*!
+    By the time the slot is called the \l {http://doc.qt.io/qt-5/qnetworkreply.html}
+    {QNetworkReply} object pointed to by \a reply should contain a
+    particular TMC course's exercise list as a JSON document. Assuming there has been
+    no errors during the download phase, the JSON document is processed and each
+    of the exercises are added to the \l Course object pointed to by \a course with
+    a call to \l Course::addExercise().
+*/
 void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 {
     if (reply->error()) {
@@ -209,6 +266,12 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
     reply->deleteLater();
 }
 
+/*!
+    The primary purpose of the function is to extract a successfully downloaded
+    zip archive to an appropriate target directory. \l
+    {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} \a reply contains the zip
+    archive data and \a ex identifies the relevant \l Exercise object.
+ */
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
     if (reply->error()) {
