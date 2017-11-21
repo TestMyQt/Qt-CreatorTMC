@@ -1,16 +1,8 @@
-/*!
-    \class TmcClient
-    \inmodule lib/tmcclient
-    \inheaderfile tmcclient.h
-    \brief Class \l TmcClient is the primary means of communication with the TMC server.
-*/
-
 #include "tmcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-#include <QSettings>
 #include <QBuffer>
 
 #include <quazip/JlCompress.h>
@@ -22,70 +14,36 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
 
-/*!
-    This is the function that gets called when the user clicks the \tt {Log in}
-    button in the \tt {TMC Login} dialog. The values for the parameters \a username,
-    \a password and \a savePassword are obtained from the \tt {TMC Login} dialog.
- */
-void TmcClient::authenticate(QString username, QString password, bool savePassword)
-{
-    QString client_id = "8355b4a75a4191edfedeae7b074571278fd4987d4234c01569678b9ad11f526d";
-    QString client_secret = "c2b1176a6189ceaa16cd51f805ef20ea6c993d36fdb76aa873ac35471d2df4f1";
-    QString username_ = username;
-    QString password_ = password;
-    QString grant_type = "password";
-
-    QSettings settings("TestMyQt", "TMC");
-    settings.setValue("username", username);
-    if (savePassword) {
-        settings.setValue("password", password);
-        settings.setValue("savePasswordChecked", "true");
-    } else {
-        settings.setValue("password", "");
-        settings.setValue("savePasswordChecked", "false");
-    }
-    settings.deleteLater();
-
-    QUrl url("https://tmc.mooc.fi/oauth/token");
-
-    QUrlQuery params;
-    params.addQueryItem("client_id", client_id);
-    params.addQueryItem("client_secret", client_secret);
-    params.addQueryItem("username", username_);
-    params.addQueryItem("password", password_);
-    params.addQueryItem("grant_type", grant_type);
-
-    QNetworkRequest request(url);
-
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-    QNetworkReply *reply = manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
-
-    connect(reply, &QNetworkReply::finished, this, [=](){
-        authenticationFinished(reply);
-    });
-}
-
-/*!
-    The QtCreatorTMC plugin uses a single \l
-    {http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
-    object for managing network communications. The object is initialized in
-    \l TestMyCode::initialize(). \l {TmcClient::} {setNetworkManager()} is called
-    from \l {TestMyCode::} {initialize()} with the address of the \c
-    QNetworkAccessManager object as the value for parameter \a m.
- */
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
     manager = m;
 }
 
-/*!
-    //! A private function and as such it doesn't get any QDoc generated for it.
-    Builds a \l {http://doc.qt.io/qt-5/qnetworkrequest.html} {QNetworkRequest}
-    from the parameter \a url. The header of the \c QNetworkRequest object is
-    set to include the access token provided by the TMC server earlier after
-    successful authentication.
- */
+void TmcClient::setAccessToken(QString token)
+{
+    accessToken = token;
+}
+
+void TmcClient::setClientId(QString id)
+{
+    clientId = id;
+}
+
+void TmcClient::setClientSecret(QString secret)
+{
+    clientSecret = secret;
+}
+
+bool TmcClient::isAuthorized()
+{
+    return !(clientId.isEmpty() || clientSecret.isEmpty());
+}
+
+bool TmcClient::isAuthenticated()
+{
+    return !accessToken.isEmpty();
+}
+
 QNetworkRequest TmcClient::buildRequest(QUrl url)
 {
     QNetworkRequest request(url);
@@ -101,14 +59,47 @@ QNetworkReply* TmcClient::doGet(QUrl url)
     return reply;
 }
 
-/*!
-    Downloads the TMC exercise specified by the \l Exercise parameter \a ex.
-    The exercise is delivered from the TMC server as zip archive data. Signal
-    \l {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply::finished} is
-    connected to slot \l {TmcClient::} {exerciseZipReplyFinished()} which means
-    that extraction of the files in the zip archive will begin automatically
-    after the download completes.
- */
+void TmcClient::authorize()
+{
+    QUrl url("https://tmc.mooc.fi/api/v8/application/qtcreator_plugin/credentials.json");
+    QNetworkReply *reply = doGet(url);
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        authorizationReplyFinished(reply);
+    });
+}
+
+void TmcClient::authenticate(QString username, QString password)
+{
+
+    if (!isAuthorized()) {
+        emit TMCError(QString("Login failed: "
+                              "no client id/secret available"));
+        emit authenticationFinished("");
+        return;
+    }
+
+    QUrl url("https://tmc.mooc.fi/oauth/token");
+
+    QString grantType = "password";
+    QUrlQuery params;
+    params.addQueryItem("client_id", clientId);
+    params.addQueryItem("client_secret", clientSecret);
+    params.addQueryItem("username", username);
+    params.addQueryItem("password", password);
+    params.addQueryItem("grant_type", grantType);
+
+    QNetworkRequest request(url);
+
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QNetworkReply *reply = manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        authenticationReplyFinished(reply);
+    });
+}
+
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 {
     QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
@@ -121,13 +112,7 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
     return reply;
 }
 
-/*!
-    Creates a \l {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply}
-    object for downloading the exercise list associated with the \l Course
-    parameter \a course and connects the object's signal
-    \l {http://doc.qt.io/qt-5/qnetworkreply.html#finished}
-    {QNetworkReply::finished} to slot \l {TmcClient::} {exerciseListReplyFinished()}.
- */
+
 void TmcClient::getExerciseList(Course *course)
 {
     QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + QString::number(course->getId()));
@@ -138,11 +123,6 @@ void TmcClient::getExerciseList(Course *course)
     });
 }
 
-/*!
-    Retrieves information about the currently logged in user from the TMC server.
-    The information is delivered as a JSON document. The information includes...
-    TODO: continue from here
- */
 void TmcClient::getUserInfo()
 {
     QUrl url("https://tmc.mooc.fi/api/v8/users/current");
@@ -154,25 +134,28 @@ void TmcClient::getUserInfo()
     });
 }
 
-/*!
-    The primary purpose of the slot is to extract the access token
-    from the parameter \a reply and save it in a member variable for
-    future use. The slot is called when the \l
-    {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} object created
-    in \l {TmcClient::} {authenticate()} emits the signal
-    \l {http://doc.qt.io/qt-5/qnetworkreply.html#finished}
-    {QNetworkReply::finished}. If an error occurred during authentication,
-    the slot emits the signal \l TmcClient::TMCError.
- */
-void TmcClient::authenticationFinished(QNetworkReply *reply)
+void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        emit TMCError(QString("Client authorization failed: %1: %2")
+                      .arg(reply->errorString(), reply->error()));
+        reply->deleteLater();
+        return;
+    }
+
+    QJsonObject json = QJsonDocument::fromJson(reply->readAll()).object();
+    setClientId(json["application_id"].toString());
+    setClientSecret(json["secret"].toString());
+
+    emit authorizationFinished(clientId, clientSecret);
+}
+
+void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
         emit TMCError(QString("Login failed: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        QSettings settings("TestMyQt", "TMC");
-        settings.setValue("username", "");
-        settings.setValue("password", "");
-        settings.deleteLater();
+        emit authenticationFinished("");
         reply->deleteLater();
         return;
     }
@@ -188,18 +171,10 @@ void TmcClient::authenticationFinished(QNetworkReply *reply)
     accessToken = name["access_token"].toString();
     qDebug() << accessToken;
 
-    emit loginFinished();
+    emit authenticationFinished(accessToken);
     reply->deleteLater();
 }
 
-/*!
-    By the time the slot is called the \l {http://doc.qt.io/qt-5/qnetworkreply.html}
-    {QNetworkReply} object pointed to by \a reply should contain a
-    particular TMC course's exercise list as a JSON document. Assuming there has been
-    no errors during the download phase, the JSON document is processed and each
-    of the exercises are added to the \l Course object pointed to by \a course with
-    a call to \l Course::addExercise().
-*/
 void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 {
     if (reply->error()) {
@@ -234,12 +209,6 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
     reply->deleteLater();
 }
 
-/*!
-    The primary purpose of the function is to extract a successfully downloaded
-    zip archive to an appropriate target directory. \l
-    {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} \a reply contains the zip
-    archive data and \a ex identifies the relevant \l Exercise object.
- */
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
     if (reply->error()) {
@@ -273,27 +242,3 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
     reply->deleteLater();
     return;
 }
-
-/*!
-    \fn void TmcClient::TMCError(QString errorString)
-
-    The signal is the error reporting mechanism of class \l TmcClient.
-    The \a errorString contains a human-readable error message.
- */
-
-/*!
-    \fn void TmcClient::exerciseListReady(Course *course)
-
-    Emitted by \l {TmcClient::} {exerciseListReplyFinished()} after the exercise
-    list returned by the TMC server has been successfully processed. The exercise
-    list can be obtained from the \l Course object parameter \a course using
-    \l {Course::} {getExercises()}.
- */
-
-/*!
-    \fn void TmcClient::exerciseZipReady(Exercise *ex)
-
-    Emitted by \l {TmcClient::} {exerciseZipReplyFinished()} after successfully
-    extracting the downloaded exercise zip archive to the appropriate directory.
-    Parameter \a ex identifies the \l Exercise object the signal was emitted for.
- */
