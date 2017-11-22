@@ -21,3 +21,6 @@ _Environment variables_:
 - Debug build `qmake -spec linux-g++ CONFIG+=debug`
 - Test build `qmake -spec linux-g++ CONFIG+=test`
 - Run `make` to install the plugin `.so` file to the plugin directory
+
+## Generating QDoc
+The QDoc configuration file is `main.qdocconf` in the root directory of the project. The QDoc documentation is automatically generated into `doc/html` by running the command `qdoc main.qdocconf`. Note that each time the command is run, all the previous content of `doc/html` is deleted. So don't place any manually generated content into the directory!
