@@ -2,7 +2,12 @@
     \class Exercise
     \inmodule lib/tmcclient
     \inheaderfile exercise.h
-    \brief Class \l Exercise objects represent TMC course exercises.
+    \brief \l Exercise objects represent TMC course exercises.
+
+    In practice TMC exercises are directories that contain the files of a miniscule
+    software project. One of the instance variables of \l Exercise is one that
+    specifies its "location". The location is the parent directory of the exercise
+    directory itself.
 */
 
 #include "exercise.h"
@@ -28,6 +33,7 @@ QString Exercise::getLocation() const {
     return m_location;
 }
 
+// TODO: Add QDoc comment
 QString Exercise::getChecksum() const {
     return m_checksum;
 }
@@ -47,6 +53,7 @@ void Exercise::setLocation(QString location) {
     m_location = location;
 }
 
+// TODO: Add QDoc comment
 void Exercise::setChecksum(QString checksum) {
     m_checksum = checksum;
 }

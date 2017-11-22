@@ -1,3 +1,21 @@
+/*!
+    \namespace TestMyCodePlugin
+    \inmodule src
+    \brief Hello, namespace!
+*/
+
+/*!
+    \namespace TestMyCodePlugin::Internal
+    \inmodule src
+    \brief Hello again, namespace!
+*/
+
+/*!
+    \class TestMyCodePlugin::Internal::TestMyCode
+    \inmodule src
+    \brief Hello, class!
+*/
+
 #include "testmycode.h"
 #include "testmycodeconstants.h"
 #include "tmcclient.h"
@@ -53,6 +71,7 @@ TestMyCode::~TestMyCode()
     // Delete members
 }
 
+/*! Hello, function! Hello, \a arguments and \a errorString! */
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool

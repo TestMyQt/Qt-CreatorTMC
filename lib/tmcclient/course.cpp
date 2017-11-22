@@ -13,7 +13,7 @@ Course::Course()
 
 }
 
-/*! Returns a pointer to the \l Course object's internal \l Exercise
+/*! Returns a pointer to the \l Course object's private \l Exercise
 collection. */
 QList<Exercise> * Course::getExercises()
 {
@@ -51,7 +51,7 @@ Exercise Course::getExercise(int id) {
     return Exercise(-1, QString("null"));
 }
 
-/*! Adds parameter \a e to the \l Course object's internal \l Exercise
+/*! Adds parameter \a e to the \l Course object's private \l Exercise
 collection. */
 void Course::addExercise(Exercise e) {
     m_exercises.append(e);
