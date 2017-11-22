@@ -34,6 +34,7 @@
 
 #include <QSettings>
 #include <QList>
+#include <QMap>
 
 #include <QtPlugin>
 #include <extensionsystem/pluginmanager.h>
@@ -147,12 +148,21 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(login->cancelbutton, &QPushButton::clicked, this, &TestMyCode::onLoginCancelClicked);
     connect(login->loginbutton, &QPushButton::clicked, this, &TestMyCode::onLoginClicked);
 
+    // Signal-Slot for Settings window
+    connect(settingsWindow->refreshlistbutton, &QPushButton::clicked, this, &TestMyCode::onRefreshCourseListClicked);
+    connect(settingsWindow->okButton, &QPushButton::clicked, this, &TestMyCode::onSettingsOkClicked);
+    connect(settingsWindow->cancelButton, &QPushButton::clicked, this, [=](){
+        settingsWidget->close();
+    });
+    connect(settingsWindow->browseButton, &QPushButton::clicked, this, &TestMyCode::onSettingsBrowseClicked);
+
     // TmcClient
     connect(&tmcClient, &TmcClient::authorizationFinished, this, &TestMyCode::handleAuthResponse);
     connect(&tmcClient, &TmcClient::authenticationFinished, this, &TestMyCode::handleLoginResponse);
     connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
     connect(&tmcClient, &TmcClient::exerciseZipReady, this, &TestMyCode::openProject);
     connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
+    connect(&tmcClient, &TmcClient::courseListReady, this, &TestMyCode::handleCourseList);
 
     // Signal-Slot for download window
     connect(downloadform->cancelbutton, &QPushButton::clicked, this, &TestMyCode::onDownloadCancelClicked);
@@ -204,7 +214,8 @@ void TestMyCode::showSettingsWindow()
     QSettings settings("TestMyQt", "TMC");
     settingsWindow->usernamefield->setText(settings.value("username", "").toString());
     settingsWindow->passwordfield->setText(settings.value("password", "").toString());
-    settingsWindow->serveraddressfield->setText(settings.value("serverAddress", "").toString());
+    settingsWindow->serveraddressfield->setText(settings.value("server", "").toString());
+    settingsWindow->workingDir->setText(settings.value("workingDir", "").toString());
     if (settings.value("savePasswordChecked", "") == "true")
         settingsWindow->savepasswordcheckbox->setCheckState(Qt::Checked);
     settings.deleteLater();
@@ -215,6 +226,17 @@ void TestMyCode::runTMC()
 {
     TMCRunner *runner = TMCRunner::instance();
     runner->runOnActiveProject();
+}
+
+void TestMyCode::onRefreshCourseListClicked()
+{
+    QString username = settingsWindow->usernamefield->text();
+    QString password = settingsWindow->passwordfield->text();
+    bool savePassword = settingsWindow->savepasswordcheckbox->isChecked();
+    if (!tmcClient.isAuthenticated())
+        doAuth(username, password, savePassword);
+    QString address = settingsWindow->serveraddressfield->text();
+    tmcClient.getCourseList(address);
 }
 
 void TestMyCode::refreshDownloadList()
@@ -257,9 +279,12 @@ void TestMyCode::onLoginClicked()
 {
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
-
     bool savePassword = login->savepasswordbox->isChecked();
+    doAuth(username, password, savePassword);
+}
 
+void TestMyCode::doAuth(QString username, QString password, bool savePassword)
+{
     tmcClient.authenticate(username, password);
 
     QSettings settings("TestMyQt", "TMC");
@@ -305,6 +330,39 @@ void TestMyCode::clearCredentials()
     settings.setValue("accessToken", "");
     settings.deleteLater();
     tmcClient.setAccessToken("");
+}
+
+void TestMyCode::handleCourseList(QMap<QString, int> courses)
+{
+    settingsWindow->coursecombobox->clear();
+    QMapIterator<QString, int> iter(courses);
+    while(iter.hasNext()) {
+        iter.next();
+        settingsWindow->coursecombobox->addItem(iter.key(), iter.value());
+    }
+}
+
+void TestMyCode::onSettingsOkClicked()
+{
+    QSettings settings("TestMyQt", "TMC");
+    settings.setValue("username", settingsWindow->usernamefield->text());
+    settings.setValue("savePasswordChecked", "false");
+    if (settingsWindow->savepasswordcheckbox->isChecked()) {
+        settings.setValue("savePasswordChecked", "true");
+        settings.setValue("password", settingsWindow->passwordfield->text());
+    }
+    settings.setValue("server", settingsWindow->serveraddressfield->text());
+    settings.setValue("workingDir", settingsWindow->workingDir->text());
+    settings.setValue("courseName", settingsWindow->coursecombobox->currentText());
+    settings.setValue("courseId", settingsWindow->coursecombobox->currentData());
+    settings.deleteLater();
+    settingsWidget->close();
+}
+
+void TestMyCode::onSettingsBrowseClicked()
+{
+    QString dir = askSaveLocation();
+    settingsWindow->workingDir->setText(dir);
 }
 
 void TestMyCode::onDownloadCancelClicked()

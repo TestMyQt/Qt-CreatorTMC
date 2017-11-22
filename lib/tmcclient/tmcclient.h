@@ -5,9 +5,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QUrl>
 #include <QFile>
 #include <QDebug>
+#include <QMap>
 #include <QUrlQuery>
 
 #include "course.h"
@@ -28,6 +28,7 @@ public:
     void getUserInfo();
     void getExerciseList(Course *course);
     QNetworkReply* getExerciseZip(Exercise *ex);
+    void getCourseList(QString address);
 
     bool isAuthorized();
     bool isAuthenticated();
@@ -38,12 +39,14 @@ signals:
     void authenticationFinished(QString accessToken);
     void exerciseListReady(Course *course);
     void exerciseZipReady(Exercise *ex);
+    void courseListReady(QMap<QString, int> courses);
     void accessTokenNotValid();
     void closeDownloadWindow();
 
 private slots:
     void authorizationReplyFinished (QNetworkReply *reply);
     void authenticationReplyFinished (QNetworkReply *reply);
+    void courseListReplyFinished(QNetworkReply *reply);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
     void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
 

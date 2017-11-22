@@ -35,6 +35,10 @@ private slots:
     void onDownloadCancelClicked();
     void onDownloadOkClicked();
     void refreshDownloadList();
+    // Settings window
+    void onRefreshCourseListClicked();
+    void onSettingsOkClicked();
+    void onSettingsBrowseClicked();
 
 private:
     // SettingsWindow
@@ -61,8 +65,10 @@ private:
     void displayTMCError(QString errorText);
     QString askSaveLocation();
     void clearCredentials();
+    void doAuth(QString username, QString password, bool savePassword);
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
+    void handleCourseList(QMap<QString, int> courses);
 
     // ...
     DownloadPanel *downloadPanel;
