@@ -22,13 +22,15 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
 
-/*! The QtCreatorTMC plugin uses a single \l
-{http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
-object for managing network communications. The object is initialized in
-\l TestMyCode::initialize(). \c setNetworkManager() is called
-from \l {TestMyCode::} {initialize()} with the address of the \l
-{http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
-object as the value for parameter \a m. */
+/*!
+    The QtCreatorTMC plugin uses a single \l
+    {http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
+    object for managing network communications. The object is initialized in
+    \l TestMyCodePlugin::Internal::TestMyCode::initialize(). \c setNetworkManager()
+    is called from \l {TestMyCodePlugin::Internal::TestMyCode::} {initialize()}
+    with the address of the \l {http://doc.qt.io/qt-5/qnetworkaccessmanager.html}
+    {QNetworkAccessManager} object as the value for parameter \a m.
+*/
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
     manager = m;
@@ -85,9 +87,9 @@ void TmcClient::authorize()
 }
 
 /*!
-    This is the function that gets called when the user clicks the \tt {Log in}
-    button in the \tt {TMC Login} dialog. The values for the parameters \a username,
-    \a password and \a savePassword are obtained from the \tt {TMC Login} dialog.
+    Gets called when the user clicks the \tt {Log in} button in the
+    \tt {TMC Login} dialog. The values for the parameters \a username
+    and \a password are those entered by the user in the dialog.
  */
 void TmcClient::authenticate(QString username, QString password)
 {

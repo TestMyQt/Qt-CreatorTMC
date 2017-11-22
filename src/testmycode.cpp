@@ -1,19 +1,23 @@
 /*!
     \namespace TestMyCodePlugin
     \inmodule src
-    \brief Hello, namespace!
 */
 
 /*!
     \namespace TestMyCodePlugin::Internal
     \inmodule src
-    \brief Hello again, namespace!
 */
 
 /*!
     \class TestMyCodePlugin::Internal::TestMyCode
     \inmodule src
-    \brief Hello, class!
+    \inheaderfile testmycode.h
+    \brief \l TestMyCode is the foundation of the QtCreatorTMC project
+        in that it is the class for the Qt Creator plugin itself.
+
+    Like all Qt Creator plugins, \l TestMyCode inherits \l
+    {https://doc-snapshots.qt.io/qtcreator-extending/extensionsystem-iplugin.html}
+    {IPlugin}.
 */
 
 #include "testmycode.h"
@@ -71,7 +75,11 @@ TestMyCode::~TestMyCode()
     // Delete members
 }
 
-/*! Hello, function! Hello, \a arguments and \a errorString! */
+/*!
+    \brief This function does a lot of things!
+
+    TODO: Refactor, modularize
+*/
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool
