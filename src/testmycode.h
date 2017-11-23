@@ -44,7 +44,7 @@ private:
     // SettingsWindow
     Ui::settingsForm *settingsWindow;
     QWidget *settingsWidget;
-    void showSettingsWindow();
+    void showSettingsWidget();
 
     // Loginform
     Ui::loginform *login;
@@ -68,6 +68,7 @@ private:
     void doAuth(QString username, QString password, bool savePassword);
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
+    void handleOrganizationList(QMap<QString, QString> organizations);
     void handleCourseList(QMap<QString, int> courses);
 
     // ...

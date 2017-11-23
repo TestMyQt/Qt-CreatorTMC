@@ -34,6 +34,13 @@ void TmcClient::setClientSecret(QString secret)
     clientSecret = secret;
 }
 
+void TmcClient::setServerAddress(QString address)
+{
+    if (address.endsWith("/"))
+        address.remove(address.length()-1, 1);
+    serverAddress = address;
+}
+
 bool TmcClient::isAuthorized()
 {
     return !(clientId.isEmpty() || clientSecret.isEmpty());
@@ -73,7 +80,7 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
 
 void TmcClient::authorize()
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/application/qtcreator_plugin/credentials.json");
+    QUrl url(serverAddress + "/api/v8/application/qtcreator_plugin/credentials.json");
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -91,7 +98,7 @@ void TmcClient::authenticate(QString username, QString password)
         return;
     }
 
-    QUrl url("https://tmc.mooc.fi/oauth/token");
+    QUrl url(serverAddress + "/oauth/token");
 
     QString grantType = "password";
     QUrlQuery params;
@@ -112,10 +119,18 @@ void TmcClient::authenticate(QString username, QString password)
     });
 }
 
-void TmcClient::getCourseList(QString address)
+void TmcClient::getOrganizationList()
 {
-    QString org = address.section("/", -1);
-    QUrl url(QString("https://tmc.mooc.fi/api/v8/core/org/%1/courses").arg(org));
+    QUrl url(QString(serverAddress + "/api/v8/org.json"));
+    QNetworkReply *reply = doGet(url);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        organizationListReplyFinished(reply);
+    });
+}
+
+void TmcClient::getCourseList(QString organization)
+{
+    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(organization));
     QNetworkReply *reply = doGet(url);
     connect(reply, &QNetworkReply::finished, this, [=](){
         courseListReplyFinished(reply);
@@ -124,7 +139,7 @@ void TmcClient::getCourseList(QString address)
 
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 {
-    QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
+    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex->getId()));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -137,7 +152,7 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 
 void TmcClient::getExerciseList(Course *course)
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + QString::number(course->getId()));
+    QUrl url(serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -147,7 +162,7 @@ void TmcClient::getExerciseList(Course *course)
 
 void TmcClient::getUserInfo()
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/users/current");
+    QUrl url(serverAddress + "/api/v8/users/current");
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -197,6 +212,25 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
+void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        qDebug() << "Error at Organization list reply finished";
+        emit TMCError(QString("Failed to download organization list: %1: %2")
+                      .arg(reply->errorString(), reply->error()));
+        reply->deleteLater();
+    }
+    QMap<QString, QString> organizations;
+    QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+    QJsonArray orgJson = json.array();
+    for (int i = 0; orgJson.size() > i; i++) {
+        QJsonObject org = orgJson[i].toObject();
+        organizations.insert(org["name"].toString(), org["slug"].toString());
+    }
+    emit organizationListReady(organizations);
+    reply->deleteLater();
+}
+
 void TmcClient::courseListReplyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
@@ -206,7 +240,7 @@ void TmcClient::courseListReplyFinished(QNetworkReply *reply)
         reply->deleteLater();
     }
     QMap<QString, int> courses;
-    QJsonDocument json = QJsonDocument::fromJson((reply->readAll()));
+    QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray coursesJson = json.array();
     for (int i = 0; coursesJson.size() > i; i++) {
         QJsonObject course = coursesJson[i].toObject();
