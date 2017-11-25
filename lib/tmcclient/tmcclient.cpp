@@ -6,6 +6,26 @@
         the TMC server.
 */
 
+/*!
+    \fn void TmcClient::TMCError(QString errorString)
+
+    Signal \c TMCError is the primary error reporting mechanism of \l TmcClient.
+    The parameter \a errorString should contain a concise error message which
+    should be displayed to the user by the slot(s) connected to the signal.
+*/
+
+/*!
+    \fn void TmcClient::authenticationFinished(QString accessToken)
+
+    Emitted after an authentication attempt. If the attempt failed, parameter
+    \a accessToken will have an empty string as its value. In case of a successful
+    authentication attempt \a accessToken will contain the access token received
+    from the TMC server.
+
+    The signal is connected to a private slot in \l {TestMyCodePlugin::Internal::} {TestMyCode}
+    which stores the access token for later use.
+*/
+
 #include "tmcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -51,6 +71,10 @@ void TmcClient::setClientSecret(QString secret)
     clientSecret = secret;
 }
 
+/*!
+    An authorized \l TmcClient object has to have a \l {https://oauth.net/2/}
+    {OAuth 2.0} client ID and client secret.
+*/
 bool TmcClient::isAuthorized()
 {
     return !(clientId.isEmpty() || clientSecret.isEmpty());
@@ -76,6 +100,11 @@ QNetworkReply* TmcClient::doGet(QUrl url)
     return reply;
 }
 
+/*!
+    Gets a client ID and client secret from the TMC server. For this to work
+    the \l TmcClient object needs to have an access token which is received
+    from the TMC server after a successful login attempt.
+*/
 void TmcClient::authorize()
 {
     QUrl url("https://tmc.mooc.fi/api/v8/application/qtcreator_plugin/credentials.json");
@@ -124,11 +153,10 @@ void TmcClient::authenticate(QString username, QString password)
 
 /*!
     Downloads the TMC exercise specified by the \l Exercise parameter \a ex.
-    The exercise is delivered from the TMC server as zip archive data. Signal
-    \l {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply::finished} is
-    connected to slot \l {TmcClient::} {exerciseZipReplyFinished()} which means
-    that extraction of the files in the zip archive will begin automatically
-    after the download completes.
+    The exercise is delivered from the TMC server as a single compressed file.
+    After the download completes the contents of the compressed file are
+    automatically extracted to the appropriate directory (determining what
+    this directory is involves \l {Exercise::} {getLocation()}).
  */
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 {
@@ -143,11 +171,9 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 }
 
 /*!
-    Creates a \l {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply}
-    object for downloading the exercise list associated with the \l Course
-    parameter \a course and connects the object's signal
-    \l {http://doc.qt.io/qt-5/qnetworkreply.html#finished}
-    {QNetworkReply::finished} to slot \l {TmcClient::} {exerciseListReplyFinished()}.
+    Downloads the exercise list associated with the \l Course pointer \a course
+    from the TMC server. The items in the list will be stored in \a course as
+    \l Exercise objects.
  */
 void TmcClient::getExerciseList(Course *course)
 {
@@ -161,8 +187,6 @@ void TmcClient::getExerciseList(Course *course)
 
 /*!
     Retrieves information about the currently logged in user from the TMC server.
-    The information is delivered as a JSON document. The information includes...
-    TODO: continue from here
  */
 void TmcClient::getUserInfo()
 {
@@ -227,6 +251,8 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 }
 
 /*!
+    //! This slot is private so no QDoc will be generated for it
+
     By the time the slot is called the \l {http://doc.qt.io/qt-5/qnetworkreply.html}
     {QNetworkReply} object pointed to by \a reply should contain a
     particular TMC course's exercise list as a JSON document. Assuming there has been
@@ -269,6 +295,8 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 }
 
 /*!
+    //! Redundant QDoc for a private slot
+
     The primary purpose of the function is to extract a successfully downloaded
     zip archive to an appropriate target directory. \l
     {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} \a reply contains the zip

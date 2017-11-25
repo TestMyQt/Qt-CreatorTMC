@@ -1,7 +1,7 @@
 /*!
     \class Course
     \inmodule lib/tmcclient
-    \inheaderfile tmcclient.h
+    \inheaderfile course.h
     \brief Class \l Course is a simple representation of a TMC course that includes
     the course's exercises as a collection of \l Exercise objects.
 */

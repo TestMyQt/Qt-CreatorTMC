@@ -6,7 +6,7 @@
 
     In practice TMC exercises are directories that contain the files of a miniscule
     software project. One of the instance variables of \l Exercise is one that
-    specifies its "location". The location is the parent directory of the exercise
+    specifies its location. The location is the parent directory of the exercise
     directory itself.
 */
 
