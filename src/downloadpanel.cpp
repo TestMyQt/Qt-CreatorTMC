@@ -87,23 +87,11 @@ QNetworkReply *DownloadPanel::getRepliesListItem( int index )
     return replies.at( index );
 }
 
-int DownloadPanel::findSenderIndex( QObject *theSender )
-{
-    int senderIndex = -1;
-
-    for( int i = 0; i < replies.size(); i++ )
-        if( replies[ i ] == theSender ) {
-            senderIndex = i;
-            break;
-    }
-
-    return senderIndex;
-}
-
 void DownloadPanel::networkReplyProgress(
     qint64 bytesReceived, qint64 bytesTotal )
 {
-    int senderIndex = findSenderIndex( QObject::sender() );
+    int senderIndex = replies.indexOf(reinterpret_cast<QNetworkReply *>
+        (QObject::sender()));
 
     progressBars[ senderIndex ]->setMaximum(
         bytesTotal != -1 ? bytesTotal : AVERAGE_DOWNLOAD_SIZE );
@@ -112,7 +100,8 @@ void DownloadPanel::networkReplyProgress(
 
 void DownloadPanel::httpFinished()
 {
-    int senderIndex = findSenderIndex( QObject::sender() );
+    int senderIndex = replies.indexOf(reinterpret_cast<QNetworkReply *>
+        (QObject::sender()));
 
     // Grey out the cancel button of the download
     downloadCancelButtons[ senderIndex ]->setEnabled( false );
