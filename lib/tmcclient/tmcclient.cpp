@@ -4,6 +4,23 @@
     \inheaderfile tmcclient.h
     \brief Class \l TmcClient is the primary means of communication with
         the TMC server.
+
+    \l TmcClient uses \l {https://oauth.net/2/} {OAuth2} for authentication by
+    sending a POST request to the TMC server with the parameters \c client_id,
+    \c client_secret, \c username, \c password and \c grant_type. Here's a
+    description of the parameters:
+    \list
+    \li \c client_id and \c client_secret are used to authorize the client application.
+    They are fetched from the TMC server at first startup and are cached in
+    application \l {http://doc.qt.io/qt-5/qsettings.html} {QSettings}.
+    \li \c username and \c password are the TMC credentials for user authentication.
+    \li \c grant_type with the string value \c "password" indicates we are
+    using the \l {https://oauth.net/2/} {OAuth2} password authentication flow.
+    \endlist
+
+    If the login information is correct, the TMC server responds with a JSON
+    document that contains an access token. \l TmcClient uses the access token
+    for further communication with the TMC server.
 */
 
 /*!
@@ -42,6 +59,18 @@
     \c QList<Exercise> which can be retrieved with \l {Course::} {getExercises()}.
 */
 
+/*!
+    \fn void TmcClient::exerciseZipReady(Exercise *ex)
+
+    The signal is emitted once the compressed exercise file requested from the
+    TMC server by \l {TmcClient::} {getExerciseZip()} has completed successfully
+    and the contents have been extracted. Parameter \a ex is the \l Exercise
+    object that corresponds to the downloaded exercise.
+
+    The signal is connected to a private function in \l {TestMyCodePlugin::Internal::}
+    {TestMyCode} that opens the exercise \a ex as a project in Qt Creator.
+*/
+
 #include "tmcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -72,16 +101,28 @@ void TmcClient::setNetworkManager(QNetworkAccessManager *m)
     manager = m;
 }
 
+/*!
+    Sets the value of the private \c accessToken member of \l TmcClient
+    to \a token.
+*/
 void TmcClient::setAccessToken(QString token)
 {
     accessToken = token;
 }
 
+/*!
+    Sets the value of the private \c clientId member of \l TmcClient
+    to \a id.
+*/
 void TmcClient::setClientId(QString id)
 {
     clientId = id;
 }
 
+/*!
+    Sets the value of the private \c clientSecret member of \l TmcClient
+    to \a secret.
+*/
 void TmcClient::setClientSecret(QString secret)
 {
     clientSecret = secret;
@@ -90,12 +131,20 @@ void TmcClient::setClientSecret(QString secret)
 /*!
     An authorized \l TmcClient object has to have a \l {https://oauth.net/2/}
     {OAuth 2.0} client ID and client secret.
+
+    Returns \c true if authorization has occured and \c false otherwise.
 */
 bool TmcClient::isAuthorized()
 {
     return !(clientId.isEmpty() || clientSecret.isEmpty());
 }
 
+/*!
+    Tests whether successful authentication has occured. The sign of
+    successful authention is that the client has an access token.
+
+    Returns \c true if authentication has occured and \c false otherwise.
+ */
 bool TmcClient::isAuthenticated()
 {
     return !accessToken.isEmpty();
@@ -231,18 +280,6 @@ void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
     emit authorizationFinished(clientId, clientSecret);
 }
 
-/*!
-    //! Redundant QDoc for a private slot
-
-    The primary purpose of the slot is to extract the access token
-    from the parameter \a reply and save it in a member variable for
-    future use. The slot is called when the \l
-    {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} object created
-    in \l {TmcClient::} {authenticate()} emits the signal
-    \l {http://doc.qt.io/qt-5/qnetworkreply.html#finished}
-    {QNetworkReply::finished}. If an error occurred during authentication,
-    the slot emits the signal \l TmcClient::TMCError.
- */
 void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
@@ -268,16 +305,6 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-/*!
-    //! This slot is private so no QDoc will be generated for it
-
-    By the time the slot is called the \l {http://doc.qt.io/qt-5/qnetworkreply.html}
-    {QNetworkReply} object pointed to by \a reply should contain a
-    particular TMC course's exercise list as a JSON document. Assuming there has been
-    no errors during the download phase, the JSON document is processed and each
-    of the exercises are added to the \l Course object pointed to by \a course with
-    a call to \l Course::addExercise().
-*/
 void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 {
     if (reply->error()) {
@@ -312,14 +339,6 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
     reply->deleteLater();
 }
 
-/*!
-    //! Redundant QDoc for a private slot
-
-    The primary purpose of the function is to extract a successfully downloaded
-    zip archive to an appropriate target directory. \l
-    {http://doc.qt.io/qt-5/qnetworkreply.html} {QNetworkReply} \a reply contains the zip
-    archive data and \a ex identifies the relevant \l Exercise object.
- */
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
     if (reply->error()) {

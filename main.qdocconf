@@ -1,10 +1,10 @@
 project = TestMyQt/QtCreatorTMC
-# description = (add some description here)
+description = A Qt Creator plugin for participating in TestMyCode courses
 
 # QDoc is a tool that constantly evolves to suit our needs,
 # and there are some compatibility issues between old and new
-# practices. For that reason, any QDoc configuration file needs to
-# include compat.qdocconf.
+# practices. For that reason, any QDoc configuration file needs
+# to include compat.qdocconf.
 # include(compat.qdocconf)
 # include(/opt/Qt5.9.1/Docs/Qt-5.9.1/global/compat.qdocconf)
 
@@ -30,7 +30,7 @@ sourcedirs  = ./src ./lib/tmcclient
 # directories containing the images used in the documentation.
 imagedirs = ./doc/images
 
-# ...
+# (What are these about?)
 sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
 headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
 examples.fileextensions = "*.cpp *.h *.js *.xq *.svg *.xml *.ui *.qhp *.qhcp *.qml"

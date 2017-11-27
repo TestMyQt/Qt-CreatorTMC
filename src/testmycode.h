@@ -58,7 +58,7 @@ private:
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
 
-    // ...
+    // DownloadPanel
     DownloadPanel *downloadPanel;
 };
 
