@@ -3,17 +3,17 @@
 
 #include "downloadpanel.h"
 
-#define TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS 3000
+static const int TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS = 2000;
 // Perhaps with a different font the height of the widgets could be reduced
 // to less than 15.
-#define FIXED_WIDGET_HEIGHT 15
+static const int FIXED_WIDGET_HEIGHT = 15;
 // The server doesn't seem to reveal the sizes of the files being downloaded,
 // so the following crude estimate is needed.
 static const int AVERAGE_DOWNLOAD_SIZE = 1500000;
 
 DownloadPanel::DownloadPanel( QWidget *parent ) : QWidget( parent )
 {
-    layout = new QGridLayout;
+    layout = new QGridLayout( parent );
     numberOfProgressBars = 0;
     doneAddingWidgets = false;
 
@@ -35,17 +35,8 @@ void DownloadPanel::addInfoLabel()
         return;
     }
 
-    // Just to create a bit of empty space between the info label and the
-    // last progress bar
-    /*
-    QLabel *blankLabel = new QLabel;
-    blankLabel->setFixedHeight( FIXED_WIDGET_HEIGHT );
-    layout->addWidget( blankLabel, 2 * numberOfProgressBars, 0 );
-    */
-
-    infoLabel = new QLabel( "Downloading files..." );
+    infoLabel = new QLabel( "Downloading files...", this );
     infoLabel->setAlignment( Qt::AlignCenter );
-    // infoLabel->setStyleSheet( "background: white" );
     infoLabel->setFixedHeight( 35 );
     layout->addWidget( infoLabel, 2 * numberOfProgressBars + 1, 0 );
 
@@ -61,13 +52,13 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
     }
 
     // Add the label
-    QLabel *label = new QLabel( downloadName );
+    QLabel *label = new QLabel( downloadName, this );
     label->setFixedHeight( FIXED_WIDGET_HEIGHT );
     layout->addWidget( label, 2 * numberOfProgressBars, 0 );
     progressBarLabels.append( label );
 
     // Add the progress bar
-    QProgressBar *bar = new QProgressBar;
+    QProgressBar *bar = new QProgressBar( this );
     bar->setMinimum( 0 );
     bar->setMaximum( AVERAGE_DOWNLOAD_SIZE );
     bar->setValue( 0 );
@@ -76,7 +67,7 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
     progressBars.append( bar );
 
     // Add the button
-    QPushButton *button = new QPushButton( "❎" );
+    QPushButton *button = new QPushButton( "❎", this );
     button->setFixedHeight( FIXED_WIDGET_HEIGHT );
     button->setFixedWidth( FIXED_WIDGET_HEIGHT );
     layout->addWidget( button, 2 * numberOfProgressBars + 1, 1 );
@@ -96,17 +87,11 @@ QNetworkReply *DownloadPanel::getRepliesListItem( int index )
     return replies.at( index );
 }
 
-#define FIND_SENDER_INDEX \
-int senderIndex = -1; \
-for( int i = 0; i < replies.size(); i++ ) \
-    if( replies[ i ] == QObject::sender() ) { \
-        senderIndex = i; \
-        break; }
-
 void DownloadPanel::networkReplyProgress(
     qint64 bytesReceived, qint64 bytesTotal )
 {
-    FIND_SENDER_INDEX
+    int senderIndex = replies.indexOf(reinterpret_cast<QNetworkReply *>
+        (QObject::sender()));
 
     progressBars[ senderIndex ]->setMaximum(
         bytesTotal != -1 ? bytesTotal : AVERAGE_DOWNLOAD_SIZE );
@@ -115,7 +100,8 @@ void DownloadPanel::networkReplyProgress(
 
 void DownloadPanel::httpFinished()
 {
-    FIND_SENDER_INDEX
+    int senderIndex = replies.indexOf(reinterpret_cast<QNetworkReply *>
+        (QObject::sender()));
 
     // Grey out the cancel button of the download
     downloadCancelButtons[ senderIndex ]->setEnabled( false );
