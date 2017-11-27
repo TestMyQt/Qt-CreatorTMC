@@ -83,19 +83,3 @@ void Exercise::saveSettings(QString courseName)
     settings.endGroup();
     settings.deleteLater();
 }
-
-//void Exercise::loadSettings(QString courseName, QString exerciseName)
-//{
-//    m_name = exerciseName;
-//    QSettings settings("TestMyQt", "Exercises");
-//    settings.beginGroup(courseName);
-//        settings.beginGroup(exerciseName);
-//            setId(settings.value("id").toInt());
-//            setChecksum(settings.value("chekcsum", "").toString());
-//            setLocation(settings.value("location", "").toString());
-//            setDlDate(settings.value("dlDate", "").toString());
-//            setOpenStatus(settings.value("openStatus", 0).toBool());
-//        settings.endGroup();
-//    settings.endGroup();
-//    settings.deleteLater();
-//}

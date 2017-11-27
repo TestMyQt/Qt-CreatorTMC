@@ -31,20 +31,25 @@ private slots:
     // Loginform
     void onLoginCancelClicked();
     void onLoginClicked();
+    void onChangeServerClicked();
     // Downloadform
     void onDownloadCancelClicked();
     void onDownloadOkClicked();
     void refreshDownloadList();
     // Settings window
-    void onRefreshCourseListClicked();
     void onSettingsOkClicked();
     void onSettingsBrowseClicked();
 
 private:
+    QString currentOrgName;
+    QString currentOrgSlug;
+    QString workingDirectory;
+
     // SettingsWindow
     Ui::settingsForm *settingsWindow;
     QWidget *settingsWidget;
     void showSettingsWidget();
+    QString askSaveLocation();
 
     // Loginform
     Ui::loginform *login;
@@ -63,7 +68,6 @@ private:
     void setDefaultCourse();
     void openProject(Exercise *ex);
     void displayTMCError(QString errorText);
-    QString askSaveLocation();
     void clearCredentials();
     void doAuth(QString username, QString password, bool savePassword);
     void handleLoginResponse(QString accessToken);

@@ -23,7 +23,8 @@ void Course::setName(QString name)
     m_name = name;
 }
 
-int Course::getId() {
+int Course::getId() const
+{
     return m_id;
 }
 
@@ -47,23 +48,10 @@ void Course::addExercise(Exercise e)
     m_exercises.append(e);
 }
 
-void Course::saveSettings()
+void Course::loadSettings()
 {
-    QSettings tmcSettings("TestMyQt", "TMC");
-    tmcSettings.setValue("currentProject", m_name);
-    tmcSettings.deleteLater();
     QSettings settings("TestMyQt", "Exercises");
     settings.beginGroup(m_name);
-        settings.setValue("id", m_id);
-    settings.endGroup();
-    settings.deleteLater();
-}
-
-void Course::loadSettings(QString name)
-{
-    QSettings settings("TestMyQt", "Exercises");
-    settings.beginGroup(name);
-    setId(settings.value("id").toInt());
         QStringList exerciseList = settings.childGroups();
         foreach (QString exercise, exerciseList) {
             settings.beginGroup(exercise);
@@ -71,7 +59,7 @@ void Course::loadSettings(QString name)
                 ex.setChecksum(settings.value("chekcsum", "").toString());
                 ex.setLocation(settings.value("location", "").toString());
                 ex.setDlDate(settings.value("dlDate", "").toString());
-                ex.setOpenStatus(settings.value("openStatus", 0).toBool());
+                ex.setOpenStatus(settings.value("openStatus", false).toBool());
             settings.endGroup();
             addExercise(ex);
         }

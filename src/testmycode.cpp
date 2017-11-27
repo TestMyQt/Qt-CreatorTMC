@@ -30,6 +30,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QByteArray>
 
 #include <QSettings>
@@ -82,22 +83,17 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Core::Command *downloadCmd = Core::ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
                                                                      Core::Context(Core::Constants::C_GLOBAL));
 
-    auto logoutAction = new QAction(tr("Logout"), this);
-    Core::Command *logoutCmd = Core::ActionManager::registerAction(logoutAction, Constants::LOGOUT_ACTION_ID,
-                                                                     Core::Context(Core::Constants::C_GLOBAL));
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
     settingsCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+S")));
     downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
-    logoutCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+L")));
 
     // Connect to trigger to a function
     connect(loginAction, &QAction::triggered, this, &TestMyCode::showLoginWidget);
     connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
-    connect(settingsAction, &QAction::triggered, this, &TestMyCode::showSettingsWindow);
+    connect(settingsAction, &QAction::triggered, this, &TestMyCode::showSettingsWidget);
     connect(downloadAction, &QAction::triggered, this, &TestMyCode::showDownloadWidget);
-    connect(logoutAction, &QAction::triggered, this, &TestMyCode::clearCredentials);
 
     // Create context menu with actions
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
@@ -107,7 +103,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
     menu->addAction(downloadCmd);
-    menu->addAction(logoutCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
     auto tools_menu = Core::ActionManager::actionContainer(Core::Constants::M_WINDOW);
@@ -132,28 +127,43 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     // Create settings
     QSettings settings("TestMyQt", "TMC");
+    currentOrgName = settings.value("orgName", "").toString();
+    currentOrgSlug = settings.value("orgSlug", "").toString();
+    workingDirectory = settings.value("workingDir", "").toString();
+    Course *course = new Course();
+    course->setName(settings.value("courseName", "").toString());
+    course->setId(settings.value("courseId", 0).toInt());
+    m_activeCourse = course;
+    m_activeCourse->loadSettings();
     tmcClient.setAccessToken(settings.value("accessToken", "").toString());
     tmcClient.setClientId(settings.value("clientId", "").toString());
     tmcClient.setClientSecret(settings.value("clientSecret", "").toString());
     tmcClient.setServerAddress(settings.value("server", "").toString());
     login->usernameinput->setText(settings.value("username", "").toString());
     login->serverInput->setText(settings.value("server", "").toString());
-    settings.deleteLater();
-
-    // Signal-Slot to popup login window in case of non-valid access token
-    connect(&tmcClient, &TmcClient::accessTokenNotValid, this, &TestMyCode::showLoginWidget);
+    settings.deleteLater();    
 
     // Signal-Slot for login window
     connect(login->cancelbutton, &QPushButton::clicked, this, &TestMyCode::onLoginCancelClicked);
     connect(login->loginbutton, &QPushButton::clicked, this, &TestMyCode::onLoginClicked);
+    connect(&tmcClient, &TmcClient::accessTokenNotValid, this, &TestMyCode::showLoginWidget);
+    connect(login->serverButton, &QPushButton::clicked, this, &TestMyCode::onChangeServerClicked);
 
     // Signal-Slot for Settings window
-    connect(settingsWindow->refreshlistbutton, &QPushButton::clicked, this, &TestMyCode::onRefreshCourseListClicked);
+    connect(settingsWindow->logoutButton, &QPushButton::clicked, this, [=](){
+        clearCredentials();
+    });
     connect(settingsWindow->okButton, &QPushButton::clicked, this, &TestMyCode::onSettingsOkClicked);
     connect(settingsWindow->cancelButton, &QPushButton::clicked, this, [=](){
         settingsWidget->close();
     });
     connect(settingsWindow->browseButton, &QPushButton::clicked, this, &TestMyCode::onSettingsBrowseClicked);
+    connect(settingsWindow->orgComboBox, &QComboBox::currentTextChanged, this, [=](){
+        if (!settingsWindow->orgComboBox->currentData().toString().isEmpty()) {
+            currentOrgSlug = settingsWindow->orgComboBox->currentData().toString();
+            tmcClient.getCourseList(currentOrgSlug);
+        }
+    });
 
     // TmcClient
     connect(&tmcClient, &TmcClient::authorizationFinished, this, &TestMyCode::handleAuthResponse);
@@ -173,12 +183,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);
-
-    // TODO: authorization happens at plugin creation time, but this could be done
-    // when a server is activated in preferences
-    if (!tmcClient.isAuthorized()) {
-        tmcClient.authorize();
-    }
 
     return true;
 }
@@ -205,20 +209,21 @@ void TestMyCode::showLoginWidget()
 
 void TestMyCode::showDownloadWidget()
 {
-    setDefaultCourse();
+    tmcClient.getExerciseList(m_activeCourse);
     downloadWidget->show();
 }
 
 void TestMyCode::showSettingsWidget()
 {
-    // TODO getOrganizationList
-    // also implement currentTextChanged signal-slot for org list
-    QSettings settings("TestMyQt", "TMC");
-
-    settingsWindow->workingDir->setText(settings.value("workingDir", "").toString());
-
-    settings.deleteLater();
-    settingsWidget->show();
+    if (!tmcClient.isAuthenticated()) {
+        loginWidget->show();
+    } else {
+        QSettings settings("TestMyQt", "TMC");
+        settingsWindow->workingDir->setText(settings.value("workingDir", "").toString());
+        settings.deleteLater();
+        tmcClient.getOrganizationList();
+        settingsWidget->show();
+    }
 }
 
 void TestMyCode::runTMC()
@@ -249,15 +254,6 @@ void TestMyCode::displayTMCError(QString errorText)
     QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
 }
 
-void TestMyCode::setDefaultCourse()
-{
-    tmcClient.getUserInfo();
-    Course* course = new Course();
-    course->setId(18);
-    m_activeCourse = course;
-    tmcClient.getExerciseList(course);
-}
-
 void TestMyCode::onLoginCancelClicked()
 {
     loginWidget->close();
@@ -267,13 +263,23 @@ void TestMyCode::onLoginClicked()
 {
     QString username = login->usernameinput->text();
     QString password = login->passwordinput->text();
-    QString serverAddress = login->serverInput->text();
-    tmcClient.setServerAddress(serverAddress);
     tmcClient.authenticate(username, password);
     QSettings settings("TestMyQt", "TMC");
     settings.setValue("username", username);
-    settings.setValue("server", serverAddress);
+    settings.setValue("server", login->serverInput->text());
     settings.deleteLater();
+}
+
+void TestMyCode::onChangeServerClicked()
+{
+    QInputDialog changeAddress;
+    QString address = changeAddress.getText(0, "TMC", "Set TMC Server address:",
+                                             QLineEdit::Normal, login->serverInput->text());
+    if (!address.isEmpty()) {
+        tmcClient.setServerAddress(address);
+        login->serverInput->setText(address);
+        tmcClient.authorize();
+    }
 }
 
 void TestMyCode::handleAuthResponse(QString clientId, QString clientSecret)
@@ -290,10 +296,10 @@ void TestMyCode::handleLoginResponse(QString accessToken)
     // We did not receive any token, credentials were not valid
     if (accessToken == "") {
         settings.setValue("username", "");
-        settings.setValue("password", "");
     } else {
         settings.setValue("accessToken", accessToken);
         loginWidget->close();
+        showSettingsWidget();
     }
 
     settings.deleteLater();
@@ -310,47 +316,71 @@ void TestMyCode::clearCredentials()
 
 void TestMyCode::handleOrganizationList(QMap<QString, QString> organizations)
 {
-    settingsWindow->orgComboBox->clear();
     QMapIterator<QString, QString> iter(organizations);
     while(iter.hasNext()) {
         iter.next();
         settingsWindow->orgComboBox->addItem(iter.key(), iter.value());
     }
-    // TODO set text to currently selected organziation,
-    // if that is found also trigger getCourseList
+    settingsWindow->orgComboBox->setCurrentText(currentOrgName);
 }
 
 void TestMyCode::handleCourseList(QMap<QString, int> courses)
 {
-    settingsWindow->coursecombobox->clear();
+    settingsWindow->courseComboBox->clear();
     QMapIterator<QString, int> iter(courses);
     while(iter.hasNext()) {
         iter.next();
-        settingsWindow->coursecombobox->addItem(iter.key(), iter.value());
+        settingsWindow->courseComboBox->addItem(iter.key(), iter.value());
     }
-    // TODO set text to currently selected course if it exists
+    settingsWindow->courseComboBox->setCurrentText(m_activeCourse->getName());
 }
 
 void TestMyCode::onSettingsOkClicked()
 {
+    if (settingsWindow->workingDir->text() == "") {
+        displayTMCError("Please set the working directory!");
+        return;
+    }
     QSettings settings("TestMyQt", "TMC");
     settings.setValue("workingDir", settingsWindow->workingDir->text());
-    settings.setValue("orgName", settingsWindow->orgComboBox->currentText();
+    settings.setValue("orgName", settingsWindow->orgComboBox->currentText());
     settings.setValue("orgSlug", settingsWindow->orgComboBox->currentData());
     settings.setValue("courseName", settingsWindow->courseComboBox->currentText());
     settings.setValue("courseId", settingsWindow->courseComboBox->currentData());
     settings.deleteLater();
+    currentOrgName = settingsWindow->orgComboBox->currentText();
+    currentOrgSlug = settingsWindow->orgComboBox->currentData().toString();
+    workingDirectory = settingsWindow->workingDir->text();
+    if (m_activeCourse->getId() != settingsWindow->courseComboBox->currentData().toInt()) {
+        Course *newCourse = new Course();
+        newCourse->setName(settingsWindow->courseComboBox->currentText());
+        newCourse->setId(settingsWindow->courseComboBox->currentData().toInt());
+        newCourse->loadSettings();
+        m_activeCourse = newCourse;
+    }
+    settingsWindow->orgComboBox->clear();
     settingsWidget->close();
 }
 
 void TestMyCode::onSettingsBrowseClicked()
 {
-    QFileDialog dialog(downloadWidget);
-    dialog.setFileMode(QFileDialog::Directory);
-    dialog.setOption(QFileDialog::ShowDirsOnly, true);
-    QString dir = dialog.selectedFiles().at(0);
+    QString dir = askSaveLocation();
     settingsWindow->workingDir->setText(dir);
 }
+
+QString TestMyCode::askSaveLocation()
+{
+    QFileDialog dialog(settingsWidget);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+
+    if (!dialog.exec())
+        return QString();
+
+    QString directory = dialog.selectedFiles().at(0);
+    return directory;
+}
+
 
 void TestMyCode::onDownloadCancelClicked()
 {
@@ -362,13 +392,10 @@ void TestMyCode::onDownloadOkClicked()
     auto exerciseList = downloadform->exerciselist;
     qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
 
-    QSettings settings("TMC", "TestMyQt");
-    QString workingDir = settings.value("workingDir", "").toString();
-    QString courseName = settings.value("courseName", "").toString();
-    if (workingDir == "" || courseName == "")
+    if (workingDirectory == "" || m_activeCourse->getName() == "")
         return;
-    QString saveDirectory = workingDir + "/" + courseName;
-    settings.deleteLater();
+
+    QString saveDirectory = workingDirectory + "/" + m_activeCourse->getName();
 
     downloadPanel = new DownloadPanel();
 

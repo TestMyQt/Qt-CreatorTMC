@@ -20,7 +20,7 @@ public:
     QString getDlDate() const;
     bool getOpenStatus() const;
     void saveSettings(QString courseName);
-    //void loadSettings(QString courseName, QString exerciseName);
+
 private:
     int m_id;
     QString m_name;

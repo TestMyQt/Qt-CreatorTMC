@@ -128,9 +128,9 @@ void TmcClient::getOrganizationList()
     });
 }
 
-void TmcClient::getCourseList(QString organization)
+void TmcClient::getCourseList(QString orgSlug)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(organization));
+    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(orgSlug));
     QNetworkReply *reply = doGet(url);
     connect(reply, &QNetworkReply::finished, this, [=](){
         courseListReplyFinished(reply);
@@ -269,10 +269,10 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
     QJsonArray exercises = jsonCourse["exercises"].toArray();
     for (int i = 0; exercises.size() > i; i++) {
         QJsonObject exercise = exercises[i].toObject();
-        // qDebug() << exercise["name"].toString();
-
         Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
         ex.setChecksum(exercise["checksum"].toString());
+        ex.setDlDate(exercise["deadline"].toString());
+        ex.saveSettings(course->getName());
         course->addExercise(ex);
         qDebug() << ex.getId() << ex.getName();
         qDebug() << course->getExercise(ex.getId()).getName();

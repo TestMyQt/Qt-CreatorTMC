@@ -29,7 +29,7 @@ public:
     void getUserInfo();
     void getExerciseList(Course *course);
     QNetworkReply* getExerciseZip(Exercise *ex);
-    void getCourseList(QString organization);
+    void getCourseList(QString orgSlug);
     void getOrganizationList();
 
     bool isAuthorized();
@@ -49,7 +49,7 @@ signals:
 private slots:
     void authorizationReplyFinished (QNetworkReply *reply);
     void authenticationReplyFinished (QNetworkReply *reply);
-    void organiationListReplyFinished(QNetworkReply *reply);
+    void organizationListReplyFinished(QNetworkReply *reply);
     void courseListReplyFinished(QNetworkReply *reply);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
     void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
