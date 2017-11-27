@@ -26,6 +26,22 @@
     which stores the access token for later use.
 */
 
+/*!
+    \fn void TmcClient::authorizationFinished(QString clientId, QString clientSecret)
+
+    Emitted when the job begun by \l {TmcClient::} {authorize()} is finished.
+    The slot connected to the signal should store \a clientId and \a clientSecret
+    for future use.
+*/
+
+/*!
+    \fn void TmcClient::exerciseListReady(Course *course)
+
+    Emitted when the job begun by \l {TmcClient} {getExerciseList()} is finished.
+    The \a course parameter contains the list of exercises as a collection of type
+    \c QList<Exercise> which can be retrieved with \l {Course::} {getExercises()}.
+*/
+
 #include "tmcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -216,6 +232,8 @@ void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
 }
 
 /*!
+    //! Redundant QDoc for a private slot
+
     The primary purpose of the slot is to extract the access token
     from the parameter \a reply and save it in a member variable for
     future use. The slot is called when the \l
