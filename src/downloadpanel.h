@@ -28,6 +28,7 @@ public slots:
 
 private:
     void closeWindowIfAllDownloadsComplete();
+    int findSenderIndex( QObject *theSender );
     QGridLayout *layout;
     QList<QProgressBar *> progressBars;
     QList<QNetworkReply *> replies;
