@@ -14,7 +14,7 @@ public:
     QString getName() const;
     Exercise getExercise(int id);
     void addExercise(Exercise e);
-    QList<Exercise> * getExercises();
+    QList<Exercise> getExercises();
     void saveSettings();
     void loadSettings();
 private:

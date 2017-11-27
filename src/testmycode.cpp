@@ -234,11 +234,11 @@ void TestMyCode::runTMC()
 
 void TestMyCode::refreshDownloadList()
 {
-    QList<Exercise> * exercises = m_activeCourse->getExercises();
+    QList<Exercise> exercises = m_activeCourse->getExercises();
     // Create item on-the-run
     downloadform->exerciselist->clear();
-    for(int i = 0; i < exercises->count(); i++) {
-        QListWidgetItem* item = new QListWidgetItem(exercises->at(i).getName(), downloadform->exerciselist);
+    for(int i = 0; i < exercises.count(); i++) {
+        QListWidgetItem* item = new QListWidgetItem(exercises.at(i).getName(), downloadform->exerciselist);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
         item->setCheckState(Qt::Checked);
     }
@@ -403,10 +403,10 @@ void TestMyCode::onDownloadOkClicked()
         if (exerciseList->item(idx)->checkState() == Qt::Checked)
         {
             qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
-            Exercise *ex = &((*m_activeCourse->getExercises())[idx]);
-            ex->setLocation(saveDirectory);
-            downloadPanel->addWidgetsToDownloadPanel( ex->getName() );
-            QNetworkReply* reply = tmcClient.getExerciseZip(ex);
+            Exercise ex = m_activeCourse->getExercises()[idx];
+            ex.setLocation(saveDirectory);
+            downloadPanel->addWidgetsToDownloadPanel( ex.getName() );
+            QNetworkReply* reply = tmcClient.getExerciseZip(&ex);
 
             connect( reply, &QNetworkReply::downloadProgress,
                 downloadPanel, &DownloadPanel::networkReplyProgress );

@@ -272,8 +272,12 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
         Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
         ex.setChecksum(exercise["checksum"].toString());
         ex.setDlDate(exercise["deadline"].toString());
-        ex.saveSettings(course->getName());
-        course->addExercise(ex);
+        // Workaround to not add same exercises over and over again
+        // needs to be reworked to allow updating
+        if (course->getExercise(exercise["id"].toInt()).getId() == -1) {
+            ex.saveSettings(course->getName());
+            course->addExercise(ex);
+        }
         qDebug() << ex.getId() << ex.getName();
         qDebug() << course->getExercise(ex.getId()).getName();
         qDebug() << exercise["checksum"].toString();

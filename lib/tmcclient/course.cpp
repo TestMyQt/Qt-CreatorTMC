@@ -8,9 +8,9 @@ Course::Course()
 
 }
 
-QList<Exercise> * Course::getExercises()
+QList<Exercise> Course::getExercises()
 {
-    return &m_exercises;
+    return m_exercises;
 }
 
 void Course::setId(int id)
