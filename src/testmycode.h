@@ -1,10 +1,9 @@
 #pragma once
-#include <ui_loginscreen.h>
 #include <ui_downloadscreen.h>
-#include <ui_settings.h>
 #include "testmycode_global.h"
 #include "tmcclient.h"
 #include "downloadpanel.h"
+#include "settingswidget.h"
 
 #include <extensionsystem/iplugin.h>
 
@@ -28,33 +27,15 @@ public:
     ShutdownFlag aboutToShutdown();
 
 private slots:
-    // Loginform
-    void onLoginCancelClicked();
-    void onLoginClicked();
-    void onChangeServerClicked();
     // Downloadform
     void onDownloadCancelClicked();
     void onDownloadOkClicked();
     void refreshDownloadList();
-    // Settings window
-    void onSettingsOkClicked();
-    void onSettingsBrowseClicked();
 
 private:
-    QString currentOrgName;
-    QString currentOrgSlug;
-    QString workingDirectory;
 
-    // SettingsWindow
-    Ui::settingsForm *settingsWindow;
-    QWidget *settingsWidget;
+    SettingsWidget *settingsWidget;
     void showSettingsWidget();
-    QString askSaveLocation();
-
-    // Loginform
-    Ui::loginform *login;
-    QWidget *loginWidget;
-    void showLoginWidget();
 
     // Downloadform
     Ui::downloadform *downloadform;
@@ -63,7 +44,6 @@ private:
 
     // tmcClient
     TmcClient tmcClient;
-    Course *m_activeCourse;
     void runTMC();
     void setDefaultCourse();
     void openProject(Exercise *ex);
@@ -72,8 +52,6 @@ private:
     void doAuth(QString username, QString password, bool savePassword);
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
-    void handleOrganizationList(QMap<QString, QString> organizations);
-    void handleCourseList(QMap<QString, int> courses);
 
     // ...
     DownloadPanel *downloadPanel;

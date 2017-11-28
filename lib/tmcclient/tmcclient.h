@@ -11,6 +11,7 @@
 #include <QUrlQuery>
 
 #include "course.h"
+#include "organization.h"
 
 class TmcClient : public QObject
 {
@@ -29,7 +30,7 @@ public:
     void getUserInfo();
     void getExerciseList(Course *course);
     QNetworkReply* getExerciseZip(Exercise *ex);
-    void getCourseList(QString orgSlug);
+    void getCourseList(Organization org);
     void getOrganizationList();
 
     bool isAuthorized();
@@ -41,8 +42,8 @@ signals:
     void authenticationFinished(QString accessToken);
     void exerciseListReady(Course *course);
     void exerciseZipReady(Exercise *ex);
-    void organizationListReady(QMap<QString, QString> organizations);
-    void courseListReady(QMap<QString, int> courses);
+    void organizationListReady(QList<Organization> organizations);
+    void courseListReady(Organization organization);
     void accessTokenNotValid();
     void closeDownloadWindow();
 
@@ -50,7 +51,7 @@ private slots:
     void authorizationReplyFinished (QNetworkReply *reply);
     void authenticationReplyFinished (QNetworkReply *reply);
     void organizationListReplyFinished(QNetworkReply *reply);
-    void courseListReplyFinished(QNetworkReply *reply);
+    void courseListReplyFinished(QNetworkReply *reply, Organization org);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
     void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
 
