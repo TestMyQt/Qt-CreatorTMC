@@ -1,8 +1,6 @@
 #include "course.h"
 #include "exercise.h"
 
-#include <QSettings>
-
 Course::Course()
 {
 
@@ -48,21 +46,33 @@ void Course::addExercise(Exercise e)
     m_exercises.append(e);
 }
 
-void Course::loadSettings()
+Course Course::fromJson(QJsonObject jsonCourse)
 {
-    QSettings settings("TestMyQt", "Exercises");
-    settings.beginGroup(m_name);
-        QStringList exerciseList = settings.childGroups();
+    Course course;
+    course.setName(jsonCourse["name"].toString());
+    course.setId(jsonCourse["id"].toInt());
+    return course;
+}
+
+Course* Course::fromQSettings(QSettings *settings)
+{
+    Course *course = new Course;
+    course->setName(settings->value("courseName", "").toString());
+    course->setId(settings->value("courseId", -1).toInt());
+    return course;
+}
+
+void Course::exerciseListFromQSettings(QSettings *settings)
+{
+    settings->beginGroup("Exercises");
+    settings->beginGroup(m_name);
+        QStringList exerciseList = settings->childGroups();
         foreach (QString exercise, exerciseList) {
-            settings.beginGroup(exercise);
-                Exercise ex(settings.value("id").toInt(), exercise);
-                ex.setChecksum(settings.value("chekcsum", "").toString());
-                ex.setLocation(settings.value("location", "").toString());
-                ex.setDlDate(settings.value("dlDate", "").toString());
-                ex.setOpenStatus(settings.value("openStatus", false).toBool());
-            settings.endGroup();
+            settings->beginGroup(exercise);
+                Exercise ex = Exercise::fromQSettings(settings);
+            settings->endGroup();
             addExercise(ex);
         }
-    settings.endGroup();
-    settings.deleteLater();
+    settings->endGroup();
+    settings->deleteLater();
 }

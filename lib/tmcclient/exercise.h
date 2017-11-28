@@ -2,6 +2,7 @@
 #define EXERCISE_H
 
 #include <QString>
+#include <QSettings>
 
 class Exercise
 {
@@ -20,6 +21,7 @@ public:
     QString getDlDate() const;
     bool getOpenStatus() const;
     void saveSettings(QString courseName);
+    static Exercise fromQSettings(QSettings *settings);
 
 private:
     int m_id;

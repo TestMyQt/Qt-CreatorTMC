@@ -128,12 +128,12 @@ void TmcClient::getOrganizationList()
     });
 }
 
-void TmcClient::getCourseList(QString orgSlug)
+void TmcClient::getCourseList(Organization org)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(orgSlug));
+    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(org.getSlug()));
     QNetworkReply *reply = doGet(url);
     connect(reply, &QNetworkReply::finished, this, [=](){
-        courseListReplyFinished(reply);
+        courseListReplyFinished(reply, org);
     });
 }
 
@@ -220,18 +220,18 @@ void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
                       .arg(reply->errorString(), reply->error()));
         reply->deleteLater();
     }
-    QMap<QString, QString> organizations;
+    QList<Organization> organizations;
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray orgJson = json.array();
     for (int i = 0; orgJson.size() > i; i++) {
         QJsonObject org = orgJson[i].toObject();
-        organizations.insert(org["name"].toString(), org["slug"].toString());
+        organizations.append(Organization(org["name"].toString(), org["slug"].toString()));
     }
     emit organizationListReady(organizations);
     reply->deleteLater();
 }
 
-void TmcClient::courseListReplyFinished(QNetworkReply *reply)
+void TmcClient::courseListReplyFinished(QNetworkReply *reply, Organization org)
 {
     if (reply->error()) {
         qDebug() << "Error at Course list reply finished";
@@ -239,14 +239,12 @@ void TmcClient::courseListReplyFinished(QNetworkReply *reply)
                       .arg(reply->errorString(), reply->error()));
         reply->deleteLater();
     }
-    QMap<QString, int> courses;
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray coursesJson = json.array();
-    for (int i = 0; coursesJson.size() > i; i++) {
-        QJsonObject course = coursesJson[i].toObject();
-        courses.insert(course["name"].toString(), course["id"].toInt());
+    foreach (QJsonValue courseJson, coursesJson) {
+        org.addCourse(Course::fromJson(courseJson.toObject()));
     }
-    emit courseListReady(courses);
+    emit courseListReady(org);
     reply->deleteLater();
 }
 

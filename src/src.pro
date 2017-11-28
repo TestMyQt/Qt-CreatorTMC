@@ -50,14 +50,18 @@ HEADERS += testmycode.h \
         tmcrunner.h \
         tmctestresult.h \
         tmcresultmodel.h \
-        downloadpanel.h
+        downloadpanel.h \
+    settingswidget.h \
+    loginwidget.h
 
 SOURCES += testmycode.cpp \
         tmcoutputpane.cpp \
         tmcrunner.cpp \
         tmctestresult.cpp \
         tmcresultmodel.cpp \
-        downloadpanel.cpp
+        downloadpanel.cpp \
+    settingswidget.cpp \
+    loginwidget.cpp
 
 FORMS += \
     ../loginscreen.ui \

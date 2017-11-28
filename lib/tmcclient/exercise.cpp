@@ -1,7 +1,5 @@
 #include "exercise.h"
 
-#include <QSettings>
-
 Exercise::Exercise(int id, QString name)
 {
     m_id = id;
@@ -82,4 +80,16 @@ void Exercise::saveSettings(QString courseName)
         settings.endGroup();
     settings.endGroup();
     settings.deleteLater();
+}
+
+Exercise Exercise::fromQSettings(QSettings *settings)
+{
+    Exercise ex = Exercise(settings->value("id").toInt(),
+                           settings->value("name").toString());
+
+    ex.setChecksum(settings->value("checksum", "").toString());
+    ex.setLocation(settings->value("location", "").toString());
+    ex.setDlDate(settings->value("dlDate", "").toString());
+    ex.setOpenStatus(settings->value("openStatus", false).toBool());
+    return ex;
 }
