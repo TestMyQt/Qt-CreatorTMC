@@ -61,7 +61,8 @@ SOURCES += testmycode.cpp \
 
 FORMS += \
     ../loginscreen.ui \
-    ../downloadscreen.ui
+    ../downloadscreen.ui \
+    ../settings.ui
 
 # Qt Creator linking
 

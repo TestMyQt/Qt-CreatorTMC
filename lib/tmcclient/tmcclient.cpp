@@ -34,6 +34,13 @@ void TmcClient::setClientSecret(QString secret)
     clientSecret = secret;
 }
 
+void TmcClient::setServerAddress(QString address)
+{
+    if (address.endsWith("/"))
+        address.remove(address.length()-1, 1);
+    serverAddress = address;
+}
+
 bool TmcClient::isAuthorized()
 {
     return !(clientId.isEmpty() || clientSecret.isEmpty());
@@ -59,9 +66,21 @@ QNetworkReply* TmcClient::doGet(QUrl url)
     return reply;
 }
 
+bool TmcClient::checkRequestStatus(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 403) {
+            emit accessTokenNotValid();
+            return false;
+        }
+        return false;
+    }
+    return true;
+}
+
 void TmcClient::authorize()
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/application/qtcreator_plugin/credentials.json");
+    QUrl url(serverAddress + "/api/v8/application/qtcreator_plugin/credentials.json");
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -79,7 +98,7 @@ void TmcClient::authenticate(QString username, QString password)
         return;
     }
 
-    QUrl url("https://tmc.mooc.fi/oauth/token");
+    QUrl url(serverAddress + "/oauth/token");
 
     QString grantType = "password";
     QUrlQuery params;
@@ -100,9 +119,27 @@ void TmcClient::authenticate(QString username, QString password)
     });
 }
 
+void TmcClient::getOrganizationList()
+{
+    QUrl url(QString(serverAddress + "/api/v8/org.json"));
+    QNetworkReply *reply = doGet(url);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        organizationListReplyFinished(reply);
+    });
+}
+
+void TmcClient::getCourseList(QString orgSlug)
+{
+    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(orgSlug));
+    QNetworkReply *reply = doGet(url);
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        courseListReplyFinished(reply);
+    });
+}
+
 QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 {
-    QUrl url(QString("https://tmc.mooc.fi/api/v8/core/exercises/%1/download").arg(ex->getId()));
+    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex->getId()));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -115,7 +152,7 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
 
 void TmcClient::getExerciseList(Course *course)
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/core/courses/" + QString::number(course->getId()));
+    QUrl url(serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -125,7 +162,7 @@ void TmcClient::getExerciseList(Course *course)
 
 void TmcClient::getUserInfo()
 {
-    QUrl url("https://tmc.mooc.fi/api/v8/users/current");
+    QUrl url(serverAddress + "/api/v8/users/current");
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -175,30 +212,72 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
+void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
 {
     if (reply->error()) {
+        qDebug() << "Error at Organization list reply finished";
+        emit TMCError(QString("Failed to download organization list: %1: %2")
+                      .arg(reply->errorString(), reply->error()));
+        reply->deleteLater();
+    }
+    QMap<QString, QString> organizations;
+    QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+    QJsonArray orgJson = json.array();
+    for (int i = 0; orgJson.size() > i; i++) {
+        QJsonObject org = orgJson[i].toObject();
+        organizations.insert(org["name"].toString(), org["slug"].toString());
+    }
+    emit organizationListReady(organizations);
+    reply->deleteLater();
+}
+
+void TmcClient::courseListReplyFinished(QNetworkReply *reply)
+{
+    if (reply->error()) {
+        qDebug() << "Error at Course list reply finished";
+        emit TMCError(QString("Failed to download course list: %1: %2")
+                      .arg(reply->errorString(), reply->error()));
+        reply->deleteLater();
+    }
+    QMap<QString, int> courses;
+    QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+    QJsonArray coursesJson = json.array();
+    for (int i = 0; coursesJson.size() > i; i++) {
+        QJsonObject course = coursesJson[i].toObject();
+        courses.insert(course["name"].toString(), course["id"].toInt());
+    }
+    emit courseListReady(courses);
+    reply->deleteLater();
+}
+
+void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
+{
+    if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Exercise list reply finished";
         emit TMCError(QString("Failed to download exercise list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
         reply->deleteLater();
+        emit closeDownloadWindow();
         return;
     }
 
     qDebug() << "Exercise List:";
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
-    qDebug() << json.toJson();
 
     QJsonObject jsonObj = json.object();
     QJsonObject jsonCourse = jsonObj["course"].toObject();
     QJsonArray exercises = jsonCourse["exercises"].toArray();
     for (int i = 0; exercises.size() > i; i++) {
         QJsonObject exercise = exercises[i].toObject();
-        // qDebug() << exercise["name"].toString();
-
         Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
         ex.setChecksum(exercise["checksum"].toString());
-        course->addExercise(ex);
+        ex.setDlDate(exercise["deadline"].toString());
+        // Workaround to not add same exercises over and over again
+        // needs to be reworked to allow updating
+        if (course->getExercise(exercise["id"].toInt()).getId() == -1) {
+            ex.saveSettings(course->getName());
+            course->addExercise(ex);
+        }
         qDebug() << ex.getId() << ex.getName();
         qDebug() << course->getExercise(ex.getId()).getName();
         qDebug() << exercise["checksum"].toString();
@@ -211,7 +290,7 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 
 void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         // One of the downloads was cancelled by the user
         if( reply->error() == QNetworkReply::OperationCanceledError ) {
             qDebug() << "Cancelled download:" << reply->url();
@@ -236,6 +315,7 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
         emit TMCError("Error unzipping exercise files!");
     } else {
         emit exerciseZipReady(ex);
+        emit closeDownloadWindow();
     }
 
     reply->close();

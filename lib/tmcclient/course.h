@@ -9,15 +9,17 @@ class Course
 public:
     Course();
     void setId(int id);
-    void setTitle(QString title);
-    int getId();
-    QString getTitle() const;
+    void setName(QString name);
+    int getId() const;
+    QString getName() const;
     Exercise getExercise(int id);
     void addExercise(Exercise e);
-    QList<Exercise> * getExercises();
+    QList<Exercise> getExercises();
+    void saveSettings();
+    void loadSettings();
 private:
     int m_id;
-    QString m_title;
+    QString m_name;
     QList<Exercise> m_exercises;
 };
 
