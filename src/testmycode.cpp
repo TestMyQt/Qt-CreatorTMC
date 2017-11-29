@@ -211,15 +211,15 @@ void TestMyCode::onDownloadOkClicked()
             qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
             Exercise ex = activeCourse->getExercises()[idx];
             ex.setLocation(saveDirectory);
-            downloadPanel->addWidgetsToDownloadPanel( ex.getName() );
+            downloadPanel->addWidgetsToDownloadPanel(ex.getName());
             QNetworkReply* reply = tmcClient.getExerciseZip(&ex);
 
-            connect( reply, &QNetworkReply::downloadProgress,
-                downloadPanel, &DownloadPanel::networkReplyProgress );
-            connect( reply, &QNetworkReply::finished,
-                downloadPanel, &DownloadPanel::httpFinished );
+            connect(reply, &QNetworkReply::downloadProgress,
+                downloadPanel, &DownloadPanel::networkReplyProgress);
+            connect(reply, &QNetworkReply::finished,
+                downloadPanel, &DownloadPanel::httpFinished);
 
-            downloadPanel->addReplyToList( reply );
+            downloadPanel->addReplyToList(reply);
         }
     }
 
