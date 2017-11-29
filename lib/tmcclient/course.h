@@ -2,6 +2,8 @@
 #define COURSE_H
 
 #include <QList>
+#include <QSettings>
+#include <QJsonObject>
 #include "exercise.h"
 
 class Course
@@ -9,15 +11,19 @@ class Course
 public:
     Course();
     void setId(int id);
-    void setTitle(QString title);
-    int getId();
-    QString getTitle() const;
+    void setName(QString name);
+    int getId() const;
+    QString getName() const;
     Exercise getExercise(int id);
     void addExercise(Exercise e);
-    QList<Exercise> * getExercises();
+    QList<Exercise> getExercises();
+    void saveSettings();
+    static Course fromJson(QJsonObject jsonCourse);
+    static Course *fromQSettings(QSettings *settings);
+    void exerciseListFromQSettings(QSettings *settings);
 private:
     int m_id;
-    QString m_title;
+    QString m_name;
     QList<Exercise> m_exercises;
 };
 
