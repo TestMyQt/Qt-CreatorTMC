@@ -21,10 +21,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         tmcclient.cpp \
         course.cpp \
-        exercise.cpp
+        exercise.cpp \
+    organization.cpp
 
 HEADERS += \
         tmcclient.h \
         course.h \
-        exercise.h
+        exercise.h \
+    organization.h
 

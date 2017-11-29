@@ -1,9 +1,9 @@
 #pragma once
-#include <ui_loginscreen.h>
 #include <ui_downloadscreen.h>
 #include "testmycode_global.h"
 #include "tmcclient.h"
 #include "downloadpanel.h"
+#include "settingswidget.h"
 
 #include <extensionsystem/iplugin.h>
 
@@ -27,19 +27,15 @@ public:
     ShutdownFlag aboutToShutdown();
 
 private slots:
-    // Loginform
-    void onLoginCancelClicked();
-    void onLoginClicked();
     // Downloadform
     void onDownloadCancelClicked();
     void onDownloadOkClicked();
     void refreshDownloadList();
 
 private:
-    // Loginform
-    Ui::loginform *login;
-    QWidget *loginWidget;
-    void showLoginWidget();
+
+    SettingsWidget *settingsWidget;
+    void showSettingsWidget();
 
     // Downloadform
     Ui::downloadform *downloadform;
@@ -48,13 +44,12 @@ private:
 
     // tmcClient
     TmcClient tmcClient;
-    Course *m_activeCourse;
     void runTMC();
     void setDefaultCourse();
     void openProject(Exercise *ex);
     void displayTMCError(QString errorText);
-    QString askSaveLocation();
     void clearCredentials();
+    void doAuth(QString username, QString password, bool savePassword);
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
 

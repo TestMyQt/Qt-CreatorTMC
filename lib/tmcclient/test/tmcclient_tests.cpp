@@ -97,7 +97,7 @@ void TmcClientTest::testCourseList()
 
     Course *c = new Course();
     c->setId(18);
-    c->setTitle("TestCourse");
+    c->setName("TestCourse");
     tmcClient.getExerciseList(c);
     reply->setContent(content);
 
