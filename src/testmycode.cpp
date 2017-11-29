@@ -193,11 +193,6 @@ void TestMyCode::displayTMCError(QString errorText)
     QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
 }
 
-void TestMyCode::onDownloadCancelClicked()
-{
-    downloadWidget->close();
-}
-
 void TestMyCode::onDownloadOkClicked()
 {
     auto exerciseList = downloadform->exerciselist;
