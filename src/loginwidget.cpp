@@ -24,10 +24,12 @@ void LoginWidget::setTmcClient(TmcClient *client)
     connect(m_client, &TmcClient::accessTokenNotValid, this, &LoginWidget::show);
 }
 
-void LoginWidget::setCredentials(QString username, QString password)
+void LoginWidget::loadQSettings()
 {
-    m_username->setText(username);
-    m_server->setText(password);
+    QSettings settings("TestMyQt", "TMC");
+    m_username->setText(settings.value("username", "").toString());
+    m_server->setText(settings.value("server", "").toString());
+    settings.deleteLater();
 }
 
 void LoginWidget::handleLoginResponse(QString accessToken)

@@ -73,6 +73,7 @@ void SettingsWidget::display()
 
 void SettingsWidget::showLoginWidget()
 {
+    loginWidget->loadQSettings();
     loginWidget->show();
 }
 
