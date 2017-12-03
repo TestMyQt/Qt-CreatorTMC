@@ -1,3 +1,10 @@
+/*!
+    \class Organization
+    \inmodule lib/tmcclient
+    \inheaderfile organization.h
+    \brief Class \l Course says, "Hello, world!"
+*/
+
 #include "organization.h"
 
 Organization::Organization()

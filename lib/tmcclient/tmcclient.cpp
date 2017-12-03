@@ -62,13 +62,36 @@
 /*!
     \fn void TmcClient::exerciseZipReady(Exercise *ex)
 
-    The signal is emitted once the compressed exercise file requested from the
+    Emitted once the compressed exercise file requested from the
     TMC server by \l {TmcClient::} {getExerciseZip()} has completed successfully
     and the contents have been extracted. Parameter \a ex is the \l Exercise
     object that corresponds to the downloaded exercise.
 
     The signal is connected to a private function in \l {TestMyCodePlugin::Internal::}
     {TestMyCode} that opens the exercise \a ex as a project in Qt Creator.
+*/
+
+/*!
+    \fn void TmcClient::accessTokenNotValid()
+
+    Emitted when the TMC server has responded to a request by the
+    \l TmcClient object with the \c {HTTP 403 Forbidden} status. The emission
+    of the signal indicates the need to \l {TmcClient::authenticate()} {reauthenticate}.
+*/
+
+/*!
+    \fn void TmcClient::closeDownloadWindow()
+
+    The signal part of the mechanism for automatically closing the download
+    window when it is no longer required.
+*/
+
+/*!
+    \fn void TmcClient::courseListReady(Organization organization)
+
+    Emitting the signal is an intermediary stage between successfully receiving
+    a particular organization's course list and taking action to display it.
+    The list of courses is contained in the \a organization parameter.
 */
 
 #include "tmcclient.h"
@@ -235,6 +258,10 @@ void TmcClient::authenticate(QString username, QString password)
     });
 }
 
+/*!
+    Gets the organization list from the TMC server. The list consists of
+    organizations that have TMC courses available.
+*/
 void TmcClient::getOrganizationList()
 {
     QUrl url(QString(serverAddress + "/api/v8/org.json"));
@@ -244,6 +271,10 @@ void TmcClient::getOrganizationList()
     });
 }
 
+/*!
+    Retrieves the course list for the organization specified by the \l Organization
+    parameter \a org.
+*/
 void TmcClient::getCourseList(Organization org)
 {
     QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(org.getSlug()));
