@@ -18,72 +18,127 @@ Exercise::Exercise(int id, QString name)
     m_name = name;
 }
 
-/*! Getter function for the exercise ID. */
+/*!
+    Getter function for the exercise ID.
+*/
 int Exercise::getId() const
 {
     return m_id;
 }
 
-/*! Getter function for the exercise name. */
+/*!
+    Getter function for the name field of the \l Exercise object.
+*/
 QString Exercise::getName() const
 {
     return m_name;
 }
 
-/*! Getter function for the directory location of the exercise. */
+/*!
+    Getter function for the directory location of the exercise.
+*/
 QString Exercise::getLocation() const
 {
     return m_location;
 }
 
+/*!
+    Getter function for the checksum field of the \l Exercise object.
+
+    \note See \l {Exercise::} {setChecksum()} for a short description of
+    TMC exercise checksums.
+*/
 QString Exercise::getChecksum() const
 {
     return m_checksum;
 }
 
+/*!
+    Getter function for the deadline date field of the \l Exercise object.
+*/
 QString Exercise::getDlDate() const
 {
     return m_dlDate;
 }
 
+/*!
+    Getter function for the open status of the \l Exercise object.
+    If the corresponding TMC exercise project has been opened in Qt Creator,
+    \c true is returned and \c false otherwise.
+
+    \b{TODO:} Do fact-check!
+*/
 bool Exercise::getOpenStatus() const
 {
     return m_openStatus;
 }
 
-/*! Sets the exercise ID to \a id. */
+/*!
+    Sets the exercise ID to \a id.
+*/
 void Exercise::setId(int id)
 {
     m_id = id;
 }
 
-/*! Sets the exercise name to \a name. */
+/*!
+    Sets the exercise name to \a name.
+*/
 void Exercise::setName(QString name)
 {
     m_name = name;
 }
 
-/*! Sets the directory location of the exercise to \a location. */
+/*!
+    Sets the directory location of the exercise to \a location.
+*/
 void Exercise::setLocation(QString location)
 {
     m_location = location;
 }
 
+/*!
+    Sets the TMC exercise checksum field of the \l Exercise object
+    to \a checksum.
+
+    \b{TODO:} Add a short description of TMC exercise checksums.
+*/
 void Exercise::setChecksum(QString checksum)
 {
     m_checksum = checksum;
 }
 
+/*!
+    Sets the deadline date field of the \l Exercise object to \a dlDate.
+
+    TMC exercises often come with a deadline. After the deadline has passed,
+    no points are usually given for completing the exercise.
+*/
 void Exercise::setDlDate(QString dlDate)
 {
     m_dlDate = dlDate;
 }
 
+/*!
+    Sets the open status of the \l Exercise object to \a openStatus. The open
+    status should be set to \c true when the corresponding TMC exercise project
+    is opened in Qt Creator; when the project is closed, the open status should
+    be set to \c false.
+
+    \b{TODO:} Do fact-check!
+*/
 void Exercise::setOpenStatus(bool openStatus)
 {
     m_openStatus = openStatus;
 }
 
+/*!
+    Saves the \l Exercise object's state in persistent storage using
+    \l {http://doc.qt.io/qt-5/qsettings.html} {QSettings}. The \l
+    {http://doc.qt.io/qt-5/qstring.html} {QString} parameter \a courseName
+    is used as a prefix in forming the key names with \l
+    {http://doc.qt.io/qt-5/qsettings.html#beginGroup} {QSettings::beginGroup()}.
+*/
 void Exercise::saveSettings(QString courseName)
 {
     // Yay or nay on the indentation?
@@ -100,6 +155,16 @@ void Exercise::saveSettings(QString courseName)
     settings.deleteLater();
 }
 
+/*!
+    Creates and returns an \l Exercise object based on the values in the \l
+    {http://doc.qt.io/qt-5/qsettings.html} {QSettings} parameter \a settings.
+    At least the values of the name and ID fields of the \l Exercise object
+    should be present in \a settings.
+
+    \note It is assumed that the appropriate prefix has been set for the \a settings
+    parameter in the calling function using the \l
+    {http://doc.qt.io/qt-5/qsettings.html#beginGroup} {beginGroup()} function.
+ */
 Exercise Exercise::fromQSettings(QSettings *settings)
 {
     Exercise ex = Exercise(settings->value("id").toInt(),
