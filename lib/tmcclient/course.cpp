@@ -67,6 +67,11 @@ void Course::addExercise(Exercise e)
     m_exercises.append(e);
 }
 
+/*!
+    Uses the \l {http://doc.qt.io/qt-5/qjsonobject.html} {QJsonObject}
+    parameter \a jsonCourse to initialize a new \l Course object which
+    is the return value.
+ */
 Course Course::fromJson(QJsonObject jsonCourse)
 {
     Course course;
@@ -75,6 +80,12 @@ Course Course::fromJson(QJsonObject jsonCourse)
     return course;
 }
 
+/*!
+    Creates a new \l Course object from the \l {http://doc.qt.io/qt-5/qsettings.html}
+    {QSettings} pointer parameter \a settings and returns it. Creating the \l Course
+    object includes setting the course name and ID to the values specified in \a
+    settings. If \a settings doesn't contain the appropriate values, defaults are used.
+ */
 Course* Course::fromQSettings(QSettings *settings)
 {
     Course *course = new Course;
@@ -83,6 +94,14 @@ Course* Course::fromQSettings(QSettings *settings)
     return course;
 }
 
+/*!
+    Uses the \l {http://doc.qt.io/qt-5/qsettings.html} {QSettings} pointer
+    \a settings to set the \l Exercise list of the \l Course object.
+
+    \note If the \l Course object already contains items in its \l Exercise
+    list, they are preserved. Any new exercises from \a settings are added
+    to the existing ones.
+*/
 void Course::exerciseListFromQSettings(QSettings *settings)
 {
     settings->beginGroup("Exercises");
