@@ -17,7 +17,6 @@ public:
     Exercise getExercise(int id);
     void addExercise(Exercise e);
     QList<Exercise> getExercises();
-    void saveSettings();
     static Course fromJson(QJsonObject jsonCourse);
     static Course *fromQSettings(QSettings *settings);
     void exerciseListFromQSettings(QSettings *settings);
