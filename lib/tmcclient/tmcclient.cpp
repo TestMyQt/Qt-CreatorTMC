@@ -94,6 +94,14 @@
     The list of courses is contained in the \a organization parameter.
 */
 
+/*!
+    \fn void TmcClient::organizationListReady(QList<Organization> organizations)
+
+    Emitting the signal is an intermediary stage between successfully receiving the
+    list of organizations arranging TMC courses and taking action to process the list.
+    The list of organizations is contained within the \a organizations parameter.
+*/
+
 #include "tmcclient.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -151,6 +159,14 @@ void TmcClient::setClientSecret(QString secret)
     clientSecret = secret;
 }
 
+/*!
+    Sets the Internet address of the TMC server that the \l TmcClient object
+    communicates with to \a address.
+
+    \note Any trailing slash character in \a address is removed before saving.
+    This makes it straightforward to concatenate the server address with a path
+    such as \c {/one/two.txt}.
+*/
 void TmcClient::setServerAddress(QString address)
 {
     if (address.endsWith("/"))
