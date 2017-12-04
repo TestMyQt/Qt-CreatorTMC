@@ -16,12 +16,12 @@ public:
     int getId() const;
     QString getName() const;
     Exercise getExercise(int id);
-    Exercise getExercise(Exercise ex);
-    void addExercise(Exercise e);
+    Exercise getExercise(const Exercise ex);
+    void addExercise(const Exercise e);
     QMap<int, Exercise> getExercises();
     bool hasUpdates();
     void saveSettings();
-    static Course fromJson(QJsonObject jsonCourse);
+    static Course fromJson(const QJsonObject jsonCourse);
     static Course fromQSettings(QSettings *settings);
     static void toQSettings(QSettings *settings, Course c);
     void exerciseListFromQSettings(QSettings *settings);

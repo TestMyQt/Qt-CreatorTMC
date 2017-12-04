@@ -44,7 +44,6 @@ void TmcManager::setTmcClient(TmcClient *client)
     m_client = client;
     connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
-    connect(m_client, &TmcClient::exerciseUpdateReady, this, &TmcManager::handleUpdates);
 }
 
 void TmcManager::setSettings(SettingsWidget *settings)
@@ -52,28 +51,53 @@ void TmcManager::setSettings(SettingsWidget *settings)
     m_settings = settings;
 }
 
-void TmcManager::handleUpdates(Course *course)
+void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> courseList)
 {
-    QMap<int, Exercise> updates = course->getExercises();
-    downloadform->exerciselist->clear();
+    QString workingDirectory = m_settings->getWorkingDirectory();
+    QString courseName = updatedCourse->getName();
 
-    foreach (Exercise ex, updates.values()) {
-        if (ex.isDownloaded()) {
-            continue;
-        }
-        QListWidgetItem* item = new QListWidgetItem(ex.getName(), downloadform->exerciselist);
-        item->setData(Qt::UserRole, QVariant::fromValue<Exercise*>(&ex));
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        item->setCheckState(Qt::Unchecked);
+    if (workingDirectory.isEmpty()) {
+        qDebug() << "No save directory set!";
+        return;
     }
 
+    if (updatedCourse->getName().isEmpty()) {
+        qDebug() << "Updated course name is null!";
+        return;
+    }
+
+    QString saveDirectory = QString("%1/%2").arg(workingDirectory, courseName);
+
+    foreach (Exercise ex, courseList) {
+        ex.setLocation(saveDirectory);
+
+        Exercise found = updatedCourse->getExercise(ex);
+
+        if (found.getId() == -1) {
+            // Not found, new exercise
+            ex.setDownloaded(false);
+            updatedCourse->addExercise(ex);
+        }
+
+        if (found == ex) {
+            // Id and checksum matches! Not a new exercise.
+            if (found.isDownloaded()) {
+                // Exercise has been downloaded
+                courseList.removeAll(ex);
+            }
+        }
+    }
+
+    downloadform->exerciselist->clear();
+    appendToDownloadWindow(courseList);
     m_updateProgress.reportFinished();
     downloadWidget->show();
 }
 
-void TmcManager::handleZip(Exercise *ex)
+void TmcManager::handleZip(Exercise ex)
 {
-
+    m_settings->getActiveCourse()->getExercise(ex).setDownloaded(true);
+    m_settings->getActiveCourse()->getExercise(ex).setUnzipped(true);
 }
 
 void TmcManager::updateExercises()
@@ -91,6 +115,16 @@ void TmcManager::updateExercises()
                                      TestMyCodePlugin::Constants::TASK_INDEX);
     m_updateProgress.reportStarted();
     m_client->getExerciseList(activeCourse);
+}
+
+void TmcManager::appendToDownloadWindow(QList<Exercise> exercises)
+{
+    foreach (Exercise ex, exercises) {
+        QListWidgetItem* item = new QListWidgetItem(ex.getName(), downloadform->exerciselist);
+        item->setData(Qt::UserRole, QVariant::fromValue(ex));
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+        item->setCheckState(Qt::Unchecked);
+    }
 }
 
 bool TmcManager::lastUpdateSuccessful()
@@ -125,22 +159,13 @@ void TmcManager::showDownloadWidget()
 void TmcManager::onDownloadOkClicked()
 {
     auto exerciseList = downloadform->exerciselist;
-
-    Course *activeCourse = m_settings->getActiveCourse();
-    if (m_settings->getWorkingDirectory() == "" || activeCourse->getName() == "")
-        return;
-
-    QString saveDirectory = m_settings->getWorkingDirectory() + "/" + activeCourse->getName();
-
     downloadPanel = new DownloadPanel();
 
     for (int idx = 0; idx < exerciseList->count(); idx++) {
         auto item = exerciseList->item(idx);
         if (item->checkState() == Qt::Checked) {
             Exercise ex = item->data(Qt::UserRole).value<Exercise>();
-            activeCourse->getExercise(ex);
-            ex->setLocation(saveDirectory);
-            downloadPanel->addWidgetsToDownloadPanel(ex->getName());
+            downloadPanel->addWidgetsToDownloadPanel(ex.getName());
             QNetworkReply* reply = m_client->getExerciseZip(ex);
 
             connect(reply, &QNetworkReply::downloadProgress,
@@ -155,4 +180,5 @@ void TmcManager::onDownloadOkClicked()
     downloadPanel->addInfoLabel();
     downloadPanel->sanityCheck(); // Should be removed at some point
     downloadPanel->show();
+    downloadWidget->close();
 }

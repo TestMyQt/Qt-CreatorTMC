@@ -10,6 +10,7 @@ class Exercise
 public:
     Exercise();
     Exercise(int id, QString name);
+    ~Exercise() { }
 
     bool operator==(const Exercise &other) const;
     bool operator!=(const Exercise &other) const;
@@ -30,9 +31,9 @@ public:
     bool getOpenStatus() const;
     bool isDownloaded() const;
     bool isUnzipped() const;
-    void saveQSettings(QSettings *settings, QString courseName);
+    void saveQSettings(QSettings *settings, const QString courseName);
     static Exercise fromQSettings(QSettings *settings);
-    static Exercise fromJson(QJsonObject jsonExercise);
+    static Exercise fromJson(const QJsonObject jsonExercise);
 
 private:
     int m_id;
@@ -45,6 +46,6 @@ private:
     bool m_openStatus;
 };
 
-Q_DECLARE_METATYPE(Exercise*)
+Q_DECLARE_METATYPE(Exercise)
 
 #endif // EXERCISE_H

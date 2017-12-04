@@ -18,6 +18,7 @@ public:
     QList<Course> getCourses();
 
     static Organization fromQSettings(QSettings *settings);
+    static Organization fromJson(const QJsonObject jsonOrg);
     static void toQSettings(QSettings *settings, Organization org);
 
 private:
