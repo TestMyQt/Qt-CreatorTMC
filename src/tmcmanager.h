@@ -34,11 +34,12 @@ public slots:
     void showDownloadWidget();
 
     void updateExercises();
-    void handleUpdates(Course *course);
+    void handleUpdates(Course *updatedCourse, QList<Exercise> courseList);
+    void appendToDownloadWindow(QList<Exercise> exercises);
 
 private slots:
     void onDownloadOkClicked();
-    void handleZip(Exercise *ex);
+    void handleZip(Exercise ex);
 
 
 private:

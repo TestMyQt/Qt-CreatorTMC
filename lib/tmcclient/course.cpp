@@ -36,17 +36,17 @@ QString Course::getName() const
     return m_name;
 }
 
-Exercise Course::getExercise(int id)
+Exercise Course::getExercise(const int id)
 {
     return m_exercises.value(id, Exercise());
 }
 
-Exercise Course::getExercise(Exercise ex)
+Exercise Course::getExercise(const Exercise ex)
 {
     return m_exercises.value(ex.getId(), Exercise());
 }
 
-void Course::addExercise(Exercise e)
+void Course::addExercise(const Exercise e)
 {
     m_exercises.insert(e.getId(), e);
 }
@@ -56,7 +56,7 @@ bool Course::hasUpdates()
     return m_updates;
 }
 
-Course Course::fromJson(QJsonObject jsonCourse)
+Course Course::fromJson(const QJsonObject jsonCourse)
 {
     Course course;
     course.setName(jsonCourse["name"].toString());

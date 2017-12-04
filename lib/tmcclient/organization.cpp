@@ -43,3 +43,12 @@ void Organization::toQSettings(QSettings *settings, Organization org)
     settings->setValue("orgName", org.getName());
     settings->setValue("orgSlug", org.getSlug());
 }
+
+Organization Organization::fromJson(const QJsonObject jsonOrg)
+{
+    Organization fromJson = Organization(
+                jsonOrg["name"].toString(),
+                jsonOrg["slug"].toString());
+
+    return fromJson;
+}

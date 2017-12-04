@@ -29,8 +29,7 @@ public:
     void authenticate(QString username, QString password);
     void getUserInfo();
     void getExerciseList(Course *course);
-    void updateCourseExercises(Course *course);
-    QNetworkReply* getExerciseZip(Exercise *ex);
+    QNetworkReply* getExerciseZip(Exercise ex);
     void getCourseList(Organization org);
     void getOrganizationList();
 
@@ -41,9 +40,8 @@ signals:
     void TMCError(QString errorString);
     void authorizationFinished(QString clientId, QString clientSecret);
     void authenticationFinished(QString accessToken);
-    void exerciseListReady(Course *course);
-    void exerciseUpdateReady(Course *course);
-    void exerciseZipReady(Exercise *ex);
+    void exerciseListReady(Course *course, QList<Exercise> courseList);
+    void exerciseZipReady(Exercise ex);
     void organizationListReady(QList<Organization> organizations);
     void courseListReady(Organization organization);
     void accessTokenNotValid();
@@ -54,7 +52,7 @@ private slots:
     void organizationListReplyFinished(QNetworkReply *reply);
     void courseListReplyFinished(QNetworkReply *reply, Organization org);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
-    void exerciseZipReplyFinished (QNetworkReply *reply, Exercise *ex);
+    void exerciseZipReplyFinished (QNetworkReply *reply, Exercise ex);
 
 private:
     QNetworkRequest buildRequest(QUrl url);

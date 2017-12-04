@@ -29,7 +29,6 @@ bool Exercise::operator!=(const Exercise &other) const
     return !(*this == other);
 }
 
-
 int Exercise::getId() const
 {
     return m_id;
@@ -110,7 +109,7 @@ void Exercise::setUnzipped(bool zipped)
     m_unzipped = zipped;
 }
 
-void Exercise::saveQSettings(QSettings *settings, QString courseName)
+void Exercise::saveQSettings(QSettings *settings, const QString courseName)
 {
     // Yay or nay on the indentation?
     settings->beginGroup(courseName);
@@ -140,7 +139,7 @@ Exercise Exercise::fromQSettings(QSettings *settings)
     return ex;
 }
 
-Exercise Exercise::fromJson(QJsonObject jsonExercise)
+Exercise Exercise::fromJson(const QJsonObject jsonExercise)
 {
 
     Exercise fromJson = Exercise(jsonExercise["id"].toInt(),

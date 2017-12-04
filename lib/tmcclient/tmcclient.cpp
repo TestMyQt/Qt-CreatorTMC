@@ -136,9 +136,9 @@ void TmcClient::getCourseList(Organization org)
     });
 }
 
-QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
+QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex->getId()));
+    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex.getId()));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -221,9 +221,8 @@ void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
     QList<Organization> organizations;
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray orgJson = json.array();
-    for (int i = 0; orgJson.size() > i; i++) {
-        QJsonObject org = orgJson[i].toObject();
-        organizations.append(Organization(org["name"].toString(), org["slug"].toString()));
+    foreach (QJsonValue jsonVal, orgJson) {
+        organizations.append(Organization::fromJson(jsonVal.toObject()));
     }
     emit organizationListReady(organizations);
     reply->deleteLater();
@@ -262,33 +261,17 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
     QJsonObject jsonCourse = jsonObj["course"].toObject();
     QJsonArray exercises = jsonCourse["exercises"].toArray();
 
-    bool updatedExercises = false;
-    for (int i = 0; exercises.size() > i; i++) {
-        Exercise newExercise = Exercise::fromJson(exercises[i].toObject());
-        Exercise oldExercise = course->getExercise(newExercise);
-        if (oldExercise.getId() != -1) {
-            // Found exercise, check for updates
-            if (oldExercise != newExercise) {
-                // Update found
-                updatedExercises = true;
-                newExercise.setLocation(oldExercise.getLocation());
-            }
-        } else {
-            // No exercise found, new exercise
-            course->addExercise(newExercise);
-        }
+    QList<Exercise> courseList;
+    foreach (QJsonValue jsonVal, exercises) {
+        courseList.append(Exercise::fromJson(jsonVal.toObject()));
     }
 
-    if (updatedExercises) {
-        emit exerciseUpdateReady(course);
-    }
-
-    emit exerciseListReady(course);
+    emit exerciseListReady(course, courseList);
 
     reply->deleteLater();
 }
 
-void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
+void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
 {
     if (!checkRequestStatus(reply)) {
         // One of the downloads was cancelled by the user
@@ -311,13 +294,12 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
         emit TMCError("Error opening exercise zip file!");
     }
 
-    QStringList extracted = JlCompress::extractDir(&storageBuff, ex->getLocation());
+    QStringList extracted = JlCompress::extractDir(&storageBuff, ex.getLocation());
     if (extracted.isEmpty()) {
-        ex->setDownloaded(false);
         emit TMCError("Error unzipping exercise files!");
     } else {
-        ex->setUnzipped(true);
-        ex->setDownloaded(true);
+        ex.setUnzipped(true);
+        ex.setDownloaded(true);
         emit exerciseZipReady(ex);
     }
 
