@@ -29,6 +29,7 @@ public:
     void authenticate(QString username, QString password);
     void getUserInfo();
     void getExerciseList(Course *course);
+    void updateCourseExercises(Course *course);
     QNetworkReply* getExerciseZip(Exercise *ex);
     void getCourseList(Organization org);
     void getOrganizationList();
@@ -40,12 +41,12 @@ signals:
     void TMCError(QString errorString);
     void authorizationFinished(QString clientId, QString clientSecret);
     void authenticationFinished(QString accessToken);
-    void exerciseListReady();
+    void exerciseListReady(Course *course);
+    void exerciseUpdateReady(Course *course);
     void exerciseZipReady(Exercise *ex);
     void organizationListReady(QList<Organization> organizations);
     void courseListReady(Organization organization);
     void accessTokenNotValid();
-    void closeDownloadWindow();
 
 private slots:
     void authorizationReplyFinished (QNetworkReply *reply);

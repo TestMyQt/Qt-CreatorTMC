@@ -6,7 +6,7 @@ Course::Course()
 
 }
 
-QList<Exercise> Course::getExercises()
+QMap<int, Exercise> Course::getExercises()
 {
     return m_exercises;
 }
@@ -21,6 +21,11 @@ void Course::setName(QString name)
     m_name = name;
 }
 
+void Course::setUpdates(bool updates)
+{
+    m_updates = updates;
+}
+
 int Course::getId() const
 {
     return m_id;
@@ -33,17 +38,22 @@ QString Course::getName() const
 
 Exercise Course::getExercise(int id)
 {
-    foreach (Exercise e, m_exercises) {
-        if (e.getId() == id) {
-            return e;
-        }
-    }
-    return Exercise(-1, QString("null"));
+    return m_exercises.value(id, Exercise());
+}
+
+Exercise Course::getExercise(Exercise ex)
+{
+    return m_exercises.value(ex.getId(), Exercise());
 }
 
 void Course::addExercise(Exercise e)
 {
-    m_exercises.append(e);
+    m_exercises.insert(e.getId(), e);
+}
+
+bool Course::hasUpdates()
+{
+    return m_updates;
 }
 
 Course Course::fromJson(QJsonObject jsonCourse)

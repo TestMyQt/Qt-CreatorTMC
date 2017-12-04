@@ -1,7 +1,7 @@
 #ifndef COURSE_H
 #define COURSE_H
 
-#include <QList>
+#include <QMap>
 #include <QSettings>
 #include <QJsonObject>
 #include "exercise.h"
@@ -12,11 +12,14 @@ public:
     Course();
     void setId(int id);
     void setName(QString name);
+    void setUpdates(bool updates);
     int getId() const;
     QString getName() const;
     Exercise getExercise(int id);
+    Exercise getExercise(Exercise ex);
     void addExercise(Exercise e);
-    QList<Exercise> getExercises();
+    QMap<int, Exercise> getExercises();
+    bool hasUpdates();
     void saveSettings();
     static Course fromJson(QJsonObject jsonCourse);
     static Course fromQSettings(QSettings *settings);
@@ -25,7 +28,8 @@ public:
 private:
     int m_id;
     QString m_name;
-    QList<Exercise> m_exercises;
+    bool m_updates;
+    QMap<int, Exercise> m_exercises;
 };
 
 Q_DECLARE_METATYPE(Course)

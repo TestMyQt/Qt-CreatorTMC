@@ -5,9 +5,6 @@
 #include "tmcrunner.h"
 #include "course.h"
 
-#include <ui_downloadscreen.h>
-
-#include <QApplication>
 #include <QDebug>
 
 #include <coreplugin/icore.h>
@@ -19,7 +16,6 @@
 
 #include <QAction>
 #include <QMessageBox>
-#include <QMainWindow>
 #include <QMenu>
 #include <QObject>
 #include <QString>
@@ -44,6 +40,7 @@ TestMyCode::~TestMyCode()
 {
     // Unregister objects from the plugin manager's object pool
     // Delete members
+    delete &tmcClient;
 }
 
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
@@ -72,19 +69,28 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto downloadAction = new QAction(tr("Download"), this);
     Core::Command *downloadCmd = Core::ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
                                                                      Core::Context(Core::Constants::C_GLOBAL));
+    auto updateAction = new QAction(tr("Update"), this);
+    Core::Command *updateCmd = Core::ActionManager::registerAction(updateAction, Constants::UPDATE_ACTION_ID,
+                                                                   Core::Context(Core::Constants::C_GLOBAL));
 
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
     settingsCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+S")));
     downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
+    updateCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+U")));
 
-    // Connect to trigger to a function
+    // Connect trigger to a function
     connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
     connect(settingsAction, &QAction::triggered, this, &TestMyCode::showSettingsWidget);
-    connect(downloadAction, &QAction::triggered, this, &TestMyCode::showDownloadWidget);
-    connect(loginAction, &QAction::triggered, this, [=](){
+    connect(loginAction, &QAction::triggered, this,  [=](){
         settingsWidget->showLoginWidget();
+    });
+    connect(downloadAction, &QAction::triggered, this, [=](){
+        m_tmcManager->showDownloadWidget();
+    });
+    connect(updateAction, &QAction::triggered, this, [=](){
+        m_tmcManager->updateExercises();
     });
 
     // Create context menu with actions
@@ -95,6 +101,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
     menu->addAction(downloadCmd);
+    menu->addAction(updateCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
     auto tools_menu = Core::ActionManager::actionContainer(Core::Constants::M_WINDOW);
@@ -106,24 +113,17 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     settingsWidget = new SettingsWidget;
     settingsWidget->setTmcClient(&tmcClient);
 
-    // Initialize download window
-    downloadWidget = new QWidget;
-    downloadform = new Ui::downloadform;
-    downloadform->setupUi(downloadWidget);
+    connect(loginAction, &QAction::triggered, this, [=](){
+        settingsWidget->showLoginWidget();
+    });
+
+    // TmcManager
+    m_tmcManager = new TmcManager;
+    m_tmcManager->setTmcClient(&tmcClient);
+    m_tmcManager->setSettings(settingsWidget);
 
     // TmcClient
-    connect(&tmcClient, &TmcClient::exerciseListReady, this, &TestMyCode::refreshDownloadList);
-    connect(&tmcClient, &TmcClient::exerciseZipReady, this, &TestMyCode::openProject);
     connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
-
-    // Signal-Slot for download window
-    connect(downloadform->okbutton, &QPushButton::clicked, this, &TestMyCode::onDownloadOkClicked);
-    connect(downloadform->cancelbutton, &QPushButton::clicked, this, [=](){
-        downloadWidget->close();
-    });
-    connect(&tmcClient, &TmcClient::closeDownloadWindow, this, [=](){
-        downloadWidget->close();
-    });
 
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);
@@ -146,16 +146,6 @@ ExtensionSystem::IPlugin::ShutdownFlag TestMyCode::aboutToShutdown()
     return SynchronousShutdown;
 }
 
-void TestMyCode::showDownloadWidget()
-{
-    if (!tmcClient.isAuthenticated()) {
-        settingsWidget->showLoginWidget();
-        return;
-    }
-    tmcClient.getExerciseList(settingsWidget->getActiveCourse());
-    downloadWidget->show();
-}
-
 void TestMyCode::showSettingsWidget()
 {
     if (!tmcClient.isAuthenticated()) {
@@ -171,18 +161,6 @@ void TestMyCode::runTMC()
     runner->runOnActiveProject();
 }
 
-void TestMyCode::refreshDownloadList()
-{
-    QList<Exercise> exercises = settingsWidget->getActiveCourse()->getExercises();
-    // Create item on-the-run
-    downloadform->exerciselist->clear();
-    for(int i = 0; i < exercises.count(); i++) {
-        QListWidgetItem* item = new QListWidgetItem(exercises.at(i).getName(), downloadform->exerciselist);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        item->setCheckState(Qt::Checked);
-    }
-}
-
 void TestMyCode::openProject(Exercise *ex)
 {
     Q_UNUSED(ex)
@@ -191,41 +169,6 @@ void TestMyCode::openProject(Exercise *ex)
 void TestMyCode::displayTMCError(QString errorText)
 {
     QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
-}
-
-void TestMyCode::onDownloadOkClicked()
-{
-    auto exerciseList = downloadform->exerciselist;
-    qDebug() << "There are " << exerciseList->count() << "exercises to be loaded.";
-
-    Course *activeCourse = settingsWidget->getActiveCourse();
-    if (settingsWidget->getWorkingDirectory() == "" || activeCourse->getName() == "")
-        return;
-
-    QString saveDirectory = settingsWidget->getWorkingDirectory() + "/" + activeCourse->getName();
-
-    downloadPanel = new DownloadPanel();
-
-    for (int idx = 0; idx < exerciseList->count(); idx++) {
-        if (exerciseList->item(idx)->checkState() == Qt::Checked) {
-            qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
-            Exercise ex = activeCourse->getExercises()[idx];
-            ex.setLocation(saveDirectory);
-            downloadPanel->addWidgetsToDownloadPanel(ex.getName());
-            QNetworkReply* reply = tmcClient.getExerciseZip(&ex);
-
-            connect(reply, &QNetworkReply::downloadProgress,
-                downloadPanel, &DownloadPanel::networkReplyProgress);
-            connect(reply, &QNetworkReply::finished,
-                downloadPanel, &DownloadPanel::httpFinished);
-
-            downloadPanel->addReplyToList(reply);
-        }
-    }
-
-    downloadPanel->addInfoLabel();
-    downloadPanel->sanityCheck(); // Should be removed at some point
-    downloadPanel->show();
 }
 
 } // namespace Internal
