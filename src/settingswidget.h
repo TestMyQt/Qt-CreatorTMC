@@ -21,11 +21,13 @@ public:
 
     QString getWorkingDirectory();
     Course* getActiveCourse();
+    int getAutoupdateInterval();
 
 signals:
     void workingDirectoryChanged(QString location);
     void organizationChanged(Organization org);
     void activeCourseChanged(Course *course);
+    void autoUpdateIntervalChanged(int interval);
 
 public slots:
 
@@ -44,6 +46,7 @@ private:
     Organization m_activeOrganization;
     Course m_activeCourse;
     QString workingDirectory;
+    int m_autoUpdateInterval;
 
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
@@ -53,6 +56,7 @@ private:
     void onSettingsOkClicked();
     void onBrowseClicked();
     void clearCredentials();
+    void setUpdateInterval(int interval);
 
     QString askSaveLocation();
 

@@ -20,6 +20,7 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     m_activeOrganization = Organization::fromQSettings(&settings);
     m_activeCourse = Course::fromQSettings(&settings);
     workingDirectory = settings.value("workingDir", "").toString();
+    m_autoUpdateInterval = settings.value("autoupdateInterval", 60).toInt();
 
     settings.deleteLater();
 
@@ -61,6 +62,12 @@ void SettingsWidget::setTmcClient(TmcClient *client)
     connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
 }
 
+void SettingsWidget::setUpdateInterval(int interval)
+{
+    m_autoUpdateInterval = interval;
+    emit autoUpdateIntervalChanged(m_autoUpdateInterval);
+}
+
 void SettingsWidget::display()
 {
     m_client->getOrganizationList();
@@ -93,6 +100,11 @@ void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
     if (index != -1) {
         box->setCurrentIndex(index);
     }
+}
+
+int SettingsWidget::getAutoupdateInterval()
+{
+    return m_autoUpdateInterval;
 }
 
 void SettingsWidget::onBrowseClicked()

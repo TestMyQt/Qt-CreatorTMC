@@ -1,9 +1,8 @@
 #pragma once
-#include <ui_downloadscreen.h>
 #include "testmycode_global.h"
 #include "tmcclient.h"
-#include "downloadpanel.h"
 #include "settingswidget.h"
+#include "tmcmanager.h"
 
 #include <extensionsystem/iplugin.h>
 
@@ -27,33 +26,21 @@ public:
     ShutdownFlag aboutToShutdown();
 
 private slots:
-    // Downloadform
-    void onDownloadOkClicked();
-    void refreshDownloadList();
 
 private:
 
+    // SettingsWidget
     SettingsWidget *settingsWidget;
     void showSettingsWidget();
 
-    // Downloadform
-    Ui::downloadform *downloadform;
-    QWidget *downloadWidget;
-    void showDownloadWidget();
+    // TmcManager
+    TmcManager *m_tmcManager;
 
     // tmcClient
     TmcClient tmcClient;
     void runTMC();
-    void setDefaultCourse();
     void openProject(Exercise *ex);
     void displayTMCError(QString errorText);
-    void clearCredentials();
-    void doAuth(QString username, QString password, bool savePassword);
-    void handleLoginResponse(QString accessToken);
-    void handleAuthResponse(QString clientId, QString clientSecret);
-
-    // ...
-    DownloadPanel *downloadPanel;
 };
 
 } // namespace Internal
