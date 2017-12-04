@@ -190,14 +190,14 @@ void SettingsWidget::onSettingsOkClicked()
     }
 
     Organization setOrg = m_orgComboBox->currentData().value<Organization>();
-    if (m_activeOrganization.getSlug() != setOrg.getSlug()) {
+    if (m_activeOrganization != setOrg) {
         m_activeOrganization = setOrg;
         Organization::toQSettings(&settings, setOrg);
         emit organizationChanged(setOrg);
     }
 
     Course setCourse = m_courseComboBox->currentData().value<Course>();
-    if (m_activeCourse.getId() != setCourse.getId()) {
+    if (m_activeCourse != setCourse) {
         m_activeCourse = setCourse;
         Course::toQSettings(&settings, setCourse);
         emit activeCourseChanged(&m_activeCourse);

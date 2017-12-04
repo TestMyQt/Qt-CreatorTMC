@@ -12,12 +12,23 @@ Organization::Organization(QString name, QString slug) :
 
 }
 
-QString Organization::getName()
+bool Organization::operator==(const Organization &other) const
+{
+    return other.getName() == m_name &&
+            other.getSlug() == m_slug;
+}
+
+bool Organization::operator!=(const Organization &other) const
+{
+    return !(*this == other);
+}
+
+QString Organization::getName() const
 {
     return m_name;
 }
 
-QString Organization::getSlug()
+QString Organization::getSlug() const
 {
     return m_slug;
 }

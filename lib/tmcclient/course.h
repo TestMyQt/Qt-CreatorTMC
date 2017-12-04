@@ -10,6 +10,9 @@ class Course
 {
 public:
     Course();
+    bool operator==(const Course &other) const;
+    bool operator!=(const Course &other) const;
+
     void setId(int id);
     void setName(QString name);
     void setUpdates(bool updates);

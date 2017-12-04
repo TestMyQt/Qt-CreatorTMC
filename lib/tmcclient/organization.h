@@ -12,8 +12,11 @@ class Organization
 public:
     Organization();
     Organization(QString name, QString slug);
-    QString getName();
-    QString getSlug();
+    bool operator==(const Organization &other) const;
+    bool operator!=(const Organization &other) const;
+
+    QString getName() const;
+    QString getSlug() const;
     void addCourse(Course c);
     QList<Course> getCourses();
 
