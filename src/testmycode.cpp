@@ -83,6 +83,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
     connect(settingsAction, &QAction::triggered, this, &TestMyCode::showSettingsWidget);
     connect(downloadAction, &QAction::triggered, this, &TestMyCode::showDownloadWidget);
+    connect(loginAction, &QAction::triggered, this, [=](){
+        settingsWidget->showLoginWidget();
+    });
 
     // Create context menu with actions
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
@@ -102,10 +105,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Initialize settings window
     settingsWidget = new SettingsWidget;
     settingsWidget->setTmcClient(&tmcClient);
-
-    connect(loginAction, &QAction::triggered, this, [=](){
-        settingsWidget->showLoginWidget();
-    });
 
     // Initialize download window
     downloadWidget = new QWidget;
@@ -194,11 +193,6 @@ void TestMyCode::displayTMCError(QString errorText)
     QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
 }
 
-void TestMyCode::onDownloadCancelClicked()
-{
-    downloadWidget->close();
-}
-
 void TestMyCode::onDownloadOkClicked()
 {
     auto exerciseList = downloadform->exerciselist;
@@ -217,15 +211,15 @@ void TestMyCode::onDownloadOkClicked()
             qDebug() << "Downloading exercise" << exerciseList->item(idx)->text();
             Exercise ex = activeCourse->getExercises()[idx];
             ex.setLocation(saveDirectory);
-            downloadPanel->addWidgetsToDownloadPanel( ex.getName() );
+            downloadPanel->addWidgetsToDownloadPanel(ex.getName());
             QNetworkReply* reply = tmcClient.getExerciseZip(&ex);
 
-            connect( reply, &QNetworkReply::downloadProgress,
-                downloadPanel, &DownloadPanel::networkReplyProgress );
-            connect( reply, &QNetworkReply::finished,
-                downloadPanel, &DownloadPanel::httpFinished );
+            connect(reply, &QNetworkReply::downloadProgress,
+                downloadPanel, &DownloadPanel::networkReplyProgress);
+            connect(reply, &QNetworkReply::finished,
+                downloadPanel, &DownloadPanel::httpFinished);
 
-            downloadPanel->addReplyToList( reply );
+            downloadPanel->addReplyToList(reply);
         }
     }
 

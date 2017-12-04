@@ -40,7 +40,7 @@ signals:
     void TMCError(QString errorString);
     void authorizationFinished(QString clientId, QString clientSecret);
     void authenticationFinished(QString accessToken);
-    void exerciseListReady(Course *course);
+    void exerciseListReady();
     void exerciseZipReady(Exercise *ex);
     void organizationListReady(QList<Organization> organizations);
     void courseListReady(Organization organization);
