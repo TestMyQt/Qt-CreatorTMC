@@ -6,6 +6,17 @@ Course::Course()
 
 }
 
+bool Course::operator==(const Course &other) const
+{
+    return other.getId() == m_id &&
+            other.getName() == m_name;
+}
+
+bool Course::operator!=(const Course &other) const
+{
+    return !(*this == other);
+}
+
 QMap<int, Exercise> Course::getExercises()
 {
     return m_exercises;
