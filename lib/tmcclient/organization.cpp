@@ -57,3 +57,9 @@ Organization Organization::fromQSettings(QSettings *settings)
     return Organization(settings->value("orgName", "").toString(),
                         settings->value("orgSlug", "").toString());
 }
+
+void Organization::toQSettings(QSettings *settings, Organization org)
+{
+    settings->setValue("orgName", org.getName());
+    settings->setValue("orgSlug", org.getSlug());
+}

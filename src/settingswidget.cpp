@@ -28,17 +28,16 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
         close();
     });
     connect(settingsWindow->cancelButton, &QPushButton::clicked, this, [=](){
+        setComboboxIndex(m_orgComboBox, m_activeOrganization.getName());
+        setComboboxIndex(m_courseComboBox, m_activeCourse.getName());
         close();
     });
 
     connect(settingsWindow->okButton, &QPushButton::clicked, this, &SettingsWidget::onSettingsOkClicked);
     connect(settingsWindow->browseButton, &QPushButton::clicked, this, &SettingsWidget::onBrowseClicked);
-    connect(m_orgComboBox, &QComboBox::currentTextChanged, this, [=](){
-        if (!m_orgComboBox->currentData().toString().isEmpty()) {
-            m_client->getCourseList(m_organizations.at(m_orgComboBox->currentIndex()));
-        }
+    connect(m_orgComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), [=](int index){
+        m_client->getCourseList(m_orgComboBox->itemData(index).value<Organization>());
     });
-
 }
 
 void SettingsWidget::setTmcClient(TmcClient *client)
@@ -65,11 +64,16 @@ void SettingsWidget::setTmcClient(TmcClient *client)
 void SettingsWidget::display()
 {
     m_client->getOrganizationList();
+    if (!m_activeOrganization.getName().isEmpty()) {
+        m_client->getCourseList(m_activeOrganization);
+    }
+    m_workingDir->setText(workingDirectory);
     show();
 }
 
 void SettingsWidget::showLoginWidget()
 {
+    loginWidget->loadQSettings();
     loginWidget->show();
 }
 
@@ -80,7 +84,15 @@ QString SettingsWidget::getWorkingDirectory()
 
 Course* SettingsWidget::getActiveCourse()
 {
-    return m_activeCourse;
+    return &m_activeCourse;
+}
+
+void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
+{
+    int index = box->findText(value);
+    if (index != -1) {
+        box->setCurrentIndex(index);
+    }
 }
 
 void SettingsWidget::onBrowseClicked()
@@ -135,20 +147,19 @@ void SettingsWidget::handleCourseList(Organization org)
 {
     m_courseComboBox->clear();
     foreach (Course c, org.getCourses()) {
-        m_courseComboBox->addItem(c.getName(), c.getId());
+        m_courseComboBox->addItem(c.getName(), QVariant::fromValue(c));
     }
-    m_courseComboBox->setCurrentText(m_activeCourse->getName());
+    setComboboxIndex(m_courseComboBox, m_activeCourse.getName());
 }
 
 void SettingsWidget::handleOrganizationList(QList<Organization> orgs)
 {
     m_organizations = orgs;
     m_orgComboBox->clear();
-    m_courseComboBox->clear();
     foreach (Organization org, m_organizations) {
-        m_orgComboBox->addItem(org.getName(), org.getSlug());
+        m_orgComboBox->addItem(org.getName(), QVariant::fromValue(org));
     }
-    m_orgComboBox->setCurrentText(m_activeOrganization.getName());
+    setComboboxIndex(m_orgComboBox, m_activeOrganization.getName());
 }
 
 void SettingsWidget::onSettingsOkClicked()
@@ -157,22 +168,28 @@ void SettingsWidget::onSettingsOkClicked()
         QMessageBox::critical(this, "TMC", "Please set the working directory!", QMessageBox::Ok);
         return;
     }
-    workingDirectory = m_workingDir->text();
 
-    emit workingDirectoryChanged(workingDirectory);
-    emit organizationChanged(Organization(m_orgComboBox->currentText(),
-                                          m_orgComboBox->currentData().toString()));
-
-    if (m_activeCourse->getId() != m_courseComboBox->currentData().toInt()) {
-        Course *newCourse = new Course();
-        newCourse->setName(m_courseComboBox->currentText());
-        newCourse->setId(m_courseComboBox->currentData().toInt());
-        QSettings settings("TestMyQt", "TMC");
-        newCourse->exerciseListFromQSettings(&settings);
-        m_activeCourse = newCourse;
-        emit activeCourseChanged(m_activeCourse);
-        settings.deleteLater();
+    QSettings settings("TestMyQt", "TMC");
+    QString setDir = m_workingDir->text();
+    if (setDir != workingDirectory) {
+        workingDirectory = setDir;
+        settings.setValue("workingDir", workingDirectory);
+        emit workingDirectoryChanged(workingDirectory);
     }
-    m_orgComboBox->clear();
+
+    Organization setOrg = m_orgComboBox->currentData().value<Organization>();
+    if (m_activeOrganization.getSlug() != setOrg.getSlug()) {
+        m_activeOrganization = setOrg;
+        Organization::toQSettings(&settings, setOrg);
+        emit organizationChanged(setOrg);
+    }
+
+    Course setCourse = m_courseComboBox->currentData().value<Course>();
+    if (m_activeCourse.getId() != setCourse.getId()) {
+        m_activeCourse = setCourse;
+        Course::toQSettings(&settings, setCourse);
+        emit activeCourseChanged(&m_activeCourse);
+    }
+    settings.deleteLater();
     close();
 }

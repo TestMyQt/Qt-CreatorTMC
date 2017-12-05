@@ -18,11 +18,14 @@ public:
     QList<Course> getCourses();
 
     static Organization fromQSettings(QSettings *settings);
+    static void toQSettings(QSettings *settings, Organization org);
 
 private:
     QString m_name;
     QString m_slug;
     QList<Course> m_courses;
 };
+
+Q_DECLARE_METATYPE(Organization)
 
 #endif // ORGANIZATION_H

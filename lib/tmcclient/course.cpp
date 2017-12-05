@@ -86,12 +86,18 @@ Course Course::fromJson(QJsonObject jsonCourse)
     object includes setting the course name and ID to the values specified in \a
     settings. If \a settings doesn't contain the appropriate values, defaults are used.
  */
-Course* Course::fromQSettings(QSettings *settings)
+Course Course::fromQSettings(QSettings *settings)
 {
-    Course *course = new Course;
-    course->setName(settings->value("courseName", "").toString());
-    course->setId(settings->value("courseId", -1).toInt());
+    Course course;
+    course.setName(settings->value("courseName", "").toString());
+    course.setId(settings->value("courseId", -1).toInt());
     return course;
+}
+
+void Course::toQSettings(QSettings *settings, Course c)
+{
+    settings->setValue("courseName", c.getName());
+    settings->setValue("courseId", c.getId());
 }
 
 /*!

@@ -42,13 +42,14 @@ private:
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;
-    Course *m_activeCourse;
+    Course m_activeCourse;
     QString workingDirectory;
 
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
     void handleOrganizationList(QList<Organization> orgs);
     void handleCourseList(Organization org);
+    void setComboboxIndex(QComboBox *box, QString value);
     void onSettingsOkClicked();
     void onBrowseClicked();
     void clearCredentials();

@@ -28,7 +28,6 @@ public:
 
 private slots:
     // Downloadform
-    void onDownloadCancelClicked();
     void onDownloadOkClicked();
     void refreshDownloadList();
 

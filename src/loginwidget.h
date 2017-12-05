@@ -15,7 +15,7 @@ public:
     explicit LoginWidget(QWidget *parent = nullptr);
 
     void setTmcClient(TmcClient *client);
-    void setCredentials(QString username, QString password);
+    void loadQSettings();
 
 signals:
 

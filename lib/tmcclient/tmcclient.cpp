@@ -458,7 +458,7 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
         qDebug() << exercise["checksum"].toString();
 
     }
-    emit exerciseListReady(course);
+    emit exerciseListReady();
 
     reply->deleteLater();
 }
