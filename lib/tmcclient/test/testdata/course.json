@@ -1,0 +1,62 @@
+{
+  "course": {
+    "id": 18,
+    "name": "qt-course",
+    "title": "Qt course 2017",
+    "reviews_url": "https://tmc.mooc.fi/api/v8/core/courses/18/reviews",
+    "spyware_urls": [
+      "http://hy.spyware.testmycode.net/"
+    ],
+    "unlock_url": "https://tmc.mooc.fi/api/v8/core/courses/18/unlock",
+    "unlockables": [],
+    "description": "Course for Qt",
+    "details_url": "https://tmc.mooc.fi/api/v8/core/courses/18",
+    "exercises": [
+      {
+        "name": "Exercise1",
+        "all_review_points_given": true,
+        "attempted": false,
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "code_review_requests_enabled": true,
+        "completed": false,
+        "deadline": null,
+        "deadline_description": null,
+        "exercise_submissions_url": "https://tmc.mooc.fi/api/v8/core/exercises/1337",
+        "id": 1337,
+        "locked": false,
+        "memory_limit": null,
+        "requires_review": false,
+        "return_url": "https://tmc.mooc.fi/api/v8/core/exercises/1337/submissions",
+        "returnable": true,
+        "reviewed": false,
+        "run_tests_locally_action_enabled": true,
+        "runtime_params": [],
+        "valgrind_strategy": "fail",
+        "zip_url": "https://tmc.mooc.fi/api/v8/core/exercises/1337/download"
+      },
+      {
+        "name": "Exercise2",
+        "all_review_points_given": true,
+        "attempted": false,
+        "checksum": "d41d8cd98f00b204e9800998ecf8427f",
+        "code_review_requests_enabled": true,
+        "completed": false,
+        "deadline": null,
+        "deadline_description": null,
+        "exercise_submissions_url": "https://tmc.mooc.fi/api/v8/core/exercises/1338",
+        "id": 1338,
+        "locked": false,
+        "memory_limit": null,
+        "requires_review": false,
+        "return_url": "https://tmc.mooc.fi/api/v8/core/exercises/1338/submissions",
+        "returnable": true,
+        "reviewed": false,
+        "run_tests_locally_action_enabled": true,
+        "runtime_params": [],
+        "valgrind_strategy": "fail",
+        "zip_url": "https://tmc.mooc.fi/api/v8/core/exercises/1338/download"
+      }
+    ]
+  }
+}
+
