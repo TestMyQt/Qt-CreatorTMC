@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QUrlQuery>
+#include <QBuffer>
 
 #include "course.h"
 #include "organization.h"
@@ -41,7 +42,7 @@ signals:
     void authorizationFinished(QString clientId, QString clientSecret);
     void authenticationFinished(QString accessToken);
     void exerciseListReady(Course *course, QList<Exercise> courseList);
-    void exerciseZipReady(Exercise ex);
+    void exerciseZipReady(QBuffer *storageBuff, Exercise ex);
     void organizationListReady(QList<Organization> organizations);
     void courseListReady(Organization organization);
     void accessTokenNotValid();

@@ -5,8 +5,6 @@
 #include <QJsonArray>
 #include <QBuffer>
 
-#include <quazip/JlCompress.h>
-
 #include "exercise.h"
 #include "course.h"
 
@@ -140,7 +138,6 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
 {
     QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex.getId()));
     QNetworkReply *reply = doGet(url);
-
     connect(reply, &QNetworkReply::finished, this, [=](){
         exerciseZipReplyFinished(reply, ex);
     });
@@ -286,23 +283,9 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
         reply->deleteLater();
         return;
     }
-
     QBuffer storageBuff;
     storageBuff.setData(reply->readAll());
-    QuaZip zip(&storageBuff);
-    if (!zip.open(QuaZip::mdUnzip)) {
-        emit TMCError("Error opening exercise zip file!");
-    }
-
-    QStringList extracted = JlCompress::extractDir(&storageBuff, ex.getLocation());
-    if (extracted.isEmpty()) {
-        emit TMCError("Error unzipping exercise files!");
-    } else {
-        ex.setUnzipped(true);
-        ex.setDownloaded(true);
-        emit exerciseZipReady(ex);
-    }
-
+    emit exerciseZipReady(&storageBuff, ex);
     reply->close();
     reply->deleteLater();
     return;

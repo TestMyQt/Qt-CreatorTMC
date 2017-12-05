@@ -29,6 +29,7 @@ public:
     void loadSettings();
 
 signals:
+    void TMCError(QString errorString);
 
 public slots:
     void showDownloadWidget();
@@ -39,11 +40,10 @@ public slots:
 
 private slots:
     void onDownloadOkClicked();
-    void handleZip(Exercise ex);
+    void handleZip(QBuffer *storageBuff, Exercise ex);
 
 
 private:
-
 
     TmcClient *m_client;
     SettingsWidget *m_settings;
