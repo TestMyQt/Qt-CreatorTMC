@@ -94,6 +94,11 @@ Course Course::fromQSettings(QSettings *settings)
     return course;
 }
 
+/*!
+    Saves the \l {Course::getName()} {name} and \l {Course::getId()} {ID} fields of
+    the \l Course parameter \a c into the \l {http://doc.qt.io/qt-5/qsettings.html}
+    {QSettings} object pointed to by parameter \a settings.
+*/
 void Course::toQSettings(QSettings *settings, Course c)
 {
     settings->setValue("courseName", c.getName());

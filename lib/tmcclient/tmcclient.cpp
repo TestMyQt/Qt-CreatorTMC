@@ -52,11 +52,11 @@
 */
 
 /*!
-    \fn void TmcClient::exerciseListReady(Course *course)
+    \fn void TmcClient::exerciseListReady()
 
-    Emitted when the job begun by \l {TmcClient} {getExerciseList()} is finished.
-    The \a course parameter contains the list of exercises as a collection of type
-    \c QList<Exercise> which can be retrieved with \l {Course::} {getExercises()}.
+    Emitted when the job begun by \l {TmcClient::} {getExerciseList()} is finished.
+    Currently the signal is connected to a private slot in \l {TestMyCodePlugin::Internal::}
+    {TestMyCode} that refreshes the exercise list displayed to the user.
 */
 
 /*!
