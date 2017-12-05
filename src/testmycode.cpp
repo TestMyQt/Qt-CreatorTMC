@@ -40,7 +40,6 @@ TestMyCode::~TestMyCode()
 {
     // Unregister objects from the plugin manager's object pool
     // Delete members
-    //delete &tmcClient;
 }
 
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)

@@ -9,6 +9,9 @@
 #include <QFuture>
 #include <QPushButton>
 #include <QMap>
+#include <QBuffer>
+
+#include <quazip/JlCompress.h>
 
 using Core::ProgressManager;
 using Core::FutureProgress;
@@ -94,8 +97,22 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> courseList
     downloadWidget->show();
 }
 
-void TmcManager::handleZip(Exercise ex)
+void TmcManager::handleZip(QBuffer *storageBuff, Exercise ex)
 {
+    QuaZip zip(storageBuff);
+    if (!zip.open(QuaZip::mdUnzip)) {
+        emit TMCError("Error opening exercise zip file");
+    }
+
+    QString saveDir = QString("%1/%2").arg(m_settings->getWorkingDirectory(),
+                                         m_settings->getActiveCourse()->getName());
+    QStringList extracted = JlCompress::extractDir(storageBuff, saveDir);
+    if (extracted.isEmpty()) {
+        emit TMCError("Error unzipping exercise files!");
+    } else {
+        ex.setUnzipped(true);
+        ex.setDownloaded(true);
+    }
     m_settings->getActiveCourse()->getExercise(ex).setDownloaded(true);
     m_settings->getActiveCourse()->getExercise(ex).setUnzipped(true);
 }
