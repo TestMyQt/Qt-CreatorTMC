@@ -36,5 +36,6 @@ private:
 };
 
 Q_DECLARE_METATYPE(Course)
+Q_DECLARE_METATYPE(Course*)
 
 #endif // COURSE_H
