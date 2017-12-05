@@ -102,9 +102,18 @@ void TmcClientTest::testCourseList()
     reply->setContent(content);
 
     QVERIFY2(exerciseList.count() == 1, "exerciseListReady");
+    QList<QVariant> arguments = exerciseList.takeFirst();
+
+    Course *course = QVariant::fromValue(arguments.at(0)).value<Course*>();
+    QList<Exercise> newExercises = QVariant::fromValue(arguments.at(1)).value<QList<Exercise>>();
+
     QVERIFY2(error.count() == 0, "TMCError");
 
-    Exercise e = c->getExercise(1538);
+    QVERIFY2(course->getId() == 18, "id");
+    QVERIFY2(course->getName() == "TestCourse", "name");
+
+    Exercise e = newExercises.takeFirst();
+    QVERIFY2(e.getId() == 1538, "id");
     QVERIFY2(e.getName() == "Set1-01.Exercise1", "name");
     QVERIFY2(e.getChecksum() == "0c6f85e1b1b885c68079a4f9b301fb50", "checksum");
 }
