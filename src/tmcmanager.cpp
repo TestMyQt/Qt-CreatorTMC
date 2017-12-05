@@ -52,6 +52,7 @@ void TmcManager::setTmcClient(TmcClient *client)
 void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
+    connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
 }
 
 void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> courseList)
@@ -125,6 +126,7 @@ void TmcManager::updateExercises()
         return;
     }
 
+    qDebug() << "Updating exercises for course" << activeCourse->getName();
     m_updateProgress.setProgressRange(0, activeCourse->getExercises().size());
     FutureProgress *progress =
             ProgressManager::addTask(m_updateProgress.future(),
@@ -149,18 +151,12 @@ bool TmcManager::lastUpdateSuccessful()
     return m_updateSuccessful;
 }
 
-int TmcManager::updateInterval()
+void TmcManager::setUpdateInterval(int interval)
 {
-    return m_updateInterval;
-}
-
-void TmcManager::setUpdateInterval(int updateInterval)
-{
-    m_updateInterval = updateInterval;
-    m_updateTimer.setInterval(updateInterval * 60000);
+    // Interval in minutes
+    m_updateTimer.setInterval(interval * 60000);
     if (m_updateTimer.interval() > 0)
         m_updateTimer.start();
-
 }
 
 void TmcManager::showDownloadWidget()
