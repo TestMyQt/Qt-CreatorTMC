@@ -91,7 +91,6 @@ void Course::toQSettings(QSettings *settings, Course c)
 
 void Course::exerciseListFromQSettings(QSettings *settings)
 {
-    settings->beginGroup("Exercises");
     settings->beginGroup(m_name);
         QStringList exerciseList = settings->childGroups();
         foreach (QString exercise, exerciseList) {
@@ -101,5 +100,4 @@ void Course::exerciseListFromQSettings(QSettings *settings)
             addExercise(ex);
         }
     settings->endGroup();
-    settings->deleteLater();
 }

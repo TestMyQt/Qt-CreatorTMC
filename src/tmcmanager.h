@@ -20,8 +20,7 @@ public:
 
     void setTmcClient(TmcClient *client);
 
-    void setAutoupdate(bool autoupdate);
-    void setUpdateInterval(int updateInterval);
+    void setUpdateInterval(int interval);
     int updateInterval();
     bool lastUpdateSuccessful();
 
@@ -58,7 +57,6 @@ private:
     QFutureInterface<void> m_updateProgress;
     QFutureInterface<void> m_downloadProgress;
 
-    int m_updateInterval;
     QTimer m_updateTimer;
     bool m_updateSuccessful;
 

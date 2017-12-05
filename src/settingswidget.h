@@ -41,12 +41,13 @@ private:
     QComboBox *m_orgComboBox;
     QComboBox *m_courseComboBox;
     QLineEdit *m_workingDir;
+    QLineEdit *m_autoUpdateInterval;
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;
     Course m_activeCourse;
     QString workingDirectory;
-    int m_autoUpdateInterval;
+    int m_interval;
 
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
