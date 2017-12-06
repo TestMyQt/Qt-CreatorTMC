@@ -32,11 +32,6 @@ void Course::setName(QString name)
     m_name = name;
 }
 
-void Course::setUpdates(bool updates)
-{
-    m_updates = updates;
-}
-
 int Course::getId() const
 {
     return m_id;
@@ -57,14 +52,14 @@ Exercise Course::getExercise(const Exercise ex)
     return m_exercises.value(ex.getId(), Exercise());
 }
 
-void Course::addExercise(const Exercise e)
+void Course::addExercise(const Exercise ex)
 {
-    m_exercises.insert(e.getId(), e);
+    m_exercises.insert(ex.getId(), ex);
 }
 
-bool Course::hasUpdates()
+bool Course::hasExercise(Exercise ex)
 {
-    return m_updates;
+    return m_exercises.contains(ex.getId());
 }
 
 Course Course::fromJson(const QJsonObject jsonCourse)

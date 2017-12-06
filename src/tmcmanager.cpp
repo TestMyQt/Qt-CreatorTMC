@@ -55,7 +55,7 @@ void TmcManager::setSettings(SettingsWidget *settings)
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
 }
 
-void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> courseList)
+void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercises)
 {
     QString workingDirectory = m_settings->getWorkingDirectory();
     QString courseName = updatedCourse->getName();
@@ -72,7 +72,7 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> courseList
 
     QString saveDirectory = QString("%1/%2").arg(workingDirectory, courseName);
 
-    foreach (Exercise ex, courseList) {
+    foreach (Exercise ex, newExercises) {
         ex.setLocation(saveDirectory);
 
         Exercise found = updatedCourse->getExercise(ex);
@@ -81,41 +81,49 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> courseList
             // Not found, new exercise
             ex.setDownloaded(false);
             updatedCourse->addExercise(ex);
+            continue;
         }
 
         if (found == ex) {
             // Id and checksum matches! Not a new exercise.
             if (found.isDownloaded()) {
                 // Exercise has been downloaded
-                courseList.removeAll(ex);
+                newExercises.removeAll(ex);
             }
         }
     }
 
     downloadform->exerciselist->clear();
-    appendToDownloadWindow(courseList);
+    appendToDownloadWindow(newExercises);
     m_updateProgress.reportFinished();
     downloadWidget->show();
 }
 
-void TmcManager::handleZip(QBuffer *storageBuff, Exercise ex)
+void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 {
-    QuaZip zip(storageBuff);
-    if (!zip.open(QuaZip::mdUnzip)) {
-        emit TMCError("Error opening exercise zip file");
-    }
+    Course *activeCourse = m_settings->getActiveCourse();
 
     QString saveDir = QString("%1/%2").arg(m_settings->getWorkingDirectory(),
-                                         m_settings->getActiveCourse()->getName());
-    QStringList extracted = JlCompress::extractDir(storageBuff, saveDir);
+                                           activeCourse->getName());
+
+    QBuffer zipBuffer(&zipData);
+    zipBuffer.open(QIODevice::ReadOnly);
+
+    QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
     if (extracted.isEmpty()) {
         emit TMCError("Error unzipping exercise files!");
-    } else {
-        ex.setUnzipped(true);
-        ex.setDownloaded(true);
+        return;
     }
-    m_settings->getActiveCourse()->getExercise(ex).setDownloaded(true);
-    m_settings->getActiveCourse()->getExercise(ex).setUnzipped(true);
+
+    if (!activeCourse->hasExercise(ex)) {
+        emit TMCError("Exercise not found in course!");
+        return;
+    }
+
+    ex.setDownloaded(true);
+    ex.setUnzipped(true);
+    // Save updated exercise back to course exercise list
+    activeCourse->addExercise(ex);
 }
 
 void TmcManager::updateExercises()
@@ -128,10 +136,9 @@ void TmcManager::updateExercises()
 
     qDebug() << "Updating exercises for course" << activeCourse->getName();
     m_updateProgress.setProgressRange(0, activeCourse->getExercises().size());
-    FutureProgress *progress =
-            ProgressManager::addTask(m_updateProgress.future(),
-                                     tr("Updating TestMyCode exercises"),
-                                     TestMyCodePlugin::Constants::TASK_INDEX);
+    ProgressManager::addTask(m_updateProgress.future(),
+                             tr("Updating TestMyCode exercises"),
+                             TestMyCodePlugin::Constants::TASK_INDEX);
     m_updateProgress.reportStarted();
     m_client->getExerciseList(activeCourse);
 }

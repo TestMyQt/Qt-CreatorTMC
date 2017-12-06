@@ -42,7 +42,7 @@ signals:
     void authorizationFinished(QString clientId, QString clientSecret);
     void authenticationFinished(QString accessToken);
     void exerciseListReady(Course *course, QList<Exercise> courseList);
-    void exerciseZipReady(QBuffer *storageBuff, Exercise ex);
+    void exerciseZipReady(QByteArray zipData, Exercise ex);
     void organizationListReady(QList<Organization> organizations);
     void courseListReady(Organization organization);
     void accessTokenNotValid();

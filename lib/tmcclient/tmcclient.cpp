@@ -273,20 +273,16 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
     if (!checkRequestStatus(reply)) {
         // One of the downloads was cancelled by the user
         if( reply->error() == QNetworkReply::OperationCanceledError ) {
-            qDebug() << "Cancelled download:" << reply->url();
+            qDebug() << "Cancelled download:" << ex.getName();
         } else {
             qDebug() << "Error at exerciseListReplyFinished";
             emit TMCError(QString("Zip download error %1: %2")
                           .arg(reply->errorString(), reply->error()));
         }
-        reply->close();
-        reply->deleteLater();
         return;
     }
-    QBuffer storageBuff;
-    storageBuff.setData(reply->readAll());
-    emit exerciseZipReady(&storageBuff, ex);
+
+    emit exerciseZipReady(reply->readAll(), ex);
     reply->close();
     reply->deleteLater();
-    return;
 }
