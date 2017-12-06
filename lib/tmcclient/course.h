@@ -20,9 +20,9 @@ public:
     QString getName() const;
     Exercise getExercise(int id);
     Exercise getExercise(const Exercise ex);
-    void addExercise(const Exercise e);
+    void addExercise(const Exercise ex);
     QMap<int, Exercise> getExercises();
-    bool hasUpdates();
+    bool hasExercise(Exercise ex);
     void saveSettings();
     static Course fromJson(const QJsonObject jsonCourse);
     static Course fromQSettings(QSettings *settings);
@@ -31,7 +31,6 @@ public:
 private:
     int m_id;
     QString m_name;
-    bool m_updates;
     QMap<int, Exercise> m_exercises;
 };
 
