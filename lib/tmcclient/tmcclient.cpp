@@ -70,6 +70,8 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
         if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 403) {
             emit accessTokenNotValid();
         }
+        reply->close();
+        reply->deleteLater();
         return false;
     }
     return true;
@@ -168,10 +170,9 @@ void TmcClient::getUserInfo()
 
 void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         emit TMCError(QString("Client authorization failed: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
         return;
     }
 
@@ -184,11 +185,10 @@ void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
 
 void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         emit TMCError(QString("Login failed: %1: %2")
                       .arg(reply->errorString(), reply->error()));
         emit authenticationFinished("");
-        reply->deleteLater();
         return;
     }
     qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
@@ -209,11 +209,11 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 
 void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Organization list reply finished";
         emit TMCError(QString("Failed to download organization list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
+        return;
     }
     QList<Organization> organizations;
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
@@ -227,11 +227,11 @@ void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
 
 void TmcClient::courseListReplyFinished(QNetworkReply *reply, Organization org)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Course list reply finished";
         emit TMCError(QString("Failed to download course list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
+        return;
     }
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray coursesJson = json.array();
@@ -248,7 +248,6 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
         qDebug() << "Error at Exercise list reply finished";
         emit TMCError(QString("Failed to download exercise list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
         return;
     }
 
