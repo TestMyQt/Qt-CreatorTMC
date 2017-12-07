@@ -28,6 +28,7 @@ signals:
     void organizationChanged(Organization org);
     void activeCourseChanged(Course *course);
     void autoUpdateIntervalChanged(int interval);
+    void tmcCliLocationChanged(QString location);
 
 public slots:
 
@@ -42,11 +43,13 @@ private:
     QComboBox *m_courseComboBox;
     QLineEdit *m_workingDir;
     QLineEdit *m_autoUpdateInterval;
+    QLineEdit *m_cliLocation;
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;
     Course m_activeCourse;
     QString workingDirectory;
+    QString tmcCliLocation;
     int m_interval;
 
     void handleLoginResponse(QString accessToken);
@@ -56,6 +59,7 @@ private:
     void setComboboxIndex(QComboBox *box, QString value);
     void onSettingsOkClicked();
     void onBrowseClicked();
+    void onCliBrowseClicked();
     void clearCredentials();
     void setUpdateInterval(int interval);
 

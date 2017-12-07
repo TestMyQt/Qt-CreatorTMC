@@ -28,6 +28,7 @@ public:
 private slots:
 
 private:
+    QString tmcCliLocation;
 
     // SettingsWidget
     SettingsWidget *settingsWidget;
