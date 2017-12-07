@@ -95,7 +95,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Create context menu with actions
     Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
     menu->menu()->setTitle(tr("TestMyCode"));
-    Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
+    Core::ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(menu);
     menu->addAction(tmcCmd);
     menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
