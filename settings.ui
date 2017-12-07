@@ -189,7 +189,7 @@
     <string>Exercise update interval (minutes)</string>
    </property>
   </widget>
-  <widget class="QLabel" name="jarLabel">
+  <widget class="QLabel" name="chooseCliLabel">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -202,7 +202,7 @@
     <string>Location of TMC CLI .jar file</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="jarLocation">
+  <widget class="QLineEdit" name="cliLocation">
    <property name="geometry">
     <rect>
      <x>200</x>
@@ -215,7 +215,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="jarBrowseButton">
+  <widget class="QPushButton" name="cliBrowseButton">
    <property name="geometry">
     <rect>
      <x>410</x>

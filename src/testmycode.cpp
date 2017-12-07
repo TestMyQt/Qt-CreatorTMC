@@ -115,6 +115,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(loginAction, &QAction::triggered, this, [=](){
         settingsWidget->showLoginWidget();
     });
+    connect(settingsWidget, &SettingsWidget::tmcCliLocationChanged, this, [=](const QString &location){
+        tmcCliLocation = location;
+    });
 
     // TmcManager
     m_tmcManager = new TmcManager;
@@ -157,6 +160,7 @@ void TestMyCode::showSettingsWidget()
 void TestMyCode::runTMC()
 {
     TMCRunner *runner = TMCRunner::instance();
+    runner->setTmcCliLocation(tmcCliLocation);
     runner->runOnActiveProject();
 }
 
