@@ -49,43 +49,10 @@ void TmcClientTest::cleanupTestCase()
 void TmcClientTest::testCourseList()
 {
 
-    content += QString("{\"course\":"
-                       "{ \"id\": 18,"
-                       "\"name\": \"qt-course\","
-                       "\"title\": \"Qt course 2017\","
-                       "\"reviews_url\": \"https://tmc.mooc.fi/api/v8/core/courses/18/reviews\","
-                       "\"spyware_urls\": [\"http://hy.spyware.testmycode.net/\"],"
-                       "\"unlock_url\": \"https://tmc.mooc.fi/api/v8/core/courses/18/unlock\","
-                       "\"unlockables\": [],"
-                       "\"description\": \"Course for Qt\","
-                       "\"details_url\": \"https://tmc.mooc.fi/api/v8/core/courses/18\","
-                       "\"exercises\": ["
-                       "{"
-                        "\"name\": \"Set1-01.Exercise1\","
-                        "\"all_review_points_given\": true,"
-                        "\"attempted\": false,"
-                        "\"checksum\": \"0c6f85e1b1b885c68079a4f9b301fb50\","
-                        "\"code_review_requests_enabled\": true,"
-                        "\"completed\": false,"
-                        "\"deadline\": null,"
-                        "\"deadline_description\": null,"
-                        "\"exercise_submissions_url\": \"https://tmc.mooc.fi/api/v8/core/exercises/1538\","
-                        "\"id\": 1538,"
-                        "\"locked\": false,"
-                        "\"memory_limit\": null,"
-                        "\"requires_review\": false,"
-                        "\"return_url\": \"https://tmc.mooc.fi/api/v8/core/exercises/1538/submissions\","
-                        "\"returnable\": true,"
-                        "\"reviewed\": false,"
-                        "\"run_tests_locally_action_enabled\": true,"
-                        "\"runtime_params\": [],"
-                        "\"valgrind_strategy\": \"fail\","
-                        "\"zip_url\": \"https://tmc.mooc.fi/api/v8/core/exercises/1538/download\""
-                       "}"
-                       "]"
-                       "}"
-                       "}");
-
+    QFile file;
+    file.setFileName(QFINDTESTDATA("testdata/course.json"));
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    content = file.readAll();
 
     TestNetworkReply *reply = new TestNetworkReply;
     reply->setStatusOK();
@@ -102,19 +69,33 @@ void TmcClientTest::testCourseList()
     reply->setContent(content);
 
     QVERIFY2(exerciseList.count() == 1, "exerciseListReady");
+    QList<QVariant> arguments = exerciseList.takeFirst();
+
+    Course *course = QVariant::fromValue(arguments.at(0)).value<Course*>();
+    QList<Exercise> newExercises = QVariant::fromValue(arguments.at(1)).value<QList<Exercise>>();
+
     QVERIFY2(error.count() == 0, "TMCError");
 
-    Exercise e = c->getExercise(1538);
-    QVERIFY2(e.getName() == "Set1-01.Exercise1", "name");
-    QVERIFY2(e.getChecksum() == "0c6f85e1b1b885c68079a4f9b301fb50", "checksum");
+    QVERIFY2(course->getId() == 18, "id");
+    QVERIFY2(course->getName() == "TestCourse", "name");
+
+    Exercise e = newExercises.takeFirst();
+    QVERIFY2(e.getId() == 1337, "id");
+    QVERIFY2(e.getName() == "Exercise1", "name");
+    QVERIFY2(e.getChecksum() == "d41d8cd98f00b204e9800998ecf8427e", "checksum");
+
+    Exercise e2 = newExercises.takeLast();
+    QVERIFY2(e2.getId() == 1338, "id");
+    QVERIFY2(e2.getName() == "Exercise2", "name");
+    QVERIFY2(e2.getChecksum() == "d41d8cd98f00b204e9800998ecf8427f", "checksum");
 }
 
 void TmcClientTest::testSuccessfulLogin()
 {
-    content = QString("{ \"access_token\": \"token\","
-                       "\"created_at\": 1510207179,"
-                       "\"scope\": \"public\","
-                       "\"token_type\": \"bearer\" }");
+    QFile file;
+    file.setFileName(QFINDTESTDATA("testdata/token.json"));
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    content = file.readAll();
 
     TestNetworkReply *reply = new TestNetworkReply;
     reply->setStatusOK();

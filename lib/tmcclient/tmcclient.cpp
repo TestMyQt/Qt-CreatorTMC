@@ -109,8 +109,6 @@
 #include <QJsonArray>
 #include <QBuffer>
 
-#include <quazip/JlCompress.h>
-
 #include "exercise.h"
 #include "course.h"
 
@@ -216,8 +214,9 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
     if (reply->error()) {
         if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 403) {
             emit accessTokenNotValid();
-            return false;
         }
+        reply->close();
+        reply->deleteLater();
         return false;
     }
     return true;
@@ -307,11 +306,10 @@ void TmcClient::getCourseList(Organization org)
     automatically extracted to the appropriate directory (determining what
     this directory is involves \l {Exercise::} {getLocation()}).
  */
-QNetworkReply* TmcClient::getExerciseZip(Exercise *ex)
+QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex->getId()));
+    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex.getId()));
     QNetworkReply *reply = doGet(url);
-
     connect(reply, &QNetworkReply::finished, this, [=](){
         exerciseZipReplyFinished(reply, ex);
     });
@@ -350,10 +348,9 @@ void TmcClient::getUserInfo()
 
 void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         emit TMCError(QString("Client authorization failed: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
         return;
     }
 
@@ -366,11 +363,10 @@ void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
 
 void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         emit TMCError(QString("Login failed: %1: %2")
                       .arg(reply->errorString(), reply->error()));
         emit authenticationFinished("");
-        reply->deleteLater();
         return;
     }
     qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
@@ -391,18 +387,17 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 
 void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Organization list reply finished";
         emit TMCError(QString("Failed to download organization list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
+        return;
     }
     QList<Organization> organizations;
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray orgJson = json.array();
-    for (int i = 0; orgJson.size() > i; i++) {
-        QJsonObject org = orgJson[i].toObject();
-        organizations.append(Organization(org["name"].toString(), org["slug"].toString()));
+    foreach (QJsonValue jsonVal, orgJson) {
+        organizations.append(Organization::fromJson(jsonVal.toObject()));
     }
     emit organizationListReady(organizations);
     reply->deleteLater();
@@ -410,11 +405,11 @@ void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
 
 void TmcClient::courseListReplyFinished(QNetworkReply *reply, Organization org)
 {
-    if (reply->error()) {
+    if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Course list reply finished";
         emit TMCError(QString("Failed to download course list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
+        return;
     }
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray coursesJson = json.array();
@@ -431,69 +426,40 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
         qDebug() << "Error at Exercise list reply finished";
         emit TMCError(QString("Failed to download exercise list: %1: %2")
                       .arg(reply->errorString(), reply->error()));
-        reply->deleteLater();
-        emit closeDownloadWindow();
         return;
     }
 
-    qDebug() << "Exercise List:";
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
 
     QJsonObject jsonObj = json.object();
     QJsonObject jsonCourse = jsonObj["course"].toObject();
     QJsonArray exercises = jsonCourse["exercises"].toArray();
-    for (int i = 0; exercises.size() > i; i++) {
-        QJsonObject exercise = exercises[i].toObject();
-        Exercise ex(exercise["id"].toInt(), exercise["name"].toString());
-        ex.setChecksum(exercise["checksum"].toString());
-        ex.setDlDate(exercise["deadline"].toString());
-        // Workaround to not add same exercises over and over again
-        // needs to be reworked to allow updating
-        if (course->getExercise(exercise["id"].toInt()).getId() == -1) {
-            ex.saveSettings(course->getName());
-            course->addExercise(ex);
-        }
-        qDebug() << ex.getId() << ex.getName();
-        qDebug() << course->getExercise(ex.getId()).getName();
-        qDebug() << exercise["checksum"].toString();
 
+    QList<Exercise> courseList;
+    foreach (QJsonValue jsonVal, exercises) {
+        courseList.append(Exercise::fromJson(jsonVal.toObject()));
     }
-    emit exerciseListReady();
+
+    emit exerciseListReady(course, courseList);
 
     reply->deleteLater();
 }
 
-void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise *ex)
+void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
 {
     if (!checkRequestStatus(reply)) {
         // One of the downloads was cancelled by the user
         if( reply->error() == QNetworkReply::OperationCanceledError ) {
-            qDebug() << "Cancelled download:" << reply->url();
+            qDebug() << "Cancelled download:" << ex.getName();
         } else {
             qDebug() << "Error at exerciseListReplyFinished";
             emit TMCError(QString("Zip download error %1: %2")
                           .arg(reply->errorString(), reply->error()));
         }
-        reply->close();
-        reply->deleteLater();
         return;
     }
 
-    QBuffer storageBuff;
-    storageBuff.setData(reply->readAll());
-    QuaZip zip(&storageBuff);
-    if (!zip.open(QuaZip::mdUnzip))
-        emit TMCError("Error opening exercise zip file!");
-
-    QStringList extracted = JlCompress::extractDir(&storageBuff, ex->getLocation());
-    if (extracted.isEmpty()) {
-        emit TMCError("Error unzipping exercise files!");
-    } else {
-        emit exerciseZipReady(ex);
-        emit closeDownloadWindow();
-    }
-
+    emit exerciseZipReady(reply->readAll(), ex);
     reply->close();
     reply->deleteLater();
-    return;
 }

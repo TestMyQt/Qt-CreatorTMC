@@ -32,15 +32,26 @@ Organization::Organization(QString name, QString slug) :
 /*!
     Getter function for the name field of the \l Organization object.
 */
-QString Organization::getName()
+QString Organization::getName() const
 {
     return m_name;
+}
+
+bool Organization::operator==(const Organization &other) const
+{
+    return other.getName() == m_name &&
+            other.getSlug() == m_slug;
+}
+
+bool Organization::operator!=(const Organization &other) const
+{
+    return !(*this == other);
 }
 
 /*!
     Getter function for the slug field of the \l Organization object.
 */
-QString Organization::getSlug()
+QString Organization::getSlug() const
 {
     return m_slug;
 }
@@ -84,4 +95,13 @@ void Organization::toQSettings(QSettings *settings, Organization org)
 {
     settings->setValue("orgName", org.getName());
     settings->setValue("orgSlug", org.getSlug());
+}
+
+Organization Organization::fromJson(const QJsonObject jsonOrg)
+{
+    Organization fromJson = Organization(
+                jsonOrg["name"].toString(),
+                jsonOrg["slug"].toString());
+
+    return fromJson;
 }

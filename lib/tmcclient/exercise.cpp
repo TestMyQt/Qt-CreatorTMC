@@ -12,10 +12,33 @@
 
 #include "exercise.h"
 
+#include <QJsonObject>
+
+Exercise::Exercise()
+{
+    m_id = -1;
+    m_name = "";
+    m_downloaded = false;
+    m_unzipped = false;
+}
+
 Exercise::Exercise(int id, QString name)
 {
     m_id = id;
     m_name = name;
+    m_downloaded = false;
+    m_unzipped = false;
+}
+
+bool Exercise::operator==(const Exercise &other) const
+{
+    return other.getId() == m_id &&
+            other.getChecksum() == m_checksum;
+}
+
+bool Exercise::operator!=(const Exercise &other) const
+{
+    return !(*this == other);
 }
 
 /*!
@@ -71,6 +94,16 @@ QString Exercise::getDlDate() const
 bool Exercise::getOpenStatus() const
 {
     return m_openStatus;
+}
+
+bool Exercise::isDownloaded() const
+{
+    return m_downloaded;
+}
+
+bool Exercise::isUnzipped() const
+{
+    return m_unzipped;
 }
 
 /*!
@@ -132,6 +165,16 @@ void Exercise::setOpenStatus(bool openStatus)
     m_openStatus = openStatus;
 }
 
+void Exercise::setDownloaded(bool downloaded)
+{
+    m_downloaded = downloaded;
+}
+
+void Exercise::setUnzipped(bool zipped)
+{
+    m_unzipped = zipped;
+}
+
 /*!
     Saves the \l Exercise object's state in persistent storage using
     \l {http://doc.qt.io/qt-5/qsettings.html} {QSettings}. The \l
@@ -139,20 +182,20 @@ void Exercise::setOpenStatus(bool openStatus)
     is used as a prefix in forming the key names with \l
     {http://doc.qt.io/qt-5/qsettings.html#beginGroup} {QSettings::beginGroup()}.
 */
-void Exercise::saveSettings(QString courseName)
+void Exercise::saveQSettings(QSettings *settings, const QString courseName)
 {
     // Yay or nay on the indentation?
-    QSettings settings("TestMyQt", "Exercises");
-    settings.beginGroup(courseName);
-        settings.beginGroup(m_name);
-            settings.setValue("id", m_id);
-            settings.setValue("checksum", m_checksum);
-            settings.setValue("location", m_location);
-            settings.setValue("dlDate", m_dlDate);
-            settings.setValue("openStatus", m_openStatus);
-        settings.endGroup();
-    settings.endGroup();
-    settings.deleteLater();
+    settings->beginGroup(courseName);
+        settings->beginGroup(m_name);
+            settings->setValue("id", m_id);
+            settings->setValue("checksum", m_checksum);
+            settings->setValue("location", m_location);
+            settings->setValue("dlDate", m_dlDate);
+            settings->setValue("openStatus", m_openStatus);
+            settings->setValue("downloaded", m_downloaded);
+            settings->setValue("unzipped", m_unzipped);
+        settings->endGroup();
+    settings->endGroup();
 }
 
 /*!
@@ -174,5 +217,18 @@ Exercise Exercise::fromQSettings(QSettings *settings)
     ex.setLocation(settings->value("location", "").toString());
     ex.setDlDate(settings->value("dlDate", "").toString());
     ex.setOpenStatus(settings->value("openStatus", false).toBool());
+    ex.setDownloaded(settings->value("downloaded", false).toBool());
+    ex.setUnzipped(settings->value("unzipped", false).toBool());
     return ex;
+}
+
+Exercise Exercise::fromJson(const QJsonObject jsonExercise)
+{
+
+    Exercise fromJson = Exercise(jsonExercise["id"].toInt(),
+            jsonExercise["name"].toString());
+    fromJson.setChecksum(jsonExercise["checksum"].toString());
+    fromJson.setDlDate(jsonExercise["deadline"].toString());
+
+    return fromJson;
 }

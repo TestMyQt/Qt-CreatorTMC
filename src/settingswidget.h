@@ -21,11 +21,13 @@ public:
 
     QString getWorkingDirectory();
     Course* getActiveCourse();
+    int getAutoupdateInterval();
 
 signals:
     void workingDirectoryChanged(QString location);
     void organizationChanged(Organization org);
     void activeCourseChanged(Course *course);
+    void autoUpdateIntervalChanged(int interval);
 
 public slots:
 
@@ -39,11 +41,13 @@ private:
     QComboBox *m_orgComboBox;
     QComboBox *m_courseComboBox;
     QLineEdit *m_workingDir;
+    QLineEdit *m_autoUpdateInterval;
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;
     Course m_activeCourse;
     QString workingDirectory;
+    int m_interval;
 
     void handleLoginResponse(QString accessToken);
     void handleAuthResponse(QString clientId, QString clientSecret);
@@ -53,6 +57,7 @@ private:
     void onSettingsOkClicked();
     void onBrowseClicked();
     void clearCredentials();
+    void setUpdateInterval(int interval);
 
     QString askSaveLocation();
 

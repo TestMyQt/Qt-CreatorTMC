@@ -5,7 +5,6 @@ SUBDIRS = \
         3rdparty \
         lib/tmcclient
 
-lib/tmcclient.depends = 3rdparty
 src.depends = lib/tmcclient 3rdparty
 
 test {

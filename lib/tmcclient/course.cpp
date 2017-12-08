@@ -14,11 +14,22 @@ Course::Course()
 
 }
 
+bool Course::operator==(const Course &other) const
+{
+    return other.getId() == m_id &&
+            other.getName() == m_name;
+}
+
+bool Course::operator!=(const Course &other) const
+{
+    return !(*this == other);
+}
+
 /*!
     Returns a pointer to the \l Course object's private \l Exercise
     collection.
 */
-QList<Exercise> Course::getExercises()
+QMap<int, Exercise> Course::getExercises()
 {
     return m_exercises;
 }
@@ -51,20 +62,25 @@ QString Course::getName() const
     Returns the \l Exercise object specified by \a id. If no such \l Exercise
     object is found, a "blank" \l Exercise object is returned (rather than null).
 */
-Exercise Course::getExercise(int id)
+Exercise Course::getExercise(const int id)
 {
-    foreach (Exercise e, m_exercises) {
-        if (e.getId() == id) {
-            return e;
-        }
-    }
-    return Exercise(-1, QString("null"));
+    return m_exercises.value(id, Exercise());
+}
+
+Exercise Course::getExercise(const Exercise ex)
+{
+    return m_exercises.value(ex.getId(), Exercise());
 }
 
 /*! Adds parameter \a e to the \l Course object's private \l Exercise collection. */
-void Course::addExercise(Exercise e)
+void Course::addExercise(const Exercise ex)
 {
-    m_exercises.append(e);
+    m_exercises.insert(ex.getId(), ex);
+}
+
+bool Course::hasExercise(Exercise ex)
+{
+    return m_exercises.contains(ex.getId());
 }
 
 /*!
@@ -72,7 +88,7 @@ void Course::addExercise(Exercise e)
     parameter \a jsonCourse to initialize a new \l Course object which
     is the return value.
  */
-Course Course::fromJson(QJsonObject jsonCourse)
+Course Course::fromJson(const QJsonObject jsonCourse)
 {
     Course course;
     course.setName(jsonCourse["name"].toString());
@@ -115,7 +131,6 @@ void Course::toQSettings(QSettings *settings, Course c)
 */
 void Course::exerciseListFromQSettings(QSettings *settings)
 {
-    settings->beginGroup("Exercises");
     settings->beginGroup(m_name);
         QStringList exerciseList = settings->childGroups();
         foreach (QString exercise, exerciseList) {
@@ -125,5 +140,4 @@ void Course::exerciseListFromQSettings(QSettings *settings)
             addExercise(ex);
         }
     settings->endGroup();
-    settings->deleteLater();
 }

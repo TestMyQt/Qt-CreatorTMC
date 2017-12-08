@@ -15,11 +15,17 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     m_orgComboBox = settingsWindow->orgComboBox;
     m_courseComboBox = settingsWindow->courseComboBox;
     m_workingDir = settingsWindow->workingDir;
+    m_autoUpdateInterval = settingsWindow->updateInterval;
 
     QSettings settings("TestMyQt", "TMC");
     m_activeOrganization = Organization::fromQSettings(&settings);
     m_activeCourse = Course::fromQSettings(&settings);
+    m_activeCourse.exerciseListFromQSettings(&settings);
+
     workingDirectory = settings.value("workingDir", "").toString();
+    m_workingDir->setText(workingDirectory);
+    m_interval = settings.value("autoupdateInterval", 60).toInt();
+    m_autoUpdateInterval->setText(QString::number(m_interval));
 
     settings.deleteLater();
 
@@ -61,6 +67,12 @@ void SettingsWidget::setTmcClient(TmcClient *client)
     connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
 }
 
+void SettingsWidget::setUpdateInterval(int interval)
+{
+    m_interval = interval;
+    emit autoUpdateIntervalChanged(m_interval);
+}
+
 void SettingsWidget::display()
 {
     m_client->getOrganizationList();
@@ -93,6 +105,11 @@ void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
     if (index != -1) {
         box->setCurrentIndex(index);
     }
+}
+
+int SettingsWidget::getAutoupdateInterval()
+{
+    return m_interval;
 }
 
 void SettingsWidget::onBrowseClicked()
@@ -177,15 +194,22 @@ void SettingsWidget::onSettingsOkClicked()
         emit workingDirectoryChanged(workingDirectory);
     }
 
+    int setInterval = m_autoUpdateInterval->text().toInt();
+    if (setInterval != m_interval) {
+        m_interval = setInterval;
+        settings.setValue("autoupdateInterval", m_interval);
+        emit autoUpdateIntervalChanged(m_interval);
+    }
+
     Organization setOrg = m_orgComboBox->currentData().value<Organization>();
-    if (m_activeOrganization.getSlug() != setOrg.getSlug()) {
+    if (m_activeOrganization != setOrg) {
         m_activeOrganization = setOrg;
         Organization::toQSettings(&settings, setOrg);
         emit organizationChanged(setOrg);
     }
 
     Course setCourse = m_courseComboBox->currentData().value<Course>();
-    if (m_activeCourse.getId() != setCourse.getId()) {
+    if (m_activeCourse != setCourse) {
         m_activeCourse = setCourse;
         Course::toQSettings(&settings, setCourse);
         emit activeCourseChanged(&m_activeCourse);

@@ -166,6 +166,29 @@
     <string/>
    </property>
   </widget>
+  <widget class="QLineEdit" name="updateInterval">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>260</y>
+     <width>61</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="updateIntervalLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>201</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Exercise update interval (minutes)</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
