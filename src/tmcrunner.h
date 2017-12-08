@@ -28,15 +28,18 @@ public:
 
     bool isTMCRunning() const { return m_executingTMC; }
     void runOnActiveProject();
+    void setTmcCliLocation(const QString location);
 
 signals:
     void testResultReady(const QList<TmcTestResult> &result);
+    void TMCError(QString errorString);
 
 private:
     void launchTmcCLI(const Utils::FileName &workingDirectory);
     QList<TmcTestResult> readTMCOutput(const QString &testOutput);
     void onFinished();
     bool m_executingTMC;
+    QString tmc_cli;
 
     explicit TMCRunner(QObject *parent = 0);
 
