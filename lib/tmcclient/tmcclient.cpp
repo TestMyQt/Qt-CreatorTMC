@@ -108,7 +108,7 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 /*!
     Setter function for the single \l {http://doc.qt.io/qt-5/qnetworkaccessmanager.html}
     {QNetworkAccessManager} object that the QtCreatorTMC plugin uses for all its
-    network communications.
+    network communications (represented by parameter \a m).
 */
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {

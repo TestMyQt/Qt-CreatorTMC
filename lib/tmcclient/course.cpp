@@ -2,8 +2,12 @@
     \class Course
     \inmodule lib/tmcclient
     \inheaderfile course.h
-    \brief Class \l Course is a simple representation of a TMC course that includes
-    the course's exercises as a collection of \l Exercise objects.
+    \brief Class \l Course is a simple representation of TMC courses that includes
+        the course's exercises as values in a \l {http://doc.qt.io/qt-5/qmap.html}
+        {QMap} object.
+
+    The keys are the IDs of the \l Exercise objects; each exercise ID is mapped to
+    the corresponding \l Exercise object.
 */
 
 #include "course.h"
@@ -14,70 +18,102 @@ Course::Course()
 
 }
 
+/*!
+    Overloading the \c{==} operator. The \l Course object is compared with the
+    parameter \a other. Two \l Course objects are considered equal if both their
+    \l {Course::getName()} {name} and \l {Course::getId()} {id} fields are equal.
+    Returns \c true if the two \l Course objects are equal and \c false otherwise.
+*/
 bool Course::operator==(const Course &other) const
 {
     return other.getId() == m_id &&
             other.getName() == m_name;
 }
 
+/*!
+    Overloading the \c{!=} operator. The \l Course object is compared with the
+    parameter \a other. Two \l Course objects are considered distinct if either
+    their \l {Course::getName()} {name} or \l {Course::getId()} {id} fields differ.
+    Returns \c true if the two \l Course objects are distinct and \c false otherwise.
+*/
 bool Course::operator!=(const Course &other) const
 {
     return !(*this == other);
 }
 
 /*!
-    Returns a pointer to the \l Course object's private \l Exercise
-    collection.
+    Getter function for the \l Course object's collection of \l Exercise
+    ID-to-object mappings.
 */
 QMap<int, Exercise> Course::getExercises()
 {
     return m_exercises;
 }
 
-/*! Sets the course ID to \a id. */
+/*!
+    Sets the course ID to \a id.
+*/
 void Course::setId(int id)
 {
     m_id = id;
 }
 
-/*! Sets the course name to \a name. */
+/*!
+    Sets the course name to \a name.
+*/
 void Course::setName(QString name)
 {
     m_name = name;
 }
 
-/*! Getter function for the course ID. */
+/*!
+    Getter function for the course ID.
+*/
 int Course::getId() const
 {
     return m_id;
 }
 
-/*! Getter function for the course name. */
+/*!
+    Getter function for the course name.
+*/
 QString Course::getName() const
 {
     return m_name;
 }
 
 /*!
-    Returns the \l Exercise object specified by \a id. If no such \l Exercise
-    object is found, a "blank" \l Exercise object is returned (rather than null).
+    Returns the \l Exercise object specified by \a id from the \l Course object's
+    collection. If no \l Exercise object with an ID equal to \a id is found, the
+    function returns a new \l Exercise object instantiated by \l Exercise::Exercise().
 */
 Exercise Course::getExercise(const int id)
 {
     return m_exercises.value(id, Exercise());
 }
 
+/*!
+    Returns the \l Exercise object with the same ID as that of the parameter \a ex.
+    If no such \l Exercise object is found in the \l Course object's collection,
+    the function returns a new \l Exercise object instantiated by \l Exercise::Exercise().
+*/
 Exercise Course::getExercise(const Exercise ex)
 {
     return m_exercises.value(ex.getId(), Exercise());
 }
 
-/*! Adds parameter \a e to the \l Course object's private \l Exercise collection. */
+/*!
+    Adds parameter \a ex to the \l Course object's \l Exercise collection.
+*/
 void Course::addExercise(const Exercise ex)
 {
     m_exercises.insert(ex.getId(), ex);
 }
 
+/*!
+    Returns \c true if the \l Course object's collection contains an \l Exercise
+    object with the same ID as that of parameter \a ex; otherwise returns \c false.
+*/
 bool Course::hasExercise(Exercise ex)
 {
     return m_exercises.contains(ex.getId());
@@ -85,8 +121,9 @@ bool Course::hasExercise(Exercise ex)
 
 /*!
     Uses the \l {http://doc.qt.io/qt-5/qjsonobject.html} {QJsonObject}
-    parameter \a jsonCourse to initialize a new \l Course object which
-    is the return value.
+    parameter \a jsonCourse to initialize and return a new \l Course object.
+    The ID and name fields of the \l Course object are set to the values
+    extracted from \a jsonCourse.
  */
 Course Course::fromJson(const QJsonObject jsonCourse)
 {

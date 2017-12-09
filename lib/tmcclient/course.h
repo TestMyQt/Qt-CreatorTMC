@@ -15,15 +15,15 @@ public:
 
     void setId(int id);
     void setName(QString name);
-    void setUpdates(bool updates);
+    void setUpdates(bool updates); // Not defined in course.cpp
     int getId() const;
     QString getName() const;
-    Exercise getExercise(int id);
+    Exercise getExercise(const int id); // const
     Exercise getExercise(const Exercise ex);
     void addExercise(const Exercise ex);
     QMap<int, Exercise> getExercises();
     bool hasExercise(Exercise ex);
-    void saveSettings();
+    void saveSettings(); // Not defined in course.cpp
     static Course fromJson(const QJsonObject jsonCourse);
     static Course fromQSettings(QSettings *settings);
     static void toQSettings(QSettings *settings, Course c);
