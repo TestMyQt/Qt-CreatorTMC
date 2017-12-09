@@ -18,7 +18,7 @@ public:
     void setUpdates(bool updates); // Not defined in course.cpp
     int getId() const;
     QString getName() const;
-    Exercise getExercise(const int id); // const
+    Exercise getExercise(const int id);
     Exercise getExercise(const Exercise ex);
     void addExercise(const Exercise ex);
     QMap<int, Exercise> getExercises();
