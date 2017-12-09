@@ -52,15 +52,17 @@
 */
 
 /*!
-    \fn void TmcClient::exerciseListReady()
+    \fn void TmcClient::exerciseListReady(Course *course, QList<Exercise> courseList)
 
     Emitted when the job begun by \l {TmcClient::} {getExerciseList()} is finished.
-    Currently the signal is connected to a private slot in \l {TestMyCodePlugin::Internal::}
-    {TestMyCode} that refreshes the exercise list displayed to the user.
+    The parameter \a course identifies the TMC course the exercise list belongs to
+    while parameter \a courseList is the exercise list itself.
+
+    The signal is connected to \l {TmcManager::handleUpdates()}.
 */
 
 /*!
-    \fn void TmcClient::exerciseZipReady(Exercise *ex)
+    \fn void TmcClient::exerciseZipReady(QByteArray zipData, Exercise ex)
 
     Emitted once the compressed exercise file requested from the
     TMC server by \l {TmcClient::} {getExerciseZip()} has completed successfully
@@ -77,13 +79,6 @@
     Emitted when the TMC server has responded to a request by the
     \l TmcClient object with the \c {HTTP 403 Forbidden} status. The emission
     of the signal indicates the need to \l {TmcClient::authenticate()} {reauthenticate}.
-*/
-
-/*!
-    \fn void TmcClient::closeDownloadWindow()
-
-    The signal part of the mechanism for automatically closing the download
-    window when it is no longer required.
 */
 
 /*!

@@ -1,3 +1,10 @@
+/*!
+    \class TmcManager
+    \inmodule src
+    \inheaderfile tmcmanager.h
+    \brief TODO: QDoc
+*/
+
 #include "tmcmanager.h"
 #include "testmycodeconstants.h"
 
@@ -55,6 +62,9 @@ void TmcManager::setSettings(SettingsWidget *settings)
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
 }
 
+/*!
+    TODO: QDoc
+*/
 void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercises)
 {
     QString workingDirectory = m_settings->getWorkingDirectory();
