@@ -38,9 +38,6 @@
     \a accessToken will have an empty string as its value. In case of a successful
     authentication attempt \a accessToken will contain the access token received
     from the TMC server.
-
-    The signal is connected to a private slot in \l {TestMyCodePlugin::Internal::} {TestMyCode}
-    which stores the access token for later use.
 */
 
 /*!
@@ -64,13 +61,10 @@
 /*!
     \fn void TmcClient::exerciseZipReady(QByteArray zipData, Exercise ex)
 
-    Emitted once the compressed exercise file requested from the
-    TMC server by \l {TmcClient::} {getExerciseZip()} has completed successfully
-    and the contents have been extracted. Parameter \a ex is the \l Exercise
-    object that corresponds to the downloaded exercise.
-
-    The signal is connected to a private function in \l {TestMyCodePlugin::Internal::}
-    {TestMyCode} that opens the exercise \a ex as a project in Qt Creator.
+    Emitted once the download of the compressed exercise file requested from the
+    TMC server by \l {TmcClient::} {getExerciseZip()} has completed successfully.
+    Parameter \a ex is the \l Exercise object that corresponds to the downloaded
+    exercise. Parameter \a zipData is the actual contents of the compressed file.
 */
 
 /*!
@@ -112,13 +106,9 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 }
 
 /*!
-    The QtCreatorTMC plugin uses a single \l
-    {http://doc.qt.io/qt-5/qnetworkaccessmanager.html} {QNetworkAccessManager}
-    object for managing network communications. The object is initialized in
-    \l TestMyCodePlugin::Internal::TestMyCode::initialize(). \c setNetworkManager()
-    is called from \l {TestMyCodePlugin::Internal::TestMyCode::} {initialize()}
-    with the address of the \l {http://doc.qt.io/qt-5/qnetworkaccessmanager.html}
-    {QNetworkAccessManager} object as the value for parameter \a m.
+    Setter function for the single \l {http://doc.qt.io/qt-5/qnetworkaccessmanager.html}
+    {QNetworkAccessManager} object that the QtCreatorTMC plugin uses for all its
+    network communications.
 */
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
@@ -183,7 +173,7 @@ bool TmcClient::isAuthorized()
     successful authention is that the client has an access token.
 
     Returns \c true if authentication has occured and \c false otherwise.
- */
+*/
 bool TmcClient::isAuthenticated()
 {
     return !accessToken.isEmpty();
@@ -218,9 +208,7 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
 }
 
 /*!
-    Gets a client ID and client secret from the TMC server. For this to work
-    the \l TmcClient object needs to have an access token which is received
-    from the TMC server after a successful login attempt.
+    Gets a client ID and client secret from the TMC server.
 */
 void TmcClient::authorize()
 {
@@ -236,7 +224,7 @@ void TmcClient::authorize()
     Gets called when the user clicks the \tt {Log in} button in the
     \tt {TMC Login} dialog. The values for the parameters \a username
     and \a password are those entered by the user in the dialog.
- */
+*/
 void TmcClient::authenticate(QString username, QString password)
 {
 
@@ -300,7 +288,7 @@ void TmcClient::getCourseList(Organization org)
     After the download completes the contents of the compressed file are
     automatically extracted to the appropriate directory (determining what
     this directory is involves \l {Exercise::} {getLocation()}).
- */
+*/
 QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
 {
     QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex.getId()));
@@ -316,7 +304,7 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
     Downloads the exercise list associated with the \l Course pointer \a course
     from the TMC server. The items in the list will be stored in \a course as
     \l Exercise objects.
- */
+*/
 void TmcClient::getExerciseList(Course *course)
 {
     QUrl url(serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
@@ -329,7 +317,7 @@ void TmcClient::getExerciseList(Course *course)
 
 /*!
     Retrieves information about the currently logged in user from the TMC server.
- */
+*/
 void TmcClient::getUserInfo()
 {
     QUrl url(serverAddress + "/api/v8/users/current");
