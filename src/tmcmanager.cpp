@@ -55,6 +55,11 @@ TmcManager::~TmcManager()
         m_downloadProgress.reportFinished();
 }
 
+/*!
+    Sets the \l TmcManager object's \l TmcClient pointer field to \a client.
+    Typically the only time when the function is called is during the initialization
+    phase of the QtCreatorTMC plugin.
+*/
 void TmcManager::setTmcClient(TmcClient *client)
 {
     m_client = client;
@@ -62,6 +67,12 @@ void TmcManager::setTmcClient(TmcClient *client)
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
 }
 
+/*!
+    Initializes the \l TmcManager object's \l SettingsWidget pointer field to \a settings.
+    A \l {http://doc.qt.io/qt-5/qobject.html#connect} {connection} is established between
+    signal \l {SettingsWidget::} {autoUpdateIntervalChanged} and public slot
+    \l {TmcManager::} {setUpdateInterval()}.
+*/
 void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
@@ -148,6 +159,11 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     activeCourse->addExercise(ex);
 }
 
+/*!
+    Called periodically to refresh the TMC exercise list of the
+    \l {SettingsWidget::getActiveCourse()} {active course}. The purpose is to determine
+    whether new or updated exercises are available.
+*/
 void TmcManager::updateExercises()
 {
     Course* activeCourse = m_settings->getActiveCourse();

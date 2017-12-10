@@ -64,11 +64,6 @@ TestMyCode::~TestMyCode()
     // Delete members
 }
 
-/*!
-    \brief This function does a lot of things!
-
-    TODO: Refactor, modularize
-*/
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool
