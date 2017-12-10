@@ -2,7 +2,13 @@
     \class TmcManager
     \inmodule src
     \inheaderfile tmcmanager.h
-    \brief TODO: QDoc
+    \brief The \l TmcManager class provides a number of mechanisms for managing and
+        executing the basic operations of a QtCreatorTMC plugin session.
+
+    The \l TmcManager object includes an internal timer that is used for periodically
+    checking for exercise updates by a call to the slot \l {TmcManager::}
+    {updateExercises()}. If exercise updates are found, a call to \l {TmcManager::}
+    {handleUpdates()} ensues.
 */
 
 #include "tmcmanager.h"
@@ -63,7 +69,13 @@ void TmcManager::setSettings(SettingsWidget *settings)
 }
 
 /*!
-    TODO: QDoc
+    The slot is connected to \l TmcClient::exerciseListReady. Parameter \a newExercises
+    is an up-to-date version of the TMC exercises of course \a updatedCourse. Each
+    \l Exercise object in \a newExercises is examined against the already present
+    exercises in \a updatedCourse. Any exercise in \a newExercises that is found to already
+    be in \a updatedCourse is removed from \a newExercises. After removing the already
+    present exercises from \a newExercises the list is then used to inform the user of
+    exercise updates (if any are available).
 */
 void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercises)
 {
@@ -168,6 +180,10 @@ bool TmcManager::lastUpdateSuccessful()
     return m_updateSuccessful;
 }
 
+/*!
+    Sets the \l {TmcManager::updateInterval()} {update interval} of the \l TmcManager
+    object to \a interval seconds.
+*/
 void TmcManager::setUpdateInterval(int interval)
 {
     // Interval in minutes

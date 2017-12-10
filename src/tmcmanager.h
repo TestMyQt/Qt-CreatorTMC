@@ -21,7 +21,7 @@ public:
     void setTmcClient(TmcClient *client);
 
     void setUpdateInterval(int interval);
-    int updateInterval();
+    int updateInterval(); // Not defined in tmcmanager.cpp
     bool lastUpdateSuccessful();
 
     void setSettings(SettingsWidget *settings);
