@@ -29,6 +29,8 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+using ProjectExplorer::SessionManager;
+
 TmcOutputPane::TmcOutputPane(QObject *parent) :
     Core::IOutputPane(parent),
     m_context(new Core::IContext(this)),
@@ -93,7 +95,8 @@ TmcOutputPane::~TmcOutputPane()
 void TmcOutputPane::onTMCTriggered()
 {
     TMCRunner *runner = TMCRunner::instance();
-    runner->runOnActiveProject();
+    Project *project = SessionManager::startupProject();
+    runner->testProject(project);
 }
 
 void TmcOutputPane:: addTestResults(const QList<TmcTestResult> &results) {

@@ -36,6 +36,9 @@
 
 static TMCRunner *s_instance = nullptr;
 
+using ProjectExplorer::SessionManager;
+using ProjectExplorer::Project;
+
 TMCRunner *TMCRunner::instance()
 {
     if (!s_instance)
@@ -54,14 +57,14 @@ TMCRunner::~TMCRunner()
     s_instance = nullptr;
 }
 
-void TMCRunner::runOnActiveProject()
+void TMCRunner::testProject(Project *project)
 {
-    ProjectExplorer::Project *project = ProjectExplorer::SessionManager::startupProject();
     if (!project) {
         QMessageBox::information(Core::ICore::mainWindow(), tr("No project"), tr("No active project"));
         return;
     }
-    const Utils::FileName project_path = project->projectFilePath().parentDir();
+    m_activeProject = project;
+    const Utils::FileName project_path = m_activeProject->projectFilePath().parentDir();
     launchTmcCLI(project_path);
 }
 
@@ -78,7 +81,6 @@ void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
     arguments << "--exercisePath" << dir;
     arguments << "--outputPath" << testOutput;
     QMessageBox::information(Core::ICore::mainWindow(), tr("launching"), tr("%1").arg(arguments.join(QString(" "))));
-    // TODO: make work in windows
     const Utils::FileName java = Utils::FileName().fromString("java");
 
     Utils::ShellCommand command(dir, env);
@@ -90,6 +92,19 @@ void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
 
     QList<TmcTestResult> output = readTMCOutput(testOutput);
     emit testResultReady(output);
+
+    if (checkPassedStatus(output)) {
+        emit testsPassed(m_activeProject);
+    }
+}
+
+bool TMCRunner::checkPassedStatus(QList<TmcTestResult> testResults)
+{
+    foreach (const TmcTestResult &result, testResults) {
+        if (!result.isSuccessful()) return false;
+    }
+
+    return true;
 }
 
 /*

@@ -13,10 +13,7 @@
 #include <QProcess>
 
 using namespace TestMyCode;
-
-namespace ProjectExplorer {
-class Project;
-}
+using ProjectExplorer::Project;
 
 class TMCRunner : public QObject
 {
@@ -27,14 +24,17 @@ public:
     ~TMCRunner();
 
     bool isTMCRunning() const { return m_executingTMC; }
-    void runOnActiveProject();
+    void testProject(Project *project);
 
 signals:
     void testResultReady(const QList<TmcTestResult> &result);
+    void testsPassed(Project *passedProject);
 
 private:
     void launchTmcCLI(const Utils::FileName &workingDirectory);
     QList<TmcTestResult> readTMCOutput(const QString &testOutput);
+    bool checkPassedStatus(QList<TmcTestResult> testResults);
+    ProjectExplorer::Project *m_activeProject;
     void onFinished();
     bool m_executingTMC;
 

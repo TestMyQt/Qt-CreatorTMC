@@ -29,6 +29,11 @@ bool Exercise::operator!=(const Exercise &other) const
     return !(*this == other);
 }
 
+bool Exercise::operator!() const
+{
+    return m_id == -1;
+}
+
 int Exercise::getId() const
 {
     return m_id;
