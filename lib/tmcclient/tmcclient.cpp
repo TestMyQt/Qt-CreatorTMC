@@ -5,9 +5,6 @@
 #include <QJsonArray>
 #include <QHttpPart>
 
-#include "exercise.h"
-#include "course.h"
-
 TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
@@ -174,6 +171,15 @@ void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
     });
 }
 
+void TmcClient::getSubmissionStatus(int submissionId)
+{
+    QUrl url(serverAddress + "/api/v8/core/submissions/" + QString::number(submissionId));
+    QNetworkReply *reply = doGet(url);
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        submissionStatusReplyFinished(reply, submissionId);
+    });
+}
 void TmcClient::getExerciseList(Course *course)
 {
     QUrl url(serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
@@ -324,5 +330,20 @@ void TmcClient::zipSubmitReplyFinished(QNetworkReply *reply, Exercise ex)
     QString submissionUrl = submission["submission_url"].toString();
 
     emit exerciseSubmitReady(ex, submissionUrl);
+    reply->deleteLater();
+}
+
+void TmcClient::submissionStatusReplyFinished(QNetworkReply *reply, int submissionId)
+{
+    if (!checkRequestStatus(reply)) {
+            emit TMCError(QString("Submission status update error %1: %2")
+                          .arg(reply->errorString(), reply->error()));
+            return;
+    }
+
+    QJsonObject jsonSubmission = QJsonDocument::fromJson(reply->readAll()).object();
+    Submission submission = Submission::fromJson(submissionId, jsonSubmission);
+
+    emit submissionStatusReady(submission);
     reply->deleteLater();
 }

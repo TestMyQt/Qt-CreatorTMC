@@ -1,6 +1,8 @@
 #include "tmcmanager.h"
 #include "testmycodeconstants.h"
 
+#include <projectexplorer/projectexplorer.h>
+
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
 
@@ -45,6 +47,7 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
 
     m_testRunner = TMCRunner::instance();
     connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
+    m_submitter = new TmcSubmitter(m_client);
 }
 
 TmcManager::~TmcManager()
@@ -161,7 +164,7 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
                                   tr("All tests passed!\nSubmit exercise to server?"));
 
     if (ret == QMessageBox::Ok) {
-       // Actually submit
+        m_submitter->submitProject(project);
     }
 }
 
@@ -174,7 +177,7 @@ void TmcManager::submitActiveExercise()
 
     Exercise projectExercise = getProjectExercise(m_activeProject);
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    // Actually submit
+    m_submitter->submitProject(m_activeProject);
 }
 
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)
@@ -202,6 +205,12 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     ex.setUnzipped(true);
     // Save updated exercise back to course exercise list
     activeCourse->addExercise(ex);
+    // open project
+    using namespace ProjectExplorer;
+    QString exerciseLocation =  saveDir + "/" + ex.getName() + "/" + ex.getName() + ".pro";
+    const ProjectExplorerPlugin::OpenProjectResult openProjectSucceeded =
+            ProjectExplorer::ProjectExplorerPlugin::openProject(exerciseLocation);
+    qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
 }
 
 void TmcManager::updateExercises()

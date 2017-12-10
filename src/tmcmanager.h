@@ -4,6 +4,7 @@
 #include "tmcclient.h"
 #include "settingswidget.h"
 #include "tmcrunner.h"
+#include "tmcsubmitter.h"
 #include "downloadpanel.h"
 
 #include <projectexplorer/projectexplorer.h>
@@ -56,6 +57,7 @@ private:
     TmcClient *m_client;
     SettingsWidget *m_settings;
     TMCRunner *m_testRunner;
+    TmcSubmitter *m_submitter;
 
     ProjectExplorer::Project *m_activeProject = nullptr;
 

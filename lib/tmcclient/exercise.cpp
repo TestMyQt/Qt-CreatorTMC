@@ -1,7 +1,5 @@
 #include "exercise.h"
 
-#include <QJsonObject>
-
 Exercise::Exercise()
 {
     m_id = -1;
@@ -72,6 +70,11 @@ bool Exercise::isDownloaded() const
 bool Exercise::isUnzipped() const
 {
     return m_unzipped;
+}
+
+void Exercise::addSubmission(Submission sub)
+{
+    m_submissions.insert(sub.getId(), sub);
 }
 
 void Exercise::setId(int id)
