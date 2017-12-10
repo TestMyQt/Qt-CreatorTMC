@@ -13,11 +13,9 @@ class SettingsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SettingsWidget(QWidget *parent = nullptr);
-    void setTmcClient(TmcClient *client);
+    explicit SettingsWidget(TmcClient *client, QWidget *parent = nullptr);
 
     void display();
-    void showLoginWidget();
 
     QString getWorkingDirectory();
     Course* getActiveCourse();
@@ -30,6 +28,7 @@ signals:
     void autoUpdateIntervalChanged(int interval);
 
 public slots:
+    void showLoginWidget();
 
 private:
     TmcClient *m_client;

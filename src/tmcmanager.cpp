@@ -16,7 +16,9 @@
 using Core::ProgressManager;
 using Core::FutureProgress;
 
-TmcManager::TmcManager(QObject *parent) : QObject(parent)
+TmcManager::TmcManager(TmcClient *client, QObject *parent) :
+    QObject(parent),
+    m_client(client)
 {
     m_updateTimer.setSingleShot(false);
     connect(&m_updateTimer, &QTimer::timeout, this, [this]() { updateExercises(); });
@@ -26,11 +28,13 @@ TmcManager::TmcManager(QObject *parent) : QObject(parent)
     downloadform = new Ui::downloadform;
     downloadform->setupUi(downloadWidget);
 
+    // TmcClient
+    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
+    connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
+
     // Signal-Slot for download window
     connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
-    connect(downloadform->cancelbutton, &QPushButton::clicked, this, [=](){
-        downloadWidget->close();
-    });
+    connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
 }
 
 TmcManager::~TmcManager()
@@ -40,13 +44,6 @@ TmcManager::~TmcManager()
 
     if (m_downloadProgress.isRunning())
         m_downloadProgress.reportFinished();
-}
-
-void TmcManager::setTmcClient(TmcClient *client)
-{
-    m_client = client;
-    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
-    connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
 }
 
 void TmcManager::setSettings(SettingsWidget *settings)
@@ -97,6 +94,18 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
     appendToDownloadWindow(newExercises);
     m_updateProgress.reportFinished();
     downloadWidget->show();
+}
+
+void TmcManager::testActiveProject()
+{
+
+
+}
+
+void TmcManager::submitActiveExercise()
+{
+
+
 }
 
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)

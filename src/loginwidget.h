@@ -12,9 +12,8 @@ class LoginWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit LoginWidget(QWidget *parent = nullptr);
+    explicit LoginWidget(TmcClient *client, QWidget *parent = nullptr);
 
-    void setTmcClient(TmcClient *client);
     void loadQSettings();
 
 signals:

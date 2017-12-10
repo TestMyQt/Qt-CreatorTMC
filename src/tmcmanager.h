@@ -15,10 +15,13 @@ class TmcManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TmcManager(QObject *parent = nullptr);
+    explicit TmcManager(TmcClient *client, QObject *parent = nullptr);
     ~TmcManager();
 
     void setTmcClient(TmcClient *client);
+
+    void testActiveProject();
+    void submitActiveExercise();
 
     void setUpdateInterval(int interval);
     int updateInterval();
