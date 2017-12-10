@@ -37,12 +37,26 @@ QString Organization::getName() const
     return m_name;
 }
 
+/*!
+    Returns \c true if the \l Organization object is equal to the parameter \a other;
+    otherwise returns \c false. The overloaded operator expression \c {o1 == o2}
+    evaluates to \c true when both the \l {Organization::getName()} {name} and
+    \l {Organization::getSlug()} {slug} fields of the \l Organization objects
+    \c o1 and \c o2 are equal; otherwise the expression evaluates to \c false.
+*/
 bool Organization::operator==(const Organization &other) const
 {
     return other.getName() == m_name &&
             other.getSlug() == m_slug;
 }
 
+/*!
+    Returns \c true if the \l Organization object is distinct from parameter \a other;
+    otherwise returns \c false. The overloaded operator expression \c {o1 != o2}
+    evaluates to \c true when either the \l {Organization::getName()} {name} or
+    \l {Organization::getSlug()} {slug} fields of the operands are not equal;
+    otherwise the expression evaluates to \c false.
+*/
 bool Organization::operator!=(const Organization &other) const
 {
     return !(*this == other);
@@ -75,7 +89,8 @@ QList<Course> Organization::getCourses()
 /*!
     Creates and returns an \l Organization object from the values extracted
     from the \l {http://doc.qt.io/qt-5/qsettings.html} {QSettings} parameter
-    \a settings. The values in \a settings are the organization name and slug.
+    \a settings. The values in \a settings are the organization
+    \l {Organization::getName()} {name} and \l {Organization::getSlug()} {slug}.
     The main purpose of the function is to preserve the user-selected organization
     between sessions.
 */
@@ -97,6 +112,13 @@ void Organization::toQSettings(QSettings *settings, Organization org)
     settings->setValue("orgSlug", org.getSlug());
 }
 
+/*!
+    Uses the \l {http://doc.qt.io/qt-5/qjsonobject.html} {QJsonObject}
+    parameter \a jsonOrg to initialize and return a new \l Organization object.
+    The \l {Organization::getName()} {name} and \l {Organization::getSlug()} {slug}
+    fields of the \l Organization object are set to the values extracted from
+    \a jsonOrg.
+*/
 Organization Organization::fromJson(const QJsonObject jsonOrg)
 {
     Organization fromJson = Organization(
