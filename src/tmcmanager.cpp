@@ -111,7 +111,6 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
 
 void TmcManager::onStartupProjectChanged(ProjectExplorer::Project *project)
 {
-    qDebug() << "active project changed:" << project->displayName();
     m_activeProject = project;
 }
 
