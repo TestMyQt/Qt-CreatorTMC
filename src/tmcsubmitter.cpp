@@ -19,6 +19,11 @@ TmcSubmitter::TmcSubmitter(TmcClient *client, QObject *parent) :
 {
     connect(m_client, &TmcClient::exerciseSubmitReady, this, &TmcSubmitter::onSubmitReply);
     connect(m_client, &TmcClient::submissionStatusReady, this, &TmcSubmitter::onSubmissionStatusReply);
+
+    connect(m_client, &TmcClient::exerciseSubmitReady, &m_submit, &SubmitWidget::onSubmitReply);
+    connect(m_client, &TmcClient::exerciseSubmitProgress, &m_submit, &SubmitWidget::submitProgress);
+    connect(m_client, &TmcClient::submissionStatusReady, &m_submit, &SubmitWidget::updateStatus);
+
     m_submitTimer.setSingleShot(false);
     m_submitTimer.setInterval(update_interval);
 }
@@ -58,6 +63,7 @@ void TmcSubmitter::submitProject(const ProjectExplorer::Project *project)
     zipBuffer->open(QIODevice::ReadOnly);
     qDebug() << "Posting:" << project->displayName();
     m_client->postExerciseZip(ex, zipBuffer->readAll());
+    m_submit.show();
 }
 
 void TmcSubmitter::onSubmitReply(Exercise ex, QString submissionUrl)
@@ -84,15 +90,23 @@ void TmcSubmitter::onSubmitReply(Exercise ex, QString submissionUrl)
 void TmcSubmitter::onSubmissionStatusReply(Submission sub)
 {
     qDebug() << "Got submission status for" << sub.getId();
-    if (sub.getStatus() == Submission::Status::Ok || m_submitProgress.progressValue() > update_retry) {
+
+    if (sub.getStatus() != Submission::Processing) {
         m_submitTimer.stop();
         m_submitProgress.reportFinished();
-        // TODO: report submission status
-    } else {
-        m_submitProgress.setProgressValue(m_submitProgress.progressValue() + 1);
     }
 
+    int timeout = m_submitProgress.progressValue();
+    if (timeout < update_retry) {
+        m_submitProgress.setProgressValue(timeout + 1);
+    } else {
+        m_submitTimer.stop();
+        m_submitProgress.reportFinished();
+        emit submitTimedOut(sub);
+        return;
+    }
 
+    emit submitResult(sub);
 }
 
 bool TmcSubmitter::createZip(QDir projectDir, QStringList files, QBuffer *zipBuffer)

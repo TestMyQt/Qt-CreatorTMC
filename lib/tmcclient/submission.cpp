@@ -30,6 +30,21 @@ Submission::Status Submission::getStatus() const
     return m_status;
 }
 
+QList<QString> Submission::getPoints() const
+{
+    return m_points;
+}
+
+QList<QString> Submission::getTestCases() const
+{
+    return m_testCases;
+}
+
+QString Submission::errorString() const
+{
+    return m_error;
+}
+
 void Submission::setStatus(Status status)
 {
     m_status = status;
@@ -38,6 +53,11 @@ void Submission::setStatus(Status status)
 void Submission::setPoints(QList<QString> points)
 {
     m_points = points;
+}
+
+void Submission::setTestCases(QList<QString> cases)
+{
+    m_testCases = cases;
 }
 
 void Submission::setPassed(bool passed)
@@ -66,6 +86,11 @@ Submission Submission::fromJson(const int id, const QJsonObject jsonSubmission)
     QString jsonStatus = jsonSubmission["status"].toString();
     if (jsonStatus == "ok") {
         submission.setStatus(Status::Ok);
+        QStringList testCases;
+        foreach (QString testCase, testCases) {
+            testCases << testCase;
+        }
+        submission.setTestCases(testCases);
     }
 
     if (jsonStatus == "fail") {

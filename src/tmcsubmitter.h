@@ -2,6 +2,7 @@
 #define TMCSUBMITTER_H
 
 #include "tmcclient.h"
+#include "submitwidget.h"
 
 #include <QFutureInterface>
 #include <QTimer>
@@ -22,6 +23,8 @@ public:
     bool createZip(QDir projectDir, QStringList files, QBuffer *zipBuffer);
 
 signals:
+    void submitResult(Submission sub);
+    void submitTimedOut(Submission sub);
 
 public slots:
     void onSubmitReply(Exercise ex, QString submissionUrl);
@@ -29,6 +32,7 @@ public slots:
 
 private:
     TmcClient *m_client;
+    SubmitWidget m_submit;
 
     QTimer m_submitTimer;
 

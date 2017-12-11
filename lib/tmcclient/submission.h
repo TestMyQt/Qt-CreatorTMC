@@ -14,7 +14,7 @@ public:
     bool operator==(const Submission &other) const;
     bool operator!=(const Submission &other) const;
 
-    enum class Status
+    enum Status
     {
         Ok,
         Fail,
@@ -25,6 +25,7 @@ public:
 
     void setStatus(Status status);
     void setPoints(QList<QString> points);
+    void setTestCases(QList<QString> cases);
     void setPassed(bool passed);
     void setSubmissionTime(QDate time);
     void setError(QString error);
@@ -33,6 +34,7 @@ public:
     int getId() const;
     Status getStatus() const;
     QList<QString> getPoints() const;
+    QList<QString> getTestCases() const;
     bool allTestPassed() const;
     QDate submissionTime() const;
     QString errorString() const;
@@ -45,6 +47,7 @@ private:
     int m_id;
     Status m_status;
     QList<QString> m_points;
+    QList<QString> m_testCases;
     bool m_testsPassed;
     QDate m_submissionTime;
     QString m_error;
