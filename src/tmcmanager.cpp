@@ -168,7 +168,7 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
                                   tr("Submit exercise to server"),
                                   tr("All tests passed!\nSubmit exercise to server?"));
 
-    if (ret == QMessageBox::Ok) {
+    if (ret == QMessageBox::Yes) {
         m_submitter->submitProject(project);
     }
 }
