@@ -61,7 +61,12 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     connect(settingsWindow->browseButton, &QPushButton::clicked, this, &SettingsWidget::onBrowseClicked);
     connect(settingsWindow->cliBrowseButton, &QPushButton::clicked, this, &SettingsWidget::onCliBrowseClicked);
     connect(m_orgComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), [=](int index){
-        m_client->getCourseList(m_orgComboBox->itemData(index).value<Organization>());
+        Organization selectedOrg = m_orgComboBox->itemData(index).value<Organization>();
+        if (!selectedOrg.getName().isEmpty()) {
+            m_client->getCourseList(selectedOrg);
+        } else {
+            m_courseComboBox->clear();
+        }
     });
 }
 
@@ -189,10 +194,24 @@ void SettingsWidget::handleOrganizationList(QList<Organization> orgs)
 {
     m_organizations = orgs;
     m_orgComboBox->clear();
+
+    bool hasActiveOrg = !!m_activeOrganization;
+    // Add "empty" org if we have none selected
+    if (!hasActiveOrg) {
+        m_orgComboBox->addItem(QString("Select an organization"),
+                               QVariant::fromValue(Organization()));
+    }
+
     foreach (Organization org, m_organizations) {
         m_orgComboBox->addItem(org.getName(), QVariant::fromValue(org));
     }
-    setComboboxIndex(m_orgComboBox, m_activeOrganization.getName());
+
+    if (hasActiveOrg) {
+        setComboboxIndex(m_orgComboBox, m_activeOrganization.getName());
+    } else {
+        m_orgComboBox->setCurrentIndex(0);
+        m_courseComboBox->clear();
+    }
 }
 
 void SettingsWidget::onSettingsOkClicked()
@@ -236,7 +255,7 @@ void SettingsWidget::onSettingsOkClicked()
     }
 
     Course setCourse = m_courseComboBox->currentData().value<Course>();
-    if (m_activeCourse != setCourse) {
+    if (!!setCourse && m_activeCourse != setCourse) {
         m_activeCourse = setCourse;
         Course::toQSettings(&settings, setCourse);
         emit activeCourseChanged(&m_activeCourse);
