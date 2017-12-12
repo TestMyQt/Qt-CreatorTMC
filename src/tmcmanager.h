@@ -36,7 +36,6 @@ signals:
 
 public slots:
     void displayTMCError(QString errorText);
-    void showDownloadWidget();
 
     void onStartupProjectChanged(ProjectExplorer::Project *project);
     Exercise getProjectExercise(ProjectExplorer::Project *project);
