@@ -25,9 +25,11 @@ public:
 
     bool isTMCRunning() const { return m_executingTMC; }
     void testProject(Project *project);
+    void setTmcCliLocation(const QString location);
 
 signals:
     void testResultReady(const QList<TmcTestResult> &result);
+    void TMCError(QString errorString);
     void testsPassed(Project *passedProject);
 
 private:
@@ -37,6 +39,7 @@ private:
     ProjectExplorer::Project *m_activeProject;
     void onFinished();
     bool m_executingTMC;
+    QString tmc_cli;
 
     explicit TMCRunner(QObject *parent = 0);
 

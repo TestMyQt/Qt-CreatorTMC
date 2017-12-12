@@ -57,6 +57,11 @@ TMCRunner::~TMCRunner()
     s_instance = nullptr;
 }
 
+void TMCRunner::setTmcCliLocation(const QString location)
+{
+    tmc_cli = location;
+}
+
 void TMCRunner::testProject(Project *project)
 {
     if (!project) {
@@ -71,7 +76,10 @@ void TMCRunner::testProject(Project *project)
 void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
 {
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString tmc_cli = env.value("TMC_CLI", "/opt/tmc_cli.jar");
+    if (tmc_cli.isEmpty()) {
+        emit TMCError("Please set the location for TMC CLI .jar file");
+        return;
+    }
     QString dir = workingDirectory.toString();
 
     QString testOutput = dir + "/out.txt";

@@ -63,6 +63,7 @@ void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
+    connect(m_settings, &SettingsWidget::tmcCliLocationChanged, m_testRunner, &TMCRunner::setTmcCliLocation);
 }
 
 void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercises)
