@@ -26,7 +26,6 @@ public:
     void testActiveProject();
     void submitActiveExercise();
 
-    void setUpdateInterval(int interval);
     int updateInterval();
     bool lastUpdateSuccessful();
 
@@ -34,14 +33,15 @@ public:
     void loadSettings();
 
 signals:
-    void TMCError(QString errorString);
 
 public slots:
+    void displayTMCError(QString errorText);
     void showDownloadWidget();
 
     void onStartupProjectChanged(ProjectExplorer::Project *project);
     Exercise getProjectExercise(ProjectExplorer::Project *project);
 
+    void setUpdateInterval(int interval);
     void updateExercises();
     void askSubmit(const ProjectExplorer::Project *project);
 

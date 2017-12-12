@@ -40,12 +40,14 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     // TmcClient
     connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
+    connect(m_client, &TmcClient::TMCError, this, &TmcManager::displayTMCError);
 
     // Signal-Slot for download window
     connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
     connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
 
     m_testRunner = TMCRunner::instance();
+    connect(m_testRunner, &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
     connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
     m_submitter = new TmcSubmitter(m_client);
 }
@@ -64,6 +66,7 @@ void TmcManager::setSettings(SettingsWidget *settings)
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
     connect(m_settings, &SettingsWidget::tmcCliLocationChanged, m_testRunner, &TMCRunner::setTmcCliLocation);
+    m_testRunner->setTmcCliLocation(m_settings->getTmcCliLocation());
 }
 
 void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercises)
@@ -137,14 +140,16 @@ Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
 void TmcManager::testActiveProject()
 {
     if (!m_activeProject) {
-        qDebug() << "No active project";
+        QMessageBox::information(m_settings, tr("No active project"),
+                                 tr("Please open a TestMyCode project"));
         return;
     }
 
     Exercise projectExercise = getProjectExercise(m_activeProject);
 
     if (!projectExercise) {
-        QMessageBox::information(m_settings, tr("Not a TestMyCode project"), tr("derp"));
+        QMessageBox::information(m_settings, tr("Not a TestMyCode project"),
+                                 tr("Please select a TestMyCode exercise"));
         return;
     }
 
@@ -192,12 +197,12 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 
     QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
     if (extracted.isEmpty()) {
-        emit TMCError("Error unzipping exercise files!");
+        displayTMCError("Error unzipping exercise files!");
         return;
     }
 
     if (!activeCourse->hasExercise(ex)) {
-        emit TMCError("Exercise not found in course!");
+        displayTMCError("Exercise not found in course!");
         return;
     }
 
@@ -261,6 +266,11 @@ void TmcManager::showDownloadWidget()
     }
     updateExercises();
     downloadWidget->show();
+}
+
+void TmcManager::displayTMCError(QString errorText)
+{
+    QMessageBox::critical(m_settings, "TMC", errorText, QMessageBox::Ok);
 }
 
 void TmcManager::onDownloadOkClicked()

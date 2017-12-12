@@ -20,6 +20,7 @@ public:
     QString getWorkingDirectory();
     Course* getActiveCourse();
     int getAutoupdateInterval();
+    QString getTmcCliLocation();
 
 signals:
     void workingDirectoryChanged(QString location);

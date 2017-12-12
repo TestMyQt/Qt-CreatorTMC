@@ -120,9 +120,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Submit active project
     connect(submitAction, &QAction::triggered, m_tmcManager, &TmcManager::submitActiveExercise);
 
-    // TmcClient
-    connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
-
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);
 
@@ -142,11 +139,6 @@ ExtensionSystem::IPlugin::ShutdownFlag TestMyCode::aboutToShutdown()
     // Disconnect from signals that are not needed during shutdown
     // Hide UI (if you add UI that is not in the main window directly)
     return SynchronousShutdown;
-}
-
-void TestMyCode::displayTMCError(QString errorText)
-{
-    QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
 }
 
 } // namespace Internal

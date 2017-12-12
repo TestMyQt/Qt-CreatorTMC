@@ -47,8 +47,6 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
 
     settings.deleteLater();
 
-    emit tmcCliLocationChanged(tmcCliLocation);
-
     connect(settingsWindow->logoutButton, &QPushButton::clicked, this, [=](){
         clearCredentials();
         close();
@@ -116,6 +114,11 @@ void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
 int SettingsWidget::getAutoupdateInterval()
 {
     return m_interval;
+}
+
+QString SettingsWidget::getTmcCliLocation()
+{
+    return tmcCliLocation;
 }
 
 void SettingsWidget::onBrowseClicked()

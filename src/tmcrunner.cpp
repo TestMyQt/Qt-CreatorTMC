@@ -64,22 +64,23 @@ void TMCRunner::setTmcCliLocation(const QString location)
 
 void TMCRunner::testProject(Project *project)
 {
+    if (tmc_cli.isEmpty()) {
+        emit TMCError("Please set the location for TMC CLI .jar file");
+        return;
+    }
+
     if (!project) {
-        QMessageBox::information(Core::ICore::mainWindow(), tr("No project"), tr("No active project"));
+        emit TMCError("No active project");
         return;
     }
     m_activeProject = project;
-    const Utils::FileName project_path = m_activeProject->projectFilePath().parentDir();
+    const Utils::FileName project_path = m_activeProject->projectDirectory();
     launchTmcCLI(project_path);
 }
 
 void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
 {
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    if (tmc_cli.isEmpty()) {
-        emit TMCError("Please set the location for TMC CLI .jar file");
-        return;
-    }
     QString dir = workingDirectory.toString();
 
     QString testOutput = dir + "/out.txt";
