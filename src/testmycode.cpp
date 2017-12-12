@@ -68,12 +68,11 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Command *settingsCmd = ActionManager::registerAction(settingsAction, Constants::SETTINGS_ACTION_ID,
                                                          Context(Core::Constants::C_GLOBAL));
 
-    auto downloadAction = new QAction(tr("Download"), this);
-    Command *downloadCmd = ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
-                                                         Context(Core::Constants::C_GLOBAL));
-    auto updateAction = new QAction(tr("Update"), this);
-    Command *updateCmd = ActionManager::registerAction(updateAction, Constants::UPDATE_ACTION_ID,
-                                                       Context(Core::Constants::C_GLOBAL));
+    auto downloadUpdateAction = new QAction(tr("Download/Update"), this);
+    Command *downloadUpdateCmd = ActionManager::registerAction(downloadUpdateAction,
+                                                               Constants::DOWNLOAD_UPLOAD_ACTION_ID,
+                                                               Context(Core::Constants::C_GLOBAL));
+
     auto submitAction = new QAction(tr("Submit"), this);
     Command *submitCmd = ActionManager::registerAction(submitAction, Constants::SUBMIT_ACTION_ID,
                                                        Context(Core::Constants::C_GLOBAL));
@@ -82,8 +81,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
     settingsCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+S")));
-    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
-    updateCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+U")));
+    downloadUpdateCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
     submitCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+B")));
 
     // Create context menu with actions
@@ -93,8 +91,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->addAction(tmcCmd);
     menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
-    menu->addAction(downloadCmd);
-    menu->addAction(updateCmd);
+    menu->addAction(downloadUpdateCmd);
     menu->addAction(submitCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
@@ -113,8 +110,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     m_tmcManager = new TmcManager(&tmcClient);
     m_tmcManager->setSettings(settingsWidget);
 
-    connect(downloadAction, &QAction::triggered, m_tmcManager, &TmcManager::showDownloadWidget);
-    connect(updateAction, &QAction::triggered, m_tmcManager, &TmcManager::updateExercises);
+    connect(downloadUpdateAction, &QAction::triggered, m_tmcManager, &TmcManager::updateExercises);
     // Run tests
     connect(tmcAction, &QAction::triggered, m_tmcManager, &TmcManager::testActiveProject);
     // Submit active project
