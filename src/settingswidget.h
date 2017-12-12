@@ -13,15 +13,14 @@ class SettingsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SettingsWidget(QWidget *parent = nullptr);
-    void setTmcClient(TmcClient *client);
+    explicit SettingsWidget(TmcClient *client, QWidget *parent = nullptr);
 
     void display();
-    void showLoginWidget();
 
     QString getWorkingDirectory();
     Course* getActiveCourse();
     int getAutoupdateInterval();
+    QString getTmcCliLocation();
 
 signals:
     void workingDirectoryChanged(QString location);
@@ -31,6 +30,7 @@ signals:
     void tmcCliLocationChanged(QString location);
 
 public slots:
+    void showLoginWidget();
 
 private:
     TmcClient *m_client;

@@ -11,8 +11,10 @@
 #include <QUrlQuery>
 #include <QBuffer>
 
+#include "exercise.h"
 #include "course.h"
 #include "organization.h"
+#include "submission.h"
 
 class TmcClient : public QObject
 {
@@ -31,6 +33,8 @@ public:
     void getUserInfo();
     void getExerciseList(Course *course);
     QNetworkReply* getExerciseZip(Exercise ex);
+    void postExerciseZip(Exercise ex, QByteArray zipData);
+    void getSubmissionStatus(int submissionId);
     void getCourseList(Organization org);
     void getOrganizationList();
 
@@ -43,8 +47,11 @@ signals:
     void authenticationFinished(QString accessToken);
     void exerciseListReady(Course *course, QList<Exercise> courseList);
     void exerciseZipReady(QByteArray zipData, Exercise ex);
+    void exerciseSubmitProgress(Exercise ex, qint64 bytesSent, qint64 bytesTotal);
+    void exerciseSubmitReady(Exercise ex, QString submissionUrl);
     void organizationListReady(QList<Organization> organizations);
     void courseListReady(Organization organization);
+    void submissionStatusReady(Submission submission);
     void accessTokenNotValid();
 
 private slots:
@@ -54,6 +61,9 @@ private slots:
     void courseListReplyFinished(QNetworkReply *reply, Organization org);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
     void exerciseZipReplyFinished (QNetworkReply *reply, Exercise ex);
+    void zipSubmitReplyFinished(QNetworkReply *reply, Exercise ex);
+    void submissionStatusReplyFinished(QNetworkReply *reply, int submissionId);
+
 
 private:
     QNetworkRequest buildRequest(QUrl url);

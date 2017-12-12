@@ -28,19 +28,15 @@ public:
 private slots:
 
 private:
-    QString tmcCliLocation;
+    // tmcClient
+    TmcClient tmcClient;
 
     // SettingsWidget
     SettingsWidget *settingsWidget;
-    void showSettingsWidget();
 
     // TmcManager
     TmcManager *m_tmcManager;
 
-    // tmcClient
-    TmcClient tmcClient;
-    void runTMC();
-    void openProject(Exercise *ex);
     void displayTMCError(QString errorText);
 };
 

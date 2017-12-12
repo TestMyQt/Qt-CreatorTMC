@@ -5,13 +5,28 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 
-SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
+SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
+    QWidget(parent),
+    m_client(client)
 {
+
+    QSettings settings("TestMyQt", "TMC");
+    m_client->setAccessToken(settings.value("accessToken", "").toString());
+    m_client->setClientId(settings.value("clientId", "").toString());
+    m_client->setClientSecret(settings.value("clientSecret", "").toString());
+    m_client->setServerAddress(settings.value("server", "").toString());
+
+    connect(m_client, &TmcClient::authorizationFinished, this, &SettingsWidget::handleAuthResponse);
+    connect(m_client, &TmcClient::authenticationFinished, this, &SettingsWidget::handleLoginResponse);
+
+    connect(m_client, &TmcClient::organizationListReady, this, &SettingsWidget::handleOrganizationList);
+    connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
+
     settingsWindow = new Ui::settingsForm;
     settingsWindow->setupUi(this);
 
     // Initialize login window
-    loginWidget = new LoginWidget;
+    loginWidget = new LoginWidget(m_client);
 
     m_orgComboBox = settingsWindow->orgComboBox;
     m_courseComboBox = settingsWindow->courseComboBox;
@@ -19,7 +34,6 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     m_cliLocation = settingsWindow->cliLocation;
     m_autoUpdateInterval = settingsWindow->updateInterval;
 
-    QSettings settings("TestMyQt", "TMC");
     m_activeOrganization = Organization::fromQSettings(&settings);
     m_activeCourse = Course::fromQSettings(&settings);
     m_activeCourse.exerciseListFromQSettings(&settings);
@@ -32,8 +46,6 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     m_cliLocation->setText(tmcCliLocation);
 
     settings.deleteLater();
-
-    emit tmcCliLocationChanged(tmcCliLocation);
 
     connect(settingsWindow->logoutButton, &QPushButton::clicked, this, [=](){
         clearCredentials();
@@ -53,27 +65,6 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     });
 }
 
-void SettingsWidget::setTmcClient(TmcClient *client)
-{
-    m_client = client;
-
-    QSettings settings("TestMyQt", "TMC");
-    m_client->setAccessToken(settings.value("accessToken", "").toString());
-    m_client->setClientId(settings.value("clientId", "").toString());
-    m_client->setClientSecret(settings.value("clientSecret", "").toString());
-    m_client->setServerAddress(settings.value("server", "").toString());
-    settings.deleteLater();
-
-    loginWidget->setTmcClient(m_client);
-
-
-    connect(m_client, &TmcClient::authorizationFinished, this, &SettingsWidget::handleAuthResponse);
-    connect(m_client, &TmcClient::authenticationFinished, this, &SettingsWidget::handleLoginResponse);
-
-    connect(m_client, &TmcClient::organizationListReady, this, &SettingsWidget::handleOrganizationList);
-    connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
-}
-
 void SettingsWidget::setUpdateInterval(int interval)
 {
     m_interval = interval;
@@ -82,6 +73,11 @@ void SettingsWidget::setUpdateInterval(int interval)
 
 void SettingsWidget::display()
 {
+    if (!m_client->isAuthenticated()) {
+        showLoginWidget();
+        return;
+    }
+
     m_client->getOrganizationList();
     if (!m_activeOrganization.getName().isEmpty()) {
         m_client->getCourseList(m_activeOrganization);
@@ -118,6 +114,11 @@ void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
 int SettingsWidget::getAutoupdateInterval()
 {
     return m_interval;
+}
+
+QString SettingsWidget::getTmcCliLocation()
+{
+    return tmcCliLocation;
 }
 
 void SettingsWidget::onBrowseClicked()

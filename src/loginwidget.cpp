@@ -3,25 +3,23 @@
 #include <QPushButton>
 #include <QInputDialog>
 
-LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
+LoginWidget::LoginWidget(TmcClient *client, QWidget *parent) :
+    QWidget(parent),
+    m_client(client)
 {
+    connect(m_client, &TmcClient::authenticationFinished, this, &LoginWidget::handleLoginResponse);
+    connect(m_client, &TmcClient::accessTokenNotValid, this, &LoginWidget::show);
+
     loginWindow = new Ui::loginform;
     loginWindow->setupUi(this);
 
-    m_username = loginWindow->usernameinput;
-    m_password = loginWindow->passwordinput;
-    m_server = loginWindow->serverInput;
-}
-
-void LoginWidget::setTmcClient(TmcClient *client)
-{
-    m_client = client;
     connect(loginWindow->cancelbutton, &QPushButton::clicked, this, &LoginWidget::close);
     connect(loginWindow->loginbutton, &QPushButton::clicked, this, &LoginWidget::onLoginClicked);
     connect(loginWindow->serverButton, &QPushButton::clicked, this, &LoginWidget::onChangeServerClicked);
 
-    connect(m_client, &TmcClient::authenticationFinished, this, &LoginWidget::handleLoginResponse);
-    connect(m_client, &TmcClient::accessTokenNotValid, this, &LoginWidget::show);
+    m_username = loginWindow->usernameinput;
+    m_password = loginWindow->passwordinput;
+    m_server = loginWindow->serverInput;
 }
 
 void LoginWidget::loadQSettings()

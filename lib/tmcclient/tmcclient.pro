@@ -18,11 +18,13 @@ SOURCES += \
         tmcclient.cpp \
         course.cpp \
         exercise.cpp \
-    organization.cpp
+        organization.cpp \
+        submission.cpp
 
 HEADERS += \
         tmcclient.h \
         course.h \
         exercise.h \
-    organization.h
+        organization.h \
+        submission.h
 

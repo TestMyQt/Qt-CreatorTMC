@@ -3,10 +3,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-#include <QBuffer>
-
-#include "exercise.h"
-#include "course.h"
+#include <QHttpPart>
 
 TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
@@ -147,6 +144,42 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
     return reply;
 }
 
+void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
+{
+    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/submissions").arg(ex.getId()));
+    QNetworkRequest request = buildRequest(url);
+
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    QHttpPart filePart;
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                       QVariant("form-data; name=\"submission[file]\"; "
+                                "filename=\"submission.zip\""));
+
+    filePart.setBody(zipData);
+    multiPart->append(filePart);
+
+    QNetworkReply *reply = manager->post(request, multiPart);
+    multiPart->setParent(reply); // delete multipart with reply
+
+    connect(reply, &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal){
+        emit exerciseSubmitProgress(ex, bytesSent, bytesTotal);
+    });
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        zipSubmitReplyFinished(reply, ex);
+    });
+}
+
+void TmcClient::getSubmissionStatus(int submissionId)
+{
+    QUrl url(serverAddress + "/api/v8/core/submissions/" + QString::number(submissionId));
+    QNetworkReply *reply = doGet(url);
+
+    connect(reply, &QNetworkReply::finished, this, [=](){
+        submissionStatusReplyFinished(reply, submissionId);
+    });
+}
 void TmcClient::getExerciseList(Course *course)
 {
     QUrl url(serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
@@ -283,5 +316,34 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
 
     emit exerciseZipReady(reply->readAll(), ex);
     reply->close();
+    reply->deleteLater();
+}
+
+void TmcClient::zipSubmitReplyFinished(QNetworkReply *reply, Exercise ex)
+{
+    if (!checkRequestStatus(reply)) {
+            emit TMCError(QString("Zip upload error %1: %2")
+                          .arg(reply->errorString(), reply->error()));
+            return;
+    }
+    QJsonObject submission = QJsonDocument::fromJson(reply->readAll()).object();
+    QString submissionUrl = submission["submission_url"].toString();
+
+    emit exerciseSubmitReady(ex, submissionUrl);
+    reply->deleteLater();
+}
+
+void TmcClient::submissionStatusReplyFinished(QNetworkReply *reply, int submissionId)
+{
+    if (!checkRequestStatus(reply)) {
+            emit TMCError(QString("Submission status update error %1: %2")
+                          .arg(reply->errorString(), reply->error()));
+            return;
+    }
+
+    QJsonObject jsonSubmission = QJsonDocument::fromJson(reply->readAll()).object();
+    Submission submission = Submission::fromJson(submissionId, jsonSubmission);
+
+    emit submissionStatusReady(submission);
     reply->deleteLater();
 }

@@ -1,5 +1,4 @@
 #include "course.h"
-#include "exercise.h"
 
 Course::Course()
 {
