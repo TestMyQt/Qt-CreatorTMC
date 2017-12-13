@@ -259,16 +259,6 @@ void TmcManager::setUpdateInterval(int interval)
         m_updateTimer.start();
 }
 
-void TmcManager::showDownloadWidget()
-{
-    if (!m_client->isAuthenticated()) {
-        m_settings->showLoginWidget();
-        return;
-    }
-    updateExercises();
-    downloadWidget->show();
-}
-
 void TmcManager::displayTMCError(QString errorText)
 {
     QMessageBox::critical(m_settings, "TMC", errorText, QMessageBox::Ok);
