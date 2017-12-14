@@ -42,6 +42,7 @@ void LoginWidget::onLoginClicked()
 {
     QString username = m_username->text();
     QString password = m_password->text();
+    m_password->setText("");
     m_client->authenticate(username, password);
     QSettings settings("TestMyQt", "TMC");
     settings.setValue("username", username);

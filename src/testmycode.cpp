@@ -89,8 +89,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->menu()->setTitle(tr("TestMyCode"));
     ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(menu);
     menu->addAction(tmcCmd);
-    menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
+    menu->addAction(settingsCmd);
     menu->addAction(downloadUpdateCmd);
     menu->addAction(submitCmd);
 

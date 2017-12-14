@@ -242,7 +242,7 @@ void TmcManager::appendToDownloadWindow(QList<Exercise> exercises)
         QListWidgetItem* item = new QListWidgetItem(ex.getName(), downloadform->exerciselist);
         item->setData(Qt::UserRole, QVariant::fromValue(ex));
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        item->setCheckState(Qt::Unchecked);
+        item->setCheckState(Qt::Checked);
     }
 }
 
