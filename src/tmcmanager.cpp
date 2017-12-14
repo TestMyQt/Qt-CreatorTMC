@@ -14,6 +14,8 @@
 #include "tmcmanager.h"
 #include "testmycodeconstants.h"
 
+#include <projectexplorer/projectexplorer.h>
+
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
 
@@ -21,6 +23,7 @@
 #include <QAction>
 #include <QFuture>
 #include <QPushButton>
+#include <QMessageBox>
 #include <QMap>
 #include <QBuffer>
 
@@ -29,7 +32,9 @@
 using Core::ProgressManager;
 using Core::FutureProgress;
 
-TmcManager::TmcManager(QObject *parent) : QObject(parent)
+TmcManager::TmcManager(TmcClient *client, QObject *parent) :
+    QObject(parent),
+    m_client(client)
 {
     m_updateTimer.setSingleShot(false);
     connect(&m_updateTimer, &QTimer::timeout, this, [this]() { updateExercises(); });
@@ -39,11 +44,25 @@ TmcManager::TmcManager(QObject *parent) : QObject(parent)
     downloadform = new Ui::downloadform;
     downloadform->setupUi(downloadWidget);
 
+    // Monitor for active project change
+    using namespace ProjectExplorer;
+    SessionManager *sm = SessionManager::instance();
+    connect(sm, &SessionManager::startupProjectChanged,
+            this, &TmcManager::onStartupProjectChanged);
+
+    // TmcClient
+    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
+    connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
+    connect(m_client, &TmcClient::TMCError, this, &TmcManager::displayTMCError);
+
     // Signal-Slot for download window
     connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
-    connect(downloadform->cancelbutton, &QPushButton::clicked, this, [=](){
-        downloadWidget->close();
-    });
+    connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
+
+    m_testRunner = TMCRunner::instance();
+    connect(m_testRunner, &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
+    connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
+    m_submitter = new TmcSubmitter(m_client);
 }
 
 TmcManager::~TmcManager()
@@ -56,18 +75,6 @@ TmcManager::~TmcManager()
 }
 
 /*!
-    Sets the \l TmcManager object's \l TmcClient pointer field to \a client.
-    Typically the only time when the function is called is during the initialization
-    phase of the QtCreatorTMC plugin.
-*/
-void TmcManager::setTmcClient(TmcClient *client)
-{
-    m_client = client;
-    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
-    connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
-}
-
-/*!
     Initializes the \l TmcManager object's \l SettingsWidget pointer field to \a settings.
     A \l {http://doc.qt.io/qt-5/qobject.html#connect} {connection} is established between
     signal \l {SettingsWidget::} {autoUpdateIntervalChanged} and public slot
@@ -77,6 +84,8 @@ void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
+    connect(m_settings, &SettingsWidget::tmcCliLocationChanged, m_testRunner, &TMCRunner::setTmcCliLocation);
+    m_testRunner->setTmcCliLocation(m_settings->getTmcCliLocation());
 }
 
 /*!
@@ -110,7 +119,7 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
 
         Exercise found = updatedCourse->getExercise(ex);
 
-        if (found.getId() == -1) {
+        if (!found) {
             // Not found, new exercise
             ex.setDownloaded(false);
             updatedCourse->addExercise(ex);
@@ -132,6 +141,78 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
     downloadWidget->show();
 }
 
+void TmcManager::onStartupProjectChanged(ProjectExplorer::Project *project)
+{
+    m_activeProject = project;
+}
+
+Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
+{
+    QString projectName = project->displayName();
+    QMap<int, Exercise> exercises = m_settings->getActiveCourse()->getExercises();
+    Exercise projectExercise;
+
+    foreach (Exercise ex, exercises.values()) {
+        if (ex.getName() == projectName) {
+            // TODO: We assume active project is in active courses exercise list
+            // by display name only. Need to figure out a stronger relation.
+            // Something like this would be better:
+            // projectExercise = m_activeProject->property("exercise").value<Exercise>();
+            projectExercise = ex;
+        }
+    }
+
+    return projectExercise;
+}
+
+void TmcManager::testActiveProject()
+{
+    if (!m_activeProject) {
+        QMessageBox::information(m_settings, tr("No active project"),
+                                 tr("Please open a TestMyCode project"));
+        return;
+    }
+
+    Exercise projectExercise = getProjectExercise(m_activeProject);
+
+    if (!projectExercise) {
+        QMessageBox::information(m_settings, tr("Not a TestMyCode project"),
+                                 tr("Please select a TestMyCode exercise"));
+        return;
+    }
+
+    m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
+    m_testRunner->testProject(m_activeProject);
+}
+
+void TmcManager::askSubmit(const ProjectExplorer::Project *project)
+{
+    if (!project) {
+        qDebug() << "Submission project was null";
+        return;
+    }
+
+    int ret = QMessageBox::question(m_settings,
+                                  tr("Submit exercise to server"),
+                                  tr("All tests passed!\nSubmit exercise to server?"));
+
+    if (ret == QMessageBox::Yes) {
+        m_submitter->submitProject(project);
+    }
+}
+
+void TmcManager::submitActiveExercise()
+{
+    if (!m_activeProject) {
+        qDebug() << "submitActiveExercise(): No active project";
+        return;
+    }
+
+    Exercise projectExercise = getProjectExercise(m_activeProject);
+    m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
+    m_submitter->submitProject(m_activeProject);
+}
+
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 {
     Course *activeCourse = m_settings->getActiveCourse();
@@ -144,12 +225,12 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 
     QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
     if (extracted.isEmpty()) {
-        emit TMCError("Error unzipping exercise files!");
+        displayTMCError("Error unzipping exercise files!");
         return;
     }
 
     if (!activeCourse->hasExercise(ex)) {
-        emit TMCError("Exercise not found in course!");
+        displayTMCError("Exercise not found in course!");
         return;
     }
 
@@ -157,6 +238,12 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     ex.setUnzipped(true);
     // Save updated exercise back to course exercise list
     activeCourse->addExercise(ex);
+    // open project
+    using namespace ProjectExplorer;
+    QString exerciseLocation =  saveDir + "/" + ex.getName() + "/" + ex.getName() + ".pro";
+    const ProjectExplorerPlugin::OpenProjectResult openProjectSucceeded =
+            ProjectExplorer::ProjectExplorerPlugin::openProject(exerciseLocation);
+    qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
 }
 
 /*!
@@ -208,14 +295,9 @@ void TmcManager::setUpdateInterval(int interval)
         m_updateTimer.start();
 }
 
-void TmcManager::showDownloadWidget()
+void TmcManager::displayTMCError(QString errorText)
 {
-    if (!m_client->isAuthenticated()) {
-        m_settings->showLoginWidget();
-        return;
-    }
-    updateExercises();
-    downloadWidget->show();
+    QMessageBox::critical(m_settings, "TMC", errorText, QMessageBox::Ok);
 }
 
 void TmcManager::onDownloadOkClicked()

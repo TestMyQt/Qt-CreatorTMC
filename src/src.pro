@@ -53,7 +53,9 @@ HEADERS += testmycode.h \
         downloadpanel.h \
         settingswidget.h \
         loginwidget.h \
-        tmcmanager.h
+        tmcmanager.h \
+        tmcsubmitter.h \
+        submitwidget.h
 
 SOURCES += testmycode.cpp \
         tmcoutputpane.cpp \
@@ -63,12 +65,15 @@ SOURCES += testmycode.cpp \
         downloadpanel.cpp \
         settingswidget.cpp \
         loginwidget.cpp \
-        tmcmanager.cpp
+        tmcmanager.cpp \
+        tmcsubmitter.cpp \
+        submitwidget.cpp
 
 FORMS += \
-    ../loginscreen.ui \
-    ../downloadscreen.ui \
-    ../settings.ui
+        ui/loginscreen.ui \
+        ui/downloadscreen.ui \
+        ui/settings.ui \
+        ui/submit.ui
 
 # Qt Creator linking
 

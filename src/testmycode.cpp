@@ -24,7 +24,6 @@
 #include "testmycodeconstants.h"
 #include "tmcclient.h"
 #include "tmcoutputpane.h"
-#include "tmcrunner.h"
 #include "course.h"
 
 #include <QDebug>
@@ -49,6 +48,10 @@
 #include <extensionsystem/pluginmanager.h>
 
 using namespace TestMyCodePlugin::Internal;
+using Core::ActionManager;
+using Core::Command;
+using Core::Context;
+using Core::ActionContainer;
 
 namespace TestMyCodePlugin {
 namespace Internal {
@@ -76,78 +79,64 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
     auto tmcAction = new QAction(tr("Test project"), this);
-    Core::Command *tmcCmd = Core::ActionManager::registerAction(tmcAction, Constants::TMC_ACTION_ID,
-                                                             Core::Context(Core::Constants::C_GLOBAL));
+    Command *tmcCmd = ActionManager::registerAction(tmcAction, Constants::TMC_ACTION_ID,
+                                                    Context(Core::Constants::C_GLOBAL));
 
     auto loginAction = new QAction(tr("Login"), this);
-    Core::Command *loginCmd = Core::ActionManager::registerAction(loginAction, Constants::LOGIN_ACTION_ID,
-                                                             Core::Context(Core::Constants::C_GLOBAL));
+    Command *loginCmd = ActionManager::registerAction(loginAction, Constants::LOGIN_ACTION_ID,
+                                                      Context(Core::Constants::C_GLOBAL));
 
     auto settingsAction = new QAction(tr("Settings"), this);
-    Core::Command *settingsCmd = Core::ActionManager::registerAction(settingsAction, Constants::SETTINGS_ACTION_ID,
-                                                                     Core::Context(Core::Constants::C_GLOBAL));
+    Command *settingsCmd = ActionManager::registerAction(settingsAction, Constants::SETTINGS_ACTION_ID,
+                                                         Context(Core::Constants::C_GLOBAL));
 
-    auto downloadAction = new QAction(tr("Download"), this);
-    Core::Command *downloadCmd = Core::ActionManager::registerAction(downloadAction, Constants::DOWNLOAD_ACTION_ID,
-                                                                     Core::Context(Core::Constants::C_GLOBAL));
-    auto updateAction = new QAction(tr("Update"), this);
-    Core::Command *updateCmd = Core::ActionManager::registerAction(updateAction, Constants::UPDATE_ACTION_ID,
-                                                                   Core::Context(Core::Constants::C_GLOBAL));
+    auto downloadUpdateAction = new QAction(tr("Download/Update"), this);
+    Command *downloadUpdateCmd = ActionManager::registerAction(downloadUpdateAction,
+                                                               Constants::DOWNLOAD_UPLOAD_ACTION_ID,
+                                                               Context(Core::Constants::C_GLOBAL));
+
+    auto submitAction = new QAction(tr("Submit"), this);
+    Command *submitCmd = ActionManager::registerAction(submitAction, Constants::SUBMIT_ACTION_ID,
+                                                       Context(Core::Constants::C_GLOBAL));
 
     // Shortcut
     tmcCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+T")));
     loginCmd->setDefaultKeySequence(QKeySequence(tr("Alt+L")));
     settingsCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+S")));
-    downloadCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
-    updateCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+U")));
-
-    // Connect trigger to a function
-    connect(tmcAction, &QAction::triggered, this, &TestMyCode::runTMC);
-    connect(settingsAction, &QAction::triggered, this, &TestMyCode::showSettingsWidget);
-    connect(loginAction, &QAction::triggered, this,  [=](){
-        settingsWidget->showLoginWidget();
-    });
-    connect(downloadAction, &QAction::triggered, this, [=](){
-        m_tmcManager->showDownloadWidget();
-    });
-    connect(updateAction, &QAction::triggered, this, [=](){
-        m_tmcManager->updateExercises();
-    });
+    downloadUpdateCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+D")));
+    submitCmd->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+B")));
 
     // Create context menu with actions
-    Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
+    ActionContainer *menu = ActionManager::createMenu(Constants::MENU_ID);
     menu->menu()->setTitle(tr("TestMyCode"));
-    Core::ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(menu);
+    ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(menu);
     menu->addAction(tmcCmd);
     menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
-    menu->addAction(downloadCmd);
-    menu->addAction(updateCmd);
+    menu->addAction(downloadUpdateCmd);
+    menu->addAction(submitCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
-    auto tools_menu = Core::ActionManager::actionContainer(Core::Constants::M_WINDOW);
-    Core::ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
+    auto tools_menu = ActionManager::actionContainer(Core::Constants::M_WINDOW);
+    ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
 
     addAutoReleasedObject(TmcOutputPane::instance());
 
     // Initialize settings window
-    settingsWidget = new SettingsWidget;
-    settingsWidget->setTmcClient(&tmcClient);
+    settingsWidget = new SettingsWidget(&tmcClient);
 
-    connect(loginAction, &QAction::triggered, this, [=](){
-        settingsWidget->showLoginWidget();
-    });
-    connect(settingsWidget, &SettingsWidget::tmcCliLocationChanged, this, [=](const QString &location){
-        tmcCliLocation = location;
-    });
+    connect(loginAction, &QAction::triggered, settingsWidget, &SettingsWidget::showLoginWidget);
+    connect(settingsAction, &QAction::triggered, settingsWidget, &SettingsWidget::display);
 
     // TmcManager
-    m_tmcManager = new TmcManager;
-    m_tmcManager->setTmcClient(&tmcClient);
+    m_tmcManager = new TmcManager(&tmcClient);
     m_tmcManager->setSettings(settingsWidget);
 
-    // TmcClient
-    connect(&tmcClient, &TmcClient::TMCError, this, &TestMyCode::displayTMCError);
+    connect(downloadUpdateAction, &QAction::triggered, m_tmcManager, &TmcManager::updateExercises);
+    // Run tests
+    connect(tmcAction, &QAction::triggered, m_tmcManager, &TmcManager::testActiveProject);
+    // Submit active project
+    connect(submitAction, &QAction::triggered, m_tmcManager, &TmcManager::submitActiveExercise);
 
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);
@@ -168,32 +157,6 @@ ExtensionSystem::IPlugin::ShutdownFlag TestMyCode::aboutToShutdown()
     // Disconnect from signals that are not needed during shutdown
     // Hide UI (if you add UI that is not in the main window directly)
     return SynchronousShutdown;
-}
-
-void TestMyCode::showSettingsWidget()
-{
-    if (!tmcClient.isAuthenticated()) {
-        settingsWidget->showLoginWidget();
-        return;
-    }
-    settingsWidget->display();
-}
-
-void TestMyCode::runTMC()
-{
-    TMCRunner *runner = TMCRunner::instance();
-    runner->setTmcCliLocation(tmcCliLocation);
-    runner->runOnActiveProject();
-}
-
-void TestMyCode::openProject(Exercise *ex)
-{
-    Q_UNUSED(ex)
-}
-
-void TestMyCode::displayTMCError(QString errorText)
-{
-    QMessageBox::critical(nullptr, "TMC", errorText, QMessageBox::Ok);
 }
 
 } // namespace Internal

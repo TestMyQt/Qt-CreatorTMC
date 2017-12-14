@@ -5,9 +5,9 @@ namespace Constants {
 
 const char TMC_ACTION_ID[] = "TestMyCodePlugin.Action.TMC";
 const char LOGIN_ACTION_ID[] = "TestMyCodePlugin.Action.Login";
-const char DOWNLOAD_ACTION_ID[] = "TestMyCodePlugin.Action.Download";
-const char UPDATE_ACTION_ID[] = "TestMyCodePlugin.Action.Update";
+const char DOWNLOAD_UPLOAD_ACTION_ID[] = "TestMyCodePlugin.Action.DownloadUpdate";
 const char SETTINGS_ACTION_ID[] = "TestMyCodePlugin.Action.Settings";
+const char SUBMIT_ACTION_ID[] = "TestMyCodePlugin.Action.Submit";
 
 const char TASK_INDEX[] = "TestMyCodePlugin.Task.Index";
 

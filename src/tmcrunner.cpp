@@ -36,6 +36,9 @@
 
 static TMCRunner *s_instance = nullptr;
 
+using ProjectExplorer::SessionManager;
+using ProjectExplorer::Project;
+
 TMCRunner *TMCRunner::instance()
 {
     if (!s_instance)
@@ -59,25 +62,25 @@ void TMCRunner::setTmcCliLocation(const QString location)
     tmc_cli = location;
 }
 
-void TMCRunner::runOnActiveProject()
+void TMCRunner::testProject(Project *project)
 {
-    ProjectExplorer::Project *project = ProjectExplorer::SessionManager::startupProject();
-    if (!project) {
-        QMessageBox::information(Core::ICore::mainWindow(), tr("No project"), tr("No active project"));
+    if (tmc_cli.isEmpty()) {
+        emit TMCError("Please set the location for TMC CLI .jar file");
         return;
     }
-    const Utils::FileName project_path = project->projectFilePath().parentDir();
+
+    if (!project) {
+        emit TMCError("No active project");
+        return;
+    }
+    m_activeProject = project;
+    const Utils::FileName project_path = m_activeProject->projectDirectory();
     launchTmcCLI(project_path);
 }
 
 void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
 {
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    //QString tmc_cli = env.value("TMC_CLI", "/opt/tmc_cli.jar");
-    if (tmc_cli.isEmpty()) {
-        emit TMCError("Please set the location for TMC CLI .jar file");
-        return;
-    }
     QString dir = workingDirectory.toString();
 
     QString testOutput = dir + "/out.txt";
@@ -87,7 +90,6 @@ void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
     arguments << "--exercisePath" << dir;
     arguments << "--outputPath" << testOutput;
     QMessageBox::information(Core::ICore::mainWindow(), tr("launching"), tr("%1").arg(arguments.join(QString(" "))));
-    // TODO: make work in windows
     const Utils::FileName java = Utils::FileName().fromString("java");
 
     Utils::ShellCommand command(dir, env);
@@ -99,6 +101,19 @@ void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
 
     QList<TmcTestResult> output = readTMCOutput(testOutput);
     emit testResultReady(output);
+
+    if (checkPassedStatus(output)) {
+        emit testsPassed(m_activeProject);
+    }
+}
+
+bool TMCRunner::checkPassedStatus(QList<TmcTestResult> testResults)
+{
+    foreach (const TmcTestResult &result, testResults) {
+        if (!result.isSuccessful()) return false;
+    }
+
+    return true;
 }
 
 /*

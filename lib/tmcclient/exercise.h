@@ -1,6 +1,8 @@
 #ifndef EXERCISE_H
 #define EXERCISE_H
 
+#include "submission.h"
+
 #include <QString>
 #include <QSettings>
 #include <QJsonObject>
@@ -14,6 +16,7 @@ public:
 
     bool operator==(const Exercise &other) const;
     bool operator!=(const Exercise &other) const;
+    bool operator!() const;
 
     void setId(int id);
     void setName(QString name);
@@ -23,6 +26,8 @@ public:
     void setOpenStatus(bool openStatus);
     void setDownloaded(bool downloaded);
     void setUnzipped(bool zipped);
+    void addSubmission(Submission sub);
+
     int getId() const;
     QString getName() const;
     QString getLocation() const;
@@ -31,6 +36,8 @@ public:
     bool getOpenStatus() const;
     bool isDownloaded() const;
     bool isUnzipped() const;
+    QMap<int, Submission> getSubmissions() const;
+
     void saveQSettings(QSettings *settings, const QString courseName);
     static Exercise fromQSettings(QSettings *settings);
     static Exercise fromJson(const QJsonObject jsonExercise);
@@ -44,6 +51,8 @@ private:
     bool m_downloaded;
     bool m_unzipped;
     bool m_openStatus;
+    QMap<int, Submission> m_submissions;
+
 };
 
 Q_DECLARE_METATYPE(Exercise)

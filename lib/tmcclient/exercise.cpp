@@ -14,8 +14,6 @@
 
 #include "exercise.h"
 
-#include <QJsonObject>
-
 Exercise::Exercise()
 {
     m_id = -1;
@@ -55,6 +53,11 @@ bool Exercise::operator==(const Exercise &other) const
 bool Exercise::operator!=(const Exercise &other) const
 {
     return !(*this == other);
+}
+
+bool Exercise::operator!() const
+{
+    return m_id == -1;
 }
 
 /*!
@@ -129,6 +132,11 @@ bool Exercise::isDownloaded() const
 bool Exercise::isUnzipped() const
 {
     return m_unzipped;
+}
+
+void Exercise::addSubmission(Submission sub)
+{
+    m_submissions.insert(sub.getId(), sub);
 }
 
 /*!
