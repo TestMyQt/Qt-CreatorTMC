@@ -119,7 +119,6 @@ void Exercise::setUnzipped(bool zipped)
 
 void Exercise::saveQSettings(QSettings *settings, const QString courseName)
 {
-    // Yay or nay on the indentation?
     settings->beginGroup(courseName);
         settings->beginGroup(m_name);
             settings->setValue("id", m_id);

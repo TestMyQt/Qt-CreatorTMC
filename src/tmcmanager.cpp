@@ -197,6 +197,7 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     zipBuffer.open(QIODevice::ReadOnly);
 
     QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
+    QString location = extracted.at(0).section("/", 0, -2);
     if (extracted.isEmpty()) {
         displayTMCError("Error unzipping exercise files!");
         return;
@@ -209,8 +210,12 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 
     ex.setDownloaded(true);
     ex.setUnzipped(true);
+    ex.setLocation(location);
     // Save updated exercise back to course exercise list
     activeCourse->addExercise(ex);
+    QSettings settings("TestMyQt", "TMC");
+    ex.saveQSettings(&settings, activeCourse->getName());
+    settings.deleteLater();
     // open project
     using namespace ProjectExplorer;
     QString exerciseLocation =  saveDir + "/" + ex.getName() + "/" + ex.getName() + ".pro";
