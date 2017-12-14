@@ -106,6 +106,16 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(loginAction, &QAction::triggered, settingsWidget, &SettingsWidget::showLoginWidget);
     connect(settingsAction, &QAction::triggered, settingsWidget, &SettingsWidget::display);
 
+    // Disable/Enable Download/Update and Submit buttons
+    if (!tmcClient.isAuthenticated()) {
+        downloadUpdateAction->setDisabled(true);
+        submitAction->setDisabled(true);
+    }
+    connect(settingsWidget, &SettingsWidget::enableDownloadSubmit, this, [=](bool enable){
+       downloadUpdateAction->setEnabled(enable);
+       submitAction->setEnabled(enable);
+    });
+
     // TmcManager
     m_tmcManager = new TmcManager(&tmcClient);
     m_tmcManager->setSettings(settingsWidget);

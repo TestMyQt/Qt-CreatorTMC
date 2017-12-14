@@ -146,6 +146,7 @@ void SettingsWidget::clearCredentials()
     settings.setValue("accessToken", "");
     settings.deleteLater();
     m_client->setAccessToken("");
+    emit enableDownloadSubmit(false);
 }
 
 QString SettingsWidget::askSaveLocation()
@@ -168,6 +169,7 @@ void SettingsWidget::handleLoginResponse(QString accessToken)
         settings.setValue("username", "");
     } else {
         settings.setValue("accessToken", accessToken);
+        emit enableDownloadSubmit(true);
         display();
     }
     settings.deleteLater();
