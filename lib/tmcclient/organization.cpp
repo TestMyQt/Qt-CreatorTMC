@@ -2,7 +2,8 @@
 
 Organization::Organization()
 {
-
+    m_name = "";
+    m_slug = "";
 }
 
 Organization::Organization(QString name, QString slug) :
@@ -21,6 +22,11 @@ bool Organization::operator==(const Organization &other) const
 bool Organization::operator!=(const Organization &other) const
 {
     return !(*this == other);
+}
+
+bool Organization::operator!() const
+{
+    return m_slug.isEmpty();
 }
 
 QString Organization::getName() const

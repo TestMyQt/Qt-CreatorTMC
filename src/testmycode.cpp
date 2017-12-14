@@ -89,8 +89,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->menu()->setTitle(tr("TestMyCode"));
     ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(menu);
     menu->addAction(tmcCmd);
-    menu->addAction(settingsCmd);
     menu->addAction(loginCmd);
+    menu->addAction(settingsCmd);
     menu->addAction(downloadUpdateCmd);
     menu->addAction(submitCmd);
 
@@ -105,6 +105,16 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     connect(loginAction, &QAction::triggered, settingsWidget, &SettingsWidget::showLoginWidget);
     connect(settingsAction, &QAction::triggered, settingsWidget, &SettingsWidget::display);
+
+    // Disable/Enable Download/Update and Submit buttons
+    if (!tmcClient.isAuthenticated()) {
+        downloadUpdateAction->setDisabled(true);
+        submitAction->setDisabled(true);
+    }
+    connect(settingsWidget, &SettingsWidget::enableDownloadSubmit, this, [=](bool enable){
+       downloadUpdateAction->setEnabled(enable);
+       submitAction->setEnabled(enable);
+    });
 
     // TmcManager
     m_tmcManager = new TmcManager(&tmcClient);

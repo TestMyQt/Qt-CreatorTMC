@@ -176,7 +176,8 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
 void TmcManager::submitActiveExercise()
 {
     if (!m_activeProject) {
-        qDebug() << "submitActiveExercise(): No active project";
+        QMessageBox::information(m_settings, tr("No active project"),
+                                 tr("Please open a TestMyCode project"));
         return;
     }
 
@@ -221,8 +222,8 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 void TmcManager::updateExercises()
 {
     Course* activeCourse = m_settings->getActiveCourse();
-    if (!activeCourse) {
-        qDebug() << "No active course!";
+    if (!activeCourse || !(*activeCourse)) {
+        m_settings->display();
         return;
     }
 
@@ -241,7 +242,7 @@ void TmcManager::appendToDownloadWindow(QList<Exercise> exercises)
         QListWidgetItem* item = new QListWidgetItem(ex.getName(), downloadform->exerciselist);
         item->setData(Qt::UserRole, QVariant::fromValue(ex));
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        item->setCheckState(Qt::Unchecked);
+        item->setCheckState(Qt::Checked);
     }
 }
 
