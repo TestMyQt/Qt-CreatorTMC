@@ -101,7 +101,7 @@ void Course::exerciseListFromQSettings(QSettings *settings)
                     settings->endGroup();
                     continue;
                 }
-                Exercise ex = Exercise::fromQSettings(settings);
+                Exercise ex = Exercise::fromQSettings(settings, exercise);
             settings->endGroup();
             addExercise(ex);
         }

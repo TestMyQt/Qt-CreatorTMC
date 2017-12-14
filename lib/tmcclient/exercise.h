@@ -39,7 +39,7 @@ public:
     QMap<int, Submission> getSubmissions() const;
 
     void saveQSettings(QSettings *settings, const QString courseName);
-    static Exercise fromQSettings(QSettings *settings);
+    static Exercise fromQSettings(QSettings *settings, QString exerciseName);
     static Exercise fromJson(const QJsonObject jsonExercise);
 
 private:
