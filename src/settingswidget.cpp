@@ -244,7 +244,7 @@ void SettingsWidget::onSettingsOkClicked()
         emit tmcCliLocationChanged(tmcCliLocation);
     }
 
-    int setInterval = m_autoUpdateInterval->text().toInt();
+    int setInterval = m_autoUpdateInterval->value();
     if (setInterval != m_interval) {
         m_interval = setInterval;
         settings.setValue("autoupdateInterval", m_interval);
