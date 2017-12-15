@@ -43,8 +43,9 @@ private:
     QComboBox *m_orgComboBox;
     QComboBox *m_courseComboBox;
     QLineEdit *m_workingDir;
-    QLineEdit *m_autoUpdateInterval;
+    QSpinBox *m_autoUpdateInterval;
     QLineEdit *m_cliLocation;
+    QLabel *m_userLoggedInLabel;
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;

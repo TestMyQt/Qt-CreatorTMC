@@ -16,6 +16,8 @@ LoginWidget::LoginWidget(TmcClient *client, QWidget *parent) :
     connect(loginWindow->cancelbutton, &QPushButton::clicked, this, &LoginWidget::close);
     connect(loginWindow->loginbutton, &QPushButton::clicked, this, &LoginWidget::onLoginClicked);
     connect(loginWindow->serverButton, &QPushButton::clicked, this, &LoginWidget::onChangeServerClicked);
+    // Login when enter is pressed in passwordinput
+    connect(loginWindow->passwordinput, &QLineEdit::returnPressed, this, &LoginWidget::onLoginClicked);
 
     m_username = loginWindow->usernameinput;
     m_password = loginWindow->passwordinput;
