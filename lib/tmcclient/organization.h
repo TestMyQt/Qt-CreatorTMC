@@ -14,6 +14,7 @@ public:
     Organization(QString name, QString slug);
     bool operator==(const Organization &other) const;
     bool operator!=(const Organization &other) const;
+    bool operator!() const;
 
     QString getName() const;
     QString getSlug() const;

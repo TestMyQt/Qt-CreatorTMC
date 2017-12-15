@@ -14,7 +14,8 @@
 
 Course::Course()
 {
-
+    m_id = -1;
+    m_name = "";
 }
 
 /*!
@@ -38,6 +39,11 @@ bool Course::operator==(const Course &other) const
 bool Course::operator!=(const Course &other) const
 {
     return !(*this == other);
+}
+
+bool Course::operator!() const
+{
+    return m_id == -1;
 }
 
 /*!

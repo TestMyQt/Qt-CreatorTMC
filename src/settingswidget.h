@@ -28,6 +28,7 @@ signals:
     void activeCourseChanged(Course *course);
     void autoUpdateIntervalChanged(int interval);
     void tmcCliLocationChanged(QString location);
+    void enableDownloadSubmit(bool enable);
 
 public slots:
     void showLoginWidget();

@@ -19,7 +19,8 @@
 
 Organization::Organization()
 {
-
+    m_name = "";
+    m_slug = "";
 }
 
 Organization::Organization(QString name, QString slug) :
@@ -27,14 +28,6 @@ Organization::Organization(QString name, QString slug) :
     m_slug(slug)
 {
 
-}
-
-/*!
-    Getter function for the name field of the \l Organization object.
-*/
-QString Organization::getName() const
-{
-    return m_name;
 }
 
 /*!
@@ -60,6 +53,19 @@ bool Organization::operator==(const Organization &other) const
 bool Organization::operator!=(const Organization &other) const
 {
     return !(*this == other);
+}
+
+bool Organization::operator!() const
+{
+    return m_slug.isEmpty();
+}
+
+/*!
+    Getter function for the name field of the \l Organization object.
+*/
+QString Organization::getName() const
+{
+    return m_name;
 }
 
 /*!
