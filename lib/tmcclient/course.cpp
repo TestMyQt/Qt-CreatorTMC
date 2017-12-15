@@ -1,5 +1,7 @@
 #include "course.h"
 
+#include <QDir>
+
 Course::Course()
 {
     m_id = -1;
@@ -95,7 +97,11 @@ void Course::exerciseListFromQSettings(QSettings *settings)
         QStringList exerciseList = settings->childGroups();
         foreach (QString exercise, exerciseList) {
             settings->beginGroup(exercise);
-                Exercise ex = Exercise::fromQSettings(settings);
+                if (!QDir(settings->value("location", "?").toString()).exists() ) {
+                    settings->endGroup();
+                    continue;
+                }
+                Exercise ex = Exercise::fromQSettings(settings, exercise);
             settings->endGroup();
             addExercise(ex);
         }

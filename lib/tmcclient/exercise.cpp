@@ -119,7 +119,6 @@ void Exercise::setUnzipped(bool zipped)
 
 void Exercise::saveQSettings(QSettings *settings, const QString courseName)
 {
-    // Yay or nay on the indentation?
     settings->beginGroup(courseName);
         settings->beginGroup(m_name);
             settings->setValue("id", m_id);
@@ -133,11 +132,9 @@ void Exercise::saveQSettings(QSettings *settings, const QString courseName)
     settings->endGroup();
 }
 
-Exercise Exercise::fromQSettings(QSettings *settings)
+Exercise Exercise::fromQSettings(QSettings *settings, QString exerciseName)
 {
-    Exercise ex = Exercise(settings->value("id").toInt(),
-                           settings->value("name").toString());
-
+    Exercise ex = Exercise(settings->value("id").toInt(), exerciseName);
     ex.setChecksum(settings->value("checksum", "").toString());
     ex.setLocation(settings->value("location", "").toString());
     ex.setDlDate(settings->value("dlDate", "").toString());
