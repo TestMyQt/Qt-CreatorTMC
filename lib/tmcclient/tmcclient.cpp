@@ -297,6 +297,11 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
     return reply;
 }
 
+/*!
+    Sends the project directory corresponding to the \l Exercise parameter \a ex
+    to the TMC server using the HTTP(S) protocol. The project directory along with
+    all its files has been packed into the archive file \a zipData prior to sending.
+ */
 void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
 {
     QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/submissions").arg(ex.getId()));

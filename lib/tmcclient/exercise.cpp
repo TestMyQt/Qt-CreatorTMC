@@ -55,6 +55,14 @@ bool Exercise::operator!=(const Exercise &other) const
     return !(*this == other);
 }
 
+/*!
+    The overloaded \b {!} operator is used to check whether the \l Exercise
+    object is in an uninitialized state. If this is the case, the return value
+    is \c true, otherwise it is \c false.
+
+    \note The telltale sign of an uninitialized \l Exercise object is an
+    \l {Exercise::getId()} {id} field set to the value -1.
+*/
 bool Exercise::operator!() const
 {
     return m_id == -1;
