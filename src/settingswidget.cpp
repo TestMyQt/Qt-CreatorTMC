@@ -94,9 +94,6 @@ void SettingsWidget::display()
 
 void SettingsWidget::showLoginWidget()
 {
-    if (m_client->isAuthorized()) {
-        m_client->authorize();
-    }
     loginWidget->loadQSettings();
     loginWidget->show();
 }
@@ -184,9 +181,6 @@ void SettingsWidget::handleAuthResponse(QString clientId, QString clientSecret)
     settings.setValue("clientId", clientId);
     settings.setValue("clientSecret", clientSecret);
     settings.deleteLater();
-
-    m_client->setClientId(clientId);
-    m_client->setClientSecret(clientSecret);
 }
 
 void SettingsWidget::handleCourseList(Organization org)
