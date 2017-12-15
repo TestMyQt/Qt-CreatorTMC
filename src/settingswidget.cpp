@@ -33,6 +33,7 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     m_workingDir = settingsWindow->workingDir;
     m_cliLocation = settingsWindow->cliLocation;
     m_autoUpdateInterval = settingsWindow->updateInterval;
+    m_userLoggedInLabel = settingsWindow->userLoggedInLabel;
 
     m_activeOrganization = Organization::fromQSettings(&settings);
     m_activeCourse = Course::fromQSettings(&settings);
@@ -42,8 +43,9 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     workingDirectory = settings.value("workingDir", "").toString();
     m_workingDir->setText(workingDirectory);
     m_interval = settings.value("autoupdateInterval", 60).toInt();
-    m_autoUpdateInterval->setText(QString::number(m_interval));
+    m_autoUpdateInterval->setValue(m_interval);
     m_cliLocation->setText(tmcCliLocation);
+    m_userLoggedInLabel->setText("Logged in as <strong>" + settings.value("username").toString() + "</strong>");
 
     settings.deleteLater();
 
