@@ -16,7 +16,6 @@ public:
 
     void setId(int id);
     void setName(QString name);
-    void setUpdates(bool updates); // Not defined in course.cpp
     int getId() const;
     QString getName() const;
     Exercise getExercise(const int id);
@@ -24,7 +23,6 @@ public:
     void addExercise(const Exercise ex);
     QMap<int, Exercise> getExercises();
     bool hasExercise(Exercise ex);
-    void saveSettings(); // Not defined in course.cpp
     static Course fromJson(const QJsonObject jsonCourse);
     static Course fromQSettings(QSettings *settings);
     static void toQSettings(QSettings *settings, Course c);

@@ -41,6 +41,11 @@ bool Course::operator!=(const Course &other) const
     return !(*this == other);
 }
 
+/*!
+    Overloading the \c{!} operator. The expression \c {!courseObject} evaluates to
+    (the function returns) \c true if the \l {Course::getId()} {id} field of
+    \c courseObject equals -1; otherwise the expression evaluates to \c false.
+*/
 bool Course::operator!() const
 {
     return m_id == -1;
