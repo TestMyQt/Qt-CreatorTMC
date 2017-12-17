@@ -233,7 +233,6 @@ void Exercise::setUnzipped(bool zipped)
 */
 void Exercise::saveQSettings(QSettings *settings, const QString courseName)
 {
-    // Yay or nay on the indentation?
     settings->beginGroup(courseName);
         settings->beginGroup(m_name);
             settings->setValue("id", m_id);
@@ -256,12 +255,10 @@ void Exercise::saveQSettings(QSettings *settings, const QString courseName)
     \note It is assumed that the appropriate prefix has been set for the \a settings
     parameter in the calling function using
     \l {http://doc.qt.io/qt-5/qsettings.html#beginGroup} {QSettings::beginGroup()}.
- */
-Exercise Exercise::fromQSettings(QSettings *settings)
+*/
+Exercise Exercise::fromQSettings(QSettings *settings, QString exerciseName)
 {
-    Exercise ex = Exercise(settings->value("id").toInt(),
-                           settings->value("name").toString());
-
+    Exercise ex = Exercise(settings->value("id").toInt(), exerciseName);
     ex.setChecksum(settings->value("checksum", "").toString());
     ex.setLocation(settings->value("location", "").toString());
     ex.setDlDate(settings->value("dlDate", "").toString());
@@ -278,7 +275,7 @@ Exercise Exercise::fromQSettings(QSettings *settings)
     {name}, \l {Exercise::getId()} {id}, \l {Exercise::getChecksum()} {checksum}
     and \l {Exercise::getDlDate()} {deadline} fields to the values extracted from
     \a jsonExercise.
- */
+*/
 Exercise Exercise::fromJson(const QJsonObject jsonExercise)
 {
     Exercise fromJson = Exercise(jsonExercise["id"].toInt(),

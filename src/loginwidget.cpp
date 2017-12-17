@@ -2,6 +2,7 @@
 
 #include <QPushButton>
 #include <QInputDialog>
+#include <QMessageBox>
 
 LoginWidget::LoginWidget(TmcClient *client, QWidget *parent) :
     QWidget(parent),
@@ -16,6 +17,8 @@ LoginWidget::LoginWidget(TmcClient *client, QWidget *parent) :
     connect(loginWindow->cancelbutton, &QPushButton::clicked, this, &LoginWidget::close);
     connect(loginWindow->loginbutton, &QPushButton::clicked, this, &LoginWidget::onLoginClicked);
     connect(loginWindow->serverButton, &QPushButton::clicked, this, &LoginWidget::onChangeServerClicked);
+    // Login when enter is pressed in passwordinput
+    connect(loginWindow->passwordinput, &QLineEdit::returnPressed, this, &LoginWidget::onLoginClicked);
 
     m_username = loginWindow->usernameinput;
     m_password = loginWindow->passwordinput;
@@ -55,9 +58,14 @@ void LoginWidget::onChangeServerClicked()
     QInputDialog changeAddress;
     QString address = changeAddress.getText(this, "TMC", "Set TMC Server address:",
                                              QLineEdit::Normal, m_server->text());
-    if (!address.isEmpty()) {
-        m_server->setText(address);
-        m_client->setServerAddress(address);
-        m_client->authorize();
+
+    QUrl userUrl = QUrl::fromUserInput(address);
+    if (userUrl.scheme() != "https") {
+        QMessageBox::critical(this, "TMC", "Use https:// scheme.", QMessageBox::Ok);
+        return;
     }
+
+    m_server->setText(address);
+    m_client->setServerAddress(address);
+    m_client->authorize();
 }
