@@ -275,6 +275,10 @@ void TmcManager::updateExercises()
     m_client->getExerciseList(activeCourse);
 }
 
+/*!
+    Appends the \l Exercise objects of the \a exercises parameter to the list of
+    TMC exercises displayed in the download window.
+*/
 void TmcManager::appendToDownloadWindow(QList<Exercise> exercises)
 {
     foreach (Exercise ex, exercises) {
