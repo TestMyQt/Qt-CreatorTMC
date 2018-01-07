@@ -1,3 +1,25 @@
+/*!
+    \namespace TestMyCodePlugin
+    \inmodule src
+*/
+
+/*!
+    \namespace TestMyCodePlugin::Internal
+    \inmodule src
+*/
+
+/*!
+    \class TestMyCodePlugin::Internal::TestMyCode
+    \inmodule src
+    \inheaderfile testmycode.h
+    \brief \l TestMyCode is the foundation of the QtCreatorTMC project
+        in that it is the class for the Qt Creator plugin itself.
+
+    Like all Qt Creator plugins, \l TestMyCode inherits \l
+    {https://doc-snapshots.qt.io/qtcreator-extending/extensionsystem-iplugin.html}
+    {IPlugin}.
+*/
+
 #include "testmycode.h"
 #include "testmycodeconstants.h"
 #include "tmcclient.h"
