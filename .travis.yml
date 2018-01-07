@@ -3,35 +3,32 @@ os: linux
 dist: trusty
 language: cpp
 compiler: gcc
-
 env:
   global:
-    - QT_MAJOR=qt59
-    - QT_MINOR=qt591
-    - QTC_VERSION=${QT_MAJOR}creator
-    - QTC_BUILD=/opt/${QT_MAJOR}
-    - QTC_SOURCE=${TRAVIS_BUILD_DIR}/${QTC_VERSION}
-    - QTC_LIBRARY_BASENAME=lib/x86_64-linux-gnu
-    - PROJECT_PRO_FILE="testmycode.pro"
-    - BUILD_OUTPUT_PATH=${TRAVIS_BUILD_DIR}
-    - QMAKE_PARAMS="-spec linux-g++ CONFIG+=test"
-
+  - QT_MAJOR=qt59
+  - QT_MINOR=qt593
+  - QTC_VERSION=${QT_MAJOR}creator
+  - QTC_BUILD=/opt/${QT_MAJOR}
+  - QTC_SOURCE=${TRAVIS_BUILD_DIR}/${QTC_VERSION}
+  - QTC_LIBRARY_BASENAME=lib/x86_64-linux-gnu
+  - PROJECT_PRO_FILE="testmycode.pro"
+  - BUILD_OUTPUT_PATH=${TRAVIS_BUILD_DIR}
+  - QMAKE_PARAMS="-spec linux-g++ CONFIG+=test"
 install:
-  - echo "Installing ${QTC_VERSION} with ${QT_MINOR}"
-  - sudo add-apt-repository -s -y ppa:beineri/opt-${QT_MINOR}-trusty
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update -qq
-  - sudo apt-get install ${QTC_VERSION} gcc-4.8 g++-4.8 
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90 
-  - apt source ${QTC_VERSION} --tar-only
-  - mkdir -p ${QTC_SOURCE} && tar xf ${QTC_VERSION}*.tar* -C ${QTC_SOURCE} --strip-components=1
-
+- echo "Installing ${QTC_VERSION} with ${QT_MINOR}"
+- sudo add-apt-repository -s -y ppa:beineri/opt-${QT_MINOR}-trusty
+- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+- sudo apt-get update -qq
+- sudo apt-get install ${QTC_VERSION} gcc-4.8 g++-4.8
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
+- apt source ${QTC_VERSION} --tar-only
+- mkdir -p ${QTC_SOURCE} && tar xf ${QTC_VERSION}*.tar* -C ${QTC_SOURCE} --strip-components=1
 script:
-  - source /opt/${QT_MAJOR}/bin/${QT_MAJOR}-env.sh
-  - echo "Executing qmake..."
-  - qmake ${PROJECT_PRO_FILE} -r ${QMAKE_PARAMS}
-  - make
-  - make check
-
+- source /opt/${QT_MAJOR}/bin/${QT_MAJOR}-env.sh
+- echo "Executing qmake..."
+- qmake ${PROJECT_PRO_FILE} -r ${QMAKE_PARAMS}
+- make
+- make check
 notifications:
-    slack: qt-creator-tmc:vy5LHrlSP5ZUFAxX6YqvotQY
+  slack:
+    secure: puFMSz5eIo53RACr8gV/qUISsQjj+tn3WhUtsbfj7QEE15hSQge2J+vABNAiFkokciHdwxdb3VRke/ttmJiqEG6vIja57QBweMZAa5uIL5RAPE9xgtwETR0xkTlbBogfThVpKOhnd8YgjY62CpXlWiVpInBuXuslHMN8VDzFqinBvJLoVrRwQScF3o1V9MC2kszrYGCvkCr7THWZWjD4UlQfYgfNWw9qE33jNndzLPotJ9OMmKcrPG19SCk3kV8/rpJtZnOUJi+qYJaT91HYY2uvv12j9olCRQvXyz46BpimdxIeIuWMGsPSosWFFFvZVUT2XPbkDzR+a0C/Ik5RkX6Sz6GusSyfRrfiWIuKLyekBj0gRfO5Z+/BsGmJQUy26MwRy3K2z28gY5CPSK2uK6a/DRbxOUSH/62zvM0u8zmVK13u5CD0iJ8OJAQfC9EPKNaVvOygg3igHJYhxByO1qKo+PnhT1Cj3Qgo6dRWQm/JPMygBDT9XQ1oLtcBSnJeUnS/pmArHInWjvA6Yl004UbKFXcOCKGwzdHI2L0r5s5VIRLF6zE2cDmPsN8THkdLShpWivijmQot5Cn4Qhtial/+cZ2md2Iq9qwA2u7Y9b7eKid2IfLTEQ/WDgWJd3M5tUaA9DEkbPQbZNkGIOButZVHyM3+3Vn9Lyu3fn9tNHI=
