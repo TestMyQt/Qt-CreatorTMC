@@ -10,7 +10,11 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/project.h>
 
+#include <utils/fileutils.h>
+
 using ProjectExplorer::Project;
+using Utils::FileName;
+using Utils::FileNameList;
 
 class TmcSubmitter : public QObject
 {
@@ -20,7 +24,7 @@ public:
     ~TmcSubmitter();
 
     void submitProject(const Project *project);
-    bool createZip(QDir projectDir, QStringList files, QBuffer *zipBuffer);
+    bool createZip(QDir projectDir, FileNameList files, QBuffer *zipBuffer);
 
 signals:
     void submitResult(Submission sub);

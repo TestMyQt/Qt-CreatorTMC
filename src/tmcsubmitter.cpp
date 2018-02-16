@@ -41,7 +41,7 @@ TmcSubmitter::~TmcSubmitter()
 void TmcSubmitter::submitProject(const ProjectExplorer::Project *project)
 {
     QDir projectDir(project->projectDirectory().toString());
-    QStringList allFiles = project->files(Project::FilesMode::AllFiles);
+    FileNameList allFiles = project->files(ProjectExplorer::Project::AllFiles);
     QBuffer *zipBuffer = new QBuffer;
     zipBuffer->open(QIODevice::ReadWrite);
 
@@ -109,7 +109,7 @@ void TmcSubmitter::onSubmissionStatusReply(Submission sub)
     emit submitResult(sub);
 }
 
-bool TmcSubmitter::createZip(QDir projectDir, QStringList files, QBuffer *zipBuffer)
+bool TmcSubmitter::createZip(QDir projectDir, FileNameList files, QBuffer *zipBuffer)
 {
     QuaZip zip(zipBuffer);
 
@@ -117,15 +117,11 @@ bool TmcSubmitter::createZip(QDir projectDir, QStringList files, QBuffer *zipBuf
         return false;
     }
 
-    QFileInfoList fileInfo;
-    foreach (QString fn, files) {
-        fileInfo << QFileInfo(fn);
-    }
-
     QuaZipFile zipFile(&zip);
     QFile inFile;
 
-    foreach(QFileInfo fileInfo, fileInfo) {
+    foreach(FileName file, files) {
+        QFileInfo fileInfo = file.toFileInfo();
         if (!fileInfo.isFile())
             continue;
 
