@@ -7,35 +7,49 @@
 
 namespace TestMyCode {
 
+namespace TmcResult {
+enum Type {
+    Pass, FIRST_TYPE = Pass,
+    Fail,
+    Invalid,
+    TestCaseStart,
+    TestCaseEnd,
+    LAST_TYPE = Invalid
+};
+}
+
 class TmcTestResult
 {
 public:
     TmcTestResult();
-    explicit TmcTestResult(const QString &name);
+    explicit TmcTestResult(const TmcResult::Type result);
 
     virtual ~TmcTestResult() {}
 
     QString name() const { return m_name; }
-    bool isSuccessful() const { return m_successful; }
+    TmcResult::Type result() const { return m_result; }
     QString message() const { return m_message; }
     QList<QString> points() const { return m_points; }
     QString exception() const { return m_exception; }
+    QString toString() const;
 
+    void setName(const QString &name) { m_name = name; }
     void setMessage(const QString &message) { m_message = message; }
-    void setSuccess(const bool &successful) { m_successful = successful; }
-    void setPoints(QList<QString> points) { m_points = points; }
+    void setResult(const TmcResult::Type result) { m_result = result; }
+    void addPoint(const QString point) { m_points.append(point); }
     void setException(const QString &ex) { m_exception = ex; }
 
 private:
 
     QString m_name;
-    bool m_successful;
+    TmcResult::Type m_result = TmcResult::Invalid;
     QString m_message;
-    QList<QString> m_points;
+    QStringList m_points;
     QString m_exception;
 
 };
-}
+
+} // TestMyCode
 
 Q_DECLARE_METATYPE(TestMyCode::TmcTestResult)
 #endif // TMCTESTRESULT_H

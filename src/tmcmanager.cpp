@@ -15,6 +15,7 @@
 #include "testmycodeconstants.h"
 
 #include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/session.h>
 
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
@@ -31,6 +32,8 @@
 
 using Core::ProgressManager;
 using Core::FutureProgress;
+using namespace ProjectExplorer;
+using namespace TestMyCode;
 
 TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     QObject(parent),
@@ -45,7 +48,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     downloadform->setupUi(downloadWidget);
 
     // Monitor for active project change
-    using namespace ProjectExplorer;
     SessionManager *sm = SessionManager::instance();
     connect(sm, &SessionManager::startupProjectChanged,
             this, &TmcManager::onStartupProjectChanged);
@@ -62,6 +64,10 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     m_testRunner = TMCRunner::instance();
     connect(m_testRunner, &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
     connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
+    // Autotest
+    connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
+            this, &TmcManager::askSubmit);
+
     m_submitter = new TmcSubmitter(m_client);
 }
 
@@ -142,12 +148,12 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
     downloadWidget->show();
 }
 
-void TmcManager::onStartupProjectChanged(ProjectExplorer::Project *project)
+void TmcManager::onStartupProjectChanged(Project *project)
 {
     m_activeProject = project;
 }
 
-Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
+Exercise TmcManager::getProjectExercise(Project *project)
 {
     QString projectName = project->displayName();
     QMap<int, Exercise> exercises = m_settings->getActiveCourse()->getExercises();
@@ -183,10 +189,11 @@ void TmcManager::testActiveProject()
     }
 
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    m_testRunner->testProject(m_activeProject);
+
+    TmcResultReader::instance()->testProject(m_activeProject);
 }
 
-void TmcManager::askSubmit(const ProjectExplorer::Project *project)
+void TmcManager::askSubmit(const Project *project)
 {
     if (!project) {
         qDebug() << "Submission project was null";
@@ -249,7 +256,7 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     using namespace ProjectExplorer;
     QString exerciseLocation =  saveDir + "/" + ex.getName() + "/" + ex.getName() + ".pro";
     const ProjectExplorerPlugin::OpenProjectResult openProjectSucceeded =
-            ProjectExplorer::ProjectExplorerPlugin::openProject(exerciseLocation);
+            ProjectExplorerPlugin::openProject(exerciseLocation);
     qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
 }
 

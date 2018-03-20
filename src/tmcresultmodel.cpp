@@ -1,13 +1,27 @@
 #include "tmcresultmodel.h"
 #include "tmctestresult.h"
 
-#include <utils/qtcassert.h>
 #include <QStandardItemModel>
 #include <QDebug>
 
 TmcResultModel::TmcResultModel(QObject *parent) : QAbstractListModel(parent)
 {
 
+}
+
+TmcTestResult TmcResultModel::testResult(const QModelIndex &idx) const
+{
+    int row = idx.row();
+    if (!idx.isValid() || row < 0 || row >= m_results.count())
+        return TmcTestResult();
+
+    return m_results.at(row);
+}
+
+
+QList<TmcTestResult> TmcResultModel::results() const
+{
+    return m_results;
 }
 
 void TmcResultModel::addResult(const TmcTestResult &result)
@@ -18,13 +32,24 @@ void TmcResultModel::addResult(const TmcTestResult &result)
     endInsertRows();
 }
 
+void TmcResultModel::addResults(const QList<TmcTestResult> &results)
+{
+    int i = m_results.count();
+    beginInsertRows(QModelIndex(), i, results.count());
+    m_results.append(results);
+    endInsertRows();
+}
+
 void TmcResultModel::clearResults()
 {
-
     beginRemoveRows(QModelIndex(), 0, m_results.count() - 1);
     m_results.erase(m_results.begin(), m_results.end());
     endRemoveRows();
+}
 
+bool TmcResultModel::hasResults()
+{
+    return !m_results.isEmpty();
 }
 
 QModelIndex TmcResultModel::index(int row, int column, const QModelIndex &parent) const
@@ -56,28 +81,8 @@ QVariant TmcResultModel::data(const QModelIndex &index, int role) const
     if (!index.isValid() || row < 0 || row >= m_results.count() || index.column() != 0)
         return QVariant();
     if (role == Qt::DisplayRole) {
-        const TmcTestResult r = result(index);
-
-        if (r.isSuccessful()) {
-            QString points = QString(" ");
-            foreach (QString point, r.points()) {
-                points.append("[ ");
-                points.append(point);
-                points.append(" ] ");
-            }
-            return QVariant(QString("[%1]: %2, points awarded: %3").arg(r.name(), "PASSED", points));
-        }
-        return QVariant(QString("[%1]: %2").arg(r.name(), r.message()));
-
+        return m_results.at(row).toString();
     }
 
     return QVariant();
-}
-
-TmcTestResult TmcResultModel::result(const QModelIndex &index) const
-{
-    int row = index.row();
-    if (!index.isValid() || row < 0 || row >= m_results.count())
-        return TmcTestResult();
-    return m_results.at(row);
 }
