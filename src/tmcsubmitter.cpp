@@ -4,6 +4,8 @@
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
 
+#include <QDirIterator>
+
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
@@ -40,8 +42,16 @@ TmcSubmitter::~TmcSubmitter()
 
 void TmcSubmitter::submitProject(const ProjectExplorer::Project *project)
 {
-    QDir projectDir(project->projectDirectory().toString());
+    QString dir = project->projectDirectory().toString();
+    QDir projectDir(dir);
+    // TODO: figure out why AllFiles does not contain .qrc files.
     FileNameList allFiles = project->files(ProjectExplorer::Project::AllFiles);
+    // Need to add qrc's manually
+    QDirIterator it(dir, QStringList() << "*.qrc", QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        allFiles << FileName(it.fileInfo());
+    }
     QBuffer *zipBuffer = new QBuffer;
     zipBuffer->open(QIODevice::ReadWrite);
 
