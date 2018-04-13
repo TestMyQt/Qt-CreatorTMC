@@ -21,7 +21,7 @@ TmcResultReader *TmcResultReader::instance()
 
 TmcResultReader::TmcResultReader(QObject *parent) :
     QObject(parent),
-    m_tmcRegex("TMC:(?<testName>\\w+)\\.(?<point>.*)")
+    m_tmcRegex("(qml: )?TMC:(?<testName>.+)\\.(?<point>.*)")
 {
     connect(TestRunner::instance(), &TestRunner::testResultReady,
             this, &TmcResultReader::readTestResult);
