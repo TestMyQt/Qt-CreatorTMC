@@ -8,6 +8,7 @@ env:
   - QT_MAJOR=qt59
   - QT_MINOR=qt594
   - QTC_VERSION=${QT_MAJOR}creator
+  - QTC_RELEASE=4.6
   - QTC_BUILD=/opt/${QT_MAJOR}
   - QTC_SOURCE=${TRAVIS_BUILD_DIR}/${QTC_VERSION}
   - QTC_LIBRARY_BASENAME=lib/x86_64-linux-gnu
