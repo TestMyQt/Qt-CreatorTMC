@@ -154,7 +154,9 @@ Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
     Exercise projectExercise;
 
     foreach (Exercise ex, exercises.values()) {
-        if (ex.getName() == projectName) {
+        QStringList parts = ex.getName().split("-");
+        QString exerciseName = parts.last();
+        if (exerciseName == projectName) {
             // TODO: We assume active project is in active courses exercise list
             // by display name only. Need to figure out a stronger relation.
             // Something like this would be better:
@@ -265,6 +267,8 @@ void TmcManager::openExercise(Exercise ex)
 
     if (!openProjectSucceeded.project()) {
         qDebug() << "Exercise open not successful: " << proFile;
+        displayTMCError("Exercise open not successful: " << proFile);
+        return;
     }
 
     qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
