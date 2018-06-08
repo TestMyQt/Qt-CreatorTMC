@@ -267,7 +267,7 @@ void TmcManager::openExercise(Exercise ex)
 
     if (!openProjectSucceeded.project()) {
         qDebug() << "Exercise open not successful: " << proFile;
-        displayTMCError("Exercise open not successful: " << proFile);
+        displayTMCError("Exercise open not successful: " + proFile);
         return;
     }
 
