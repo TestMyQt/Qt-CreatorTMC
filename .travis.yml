@@ -21,7 +21,6 @@ install:
 - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 - sudo apt-get update -qq
 - sudo apt-get install gcc-7 g++-7
-- sudo apt-get build-dep ${QTC_VERSION}
 - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90
 - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
 - git clone -b ${QTC_RELEASE} --single-branch --depth 1 https://github.com/qt-creator/qt-creator.git ${QTC_SOURCE}
