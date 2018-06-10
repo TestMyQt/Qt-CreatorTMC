@@ -42,12 +42,12 @@ void TmcResultReader::testProject(Project *project)
 }
 
 void TmcResultReader::readTestResult(const TestResultPtr &result) {
-    QString description = result.get()->description();
+    QString description = result->description();
 
     // TestCase is registered as a TMC test case if it has
     // the qInfo message with prefix TMC, name and points
 
-    Result::Type resultType = result.get()->result();
+    Result::Type resultType = result->result();
     switch (resultType) {
     case Result::MessageTestCaseStart:
         // Start a new result
