@@ -5,27 +5,29 @@ language: cpp
 compiler: gcc
 env:
   global:
-  - QT_MAJOR=qt59
-  - QT_MINOR=qt593
-  - QTC_VERSION=${QT_MAJOR}creator
-  - QTC_BUILD=/opt/${QT_MAJOR}
-  - QTC_SOURCE=${TRAVIS_BUILD_DIR}/${QTC_VERSION}
-  - QTC_LIBRARY_BASENAME=lib/x86_64-linux-gnu
+  - QTC_MAJOR=4.6
+  - QTC_MINOR=4.6.1
+  - QTC_BUILD=${TRAVIS_BUILD_DIR}/${QTC_VERSION}-build
+  - QTC_SOURCE=${TRAVIS_BUILD_DIR}/${QTC_VERSION}-source
   - PROJECT_PRO_FILE="testmycode.pro"
   - BUILD_OUTPUT_PATH=${TRAVIS_BUILD_DIR}
   - QMAKE_PARAMS="-spec linux-g++ CONFIG+=test"
+  - MAKEFLAGS="-j 2"
 install:
-- echo "Installing ${QTC_VERSION} with ${QT_MINOR}"
-- sudo add-apt-repository -s -y ppa:beineri/opt-${QT_MINOR}-trusty
 - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+- sudo add-apt-repository -y ppa:beineri/opt-qt-5.10.1-trusty
 - sudo apt-get update -qq
-- sudo apt-get install ${QTC_VERSION} gcc-4.8 g++-4.8
-- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
-- apt source ${QTC_VERSION} --tar-only
-- mkdir -p ${QTC_SOURCE} && tar xf ${QTC_VERSION}*.tar* -C ${QTC_SOURCE} --strip-components=1
+- sudo apt-get install gcc-7 g++-7 p7zip-full qt510-meta-minimal
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+  # QTC_SOURCE
+- wget http://download.qt.io/official_releases/qtcreator/${QTC_MAJOR}/${QTC_MINOR}/installer_source/linux_gcc_64_rhel72/qtcreator_dev.7z
+  # QTC_BUILD
+- wget http://download.qt.io/official_releases/qtcreator/${QTC_MAJOR}/${QTC_MINOR}/installer_source/linux_gcc_64_rhel72/qtcreator.7z
+- 7z x qtcreator_dev.7z -o${QTC_SOURCE} > /dev/null
+- 7z x qtcreator.7z -o${QTC_BUILD} > /dev/null
 script:
-- source /opt/${QT_MAJOR}/bin/${QT_MAJOR}-env.sh
-- echo "Executing qmake..."
+- source /opt/qt510/bin/qt510-env.sh
 - qmake ${PROJECT_PRO_FILE} -r ${QMAKE_PARAMS}
 - make
 - make check

@@ -154,7 +154,9 @@ Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
     Exercise projectExercise;
 
     foreach (Exercise ex, exercises.values()) {
-        if (ex.getName() == projectName) {
+        QStringList parts = ex.getName().split("-");
+        QString exerciseName = parts.last();
+        if (exerciseName == projectName) {
             // TODO: We assume active project is in active courses exercise list
             // by display name only. Need to figure out a stronger relation.
             // Something like this would be better:
@@ -226,7 +228,6 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     zipBuffer.open(QIODevice::ReadOnly);
 
     QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
-    QString location = extracted.at(0).section("/", 0, -2);
     if (extracted.isEmpty()) {
         displayTMCError("Error unzipping exercise files!");
         return;
@@ -239,17 +240,37 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 
     ex.setDownloaded(true);
     ex.setUnzipped(true);
-    ex.setLocation(location);
+
+    ex.setLocation(saveDir);
     // Save updated exercise back to course exercise list
     activeCourse->addExercise(ex);
     QSettings settings("TestMyQt", "TMC");
     ex.saveQSettings(&settings, activeCourse->getName());
     settings.deleteLater();
     // open project
+    openExercise(ex);
+}
+
+void TmcManager::openExercise(Exercise ex)
+{
+    if (ex.getLocation().isEmpty()) {
+        displayTMCError("Exercise location is empty!");
+        return;
+    }
+
     using namespace ProjectExplorer;
-    QString exerciseLocation =  saveDir + "/" + ex.getName() + "/" + ex.getName() + ".pro";
+    // Part1-Exercise1 -> Part1/Exercise1
+    QStringList parts = ex.getName().split("-");
+    QString proFile = ex.getLocation() + "/" + parts.join("/") + "/" + parts.last() + ".pro";
     const ProjectExplorerPlugin::OpenProjectResult openProjectSucceeded =
-            ProjectExplorer::ProjectExplorerPlugin::openProject(exerciseLocation);
+            ProjectExplorerPlugin::openProject(proFile);
+
+    if (!openProjectSucceeded.project()) {
+        qDebug() << "Exercise open not successful: " << proFile;
+        displayTMCError("Exercise open not successful: " + proFile);
+        return;
+    }
+
     qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
 }
 
