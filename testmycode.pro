@@ -3,13 +3,16 @@ TEMPLATE = subdirs
 SUBDIRS = \
         src \
         3rdparty \
-        lib/tmcclient
+        tmcclient
 
-src.depends = lib/tmcclient 3rdparty
+tmcclient.subdir = lib/tmcclient
+src.depends = tmcclient 3rdparty
 
 test {
     message(Configuring test build)
-    SUBDIRS += lib/tmcclient/test
+    SUBDIRS += test
+
+    test.subdirs = lib/tmcclient/test
     test.depends += 3rdparty
-    test.depends += lib/tmcclient
+    test.depends += tmcclient
 }
