@@ -1,5 +1,6 @@
 #include "tmcsubmitter.h"
 #include "testmycodeconstants.h"
+#include "ziphelper.h"
 
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
@@ -59,7 +60,7 @@ void TmcSubmitter::submitProject(const ProjectExplorer::Project *project)
     if (!ex) return;
 
     qDebug() << "Zipping" << ex.getName();
-    if (!createZip(projectDir, allFiles, zipBuffer)) {
+    if (!ZipHelper::createZip(projectDir, allFiles, zipBuffer)) {
         qDebug() << "Zipping failed:" << project->displayName();
         return;
     }
@@ -119,51 +120,4 @@ void TmcSubmitter::onSubmissionStatusReply(Submission sub)
     emit submitResult(sub);
 }
 
-bool TmcSubmitter::createZip(QDir projectDir, FileNameList files, QBuffer *zipBuffer)
-{
-    QuaZip zip(zipBuffer);
 
-    if (!zip.open(QuaZip::mdCreate)) {
-        return false;
-    }
-
-    QuaZipFile zipFile(&zip);
-    QFile inFile;
-
-    foreach(FileName file, files) {
-        QFileInfo fileInfo = file.toFileInfo();
-        if (!fileInfo.isFile())
-            continue;
-
-        QString filenameRelativePath = fileInfo.filePath().remove(0, projectDir.absolutePath().length() + 1);
-
-        inFile.setFileName(fileInfo.filePath());
-        if (!inFile.open(QIODevice::ReadOnly)) {
-            return false;
-        }
-
-        QuaZipNewInfo info = QuaZipNewInfo(filenameRelativePath, fileInfo.filePath());
-        if (!zipFile.open(QIODevice::WriteOnly, info)) {
-            return false;
-        }
-
-        // Copy data to zip
-        zipFile.write(inFile.readAll());
-
-        // Was writing ok?
-        if (zipFile.getZipError() != 0) {
-            return false;
-        }
-
-        zipFile.close();
-
-        // Was close ok?
-        if (zipFile.getZipError() != 0) {
-            return false;
-        }
-
-        inFile.close();
-    }
-
-    return true;
-}
