@@ -128,6 +128,11 @@ QString SettingsWidget::getTmcCliLocation()
     return tmcCliLocation;
 }
 
+bool SettingsWidget::haveTmcCli()
+{
+    return !tmcCliLocation.isEmpty();
+}
+
 void SettingsWidget::onBrowseClicked()
 {
     QString dir = askSaveLocation();
@@ -222,10 +227,6 @@ void SettingsWidget::onSettingsOkClicked()
 {
     if (m_workingDir->text() == "") {
         QMessageBox::critical(this, "TMC", "Please set the working directory!", QMessageBox::Ok);
-        return;
-    }
-    if (m_cliLocation->text() == "") {
-        QMessageBox::critical(this, "TMC", "Please set the jar location!", QMessageBox::Ok);
         return;
     }
 

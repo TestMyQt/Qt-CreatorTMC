@@ -190,9 +190,12 @@ void TmcManager::testActiveProject()
     }
 
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    // TestRunner runs tmc-langs.jar
-    // m_testRunner->testProject(m_activeProject);
-    TmcResultReader::instance()->testProject(m_activeProject);
+    if (m_settings->haveTmcCli()) {
+        // TestRunner runs tmc-langs.jar
+        m_testRunner->testProject(m_activeProject);
+    } else {
+        TmcResultReader::instance()->testProject(m_activeProject);
+    }
 }
 
 void TmcManager::askSubmit(const ProjectExplorer::Project *project)
