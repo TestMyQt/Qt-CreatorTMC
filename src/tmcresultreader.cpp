@@ -32,6 +32,10 @@ TmcResultReader::TmcResultReader(QObject *parent) :
 
 void TmcResultReader::testProject(Project *project)
 {
+    if (!project) {
+        qDebug() << "Testing project null!";
+        return;
+    }
     m_testResults.clear();
     m_project = project;
     TestRunner *runner = TestRunner::instance();

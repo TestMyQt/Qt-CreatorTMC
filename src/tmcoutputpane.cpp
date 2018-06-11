@@ -128,9 +128,8 @@ TmcOutputPane::~TmcOutputPane()
 
 void TmcOutputPane::onTMCTriggered()
 {
-    TMCRunner *runner = TMCRunner::instance();
     Project *project = SessionManager::startupProject();
-    runner->testProject(project);
+    TmcResultReader::instance()->testProject(project);
 }
 
 void TmcOutputPane::addTestResult(const TmcTestResult &result)
