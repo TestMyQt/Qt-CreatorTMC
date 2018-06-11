@@ -142,9 +142,14 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
     }
 
     downloadform->exerciselist->clear();
-    appendToDownloadWindow(newExercises);
+
+    // Have new exercises
+    if (!newExercises.isEmpty()) {
+        appendToDownloadWindow(newExercises);
+        downloadWidget->show();
+    }
+
     m_updateProgress.reportFinished();
-    downloadWidget->show();
 }
 
 void TmcManager::onStartupProjectChanged(ProjectExplorer::Project *project)
