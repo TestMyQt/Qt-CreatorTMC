@@ -44,38 +44,40 @@ DEPENDPATH += $$PWD/../3rdparty/quazip/ \
 # TestMyCode files
 
 HEADERS += testmycode.h \
-        testmycode_global.h \
-        testmycodeconstants.h \
-        tmcoutputpane.h \
-        tmcrunner.h \
-        tmctestresult.h \
-        tmcresultmodel.h \
-        downloadpanel.h \
-        settingswidget.h \
-        loginwidget.h \
-        tmcmanager.h \
-        tmcsubmitter.h \
-        submitwidget.h \
-        tmcresultreader.h
+    testmycode_global.h \
+    testmycodeconstants.h \
+    tmcoutputpane.h \
+    tmcrunner.h \
+    tmctestresult.h \
+    tmcresultmodel.h \
+    downloadpanel.h \
+    settingswidget.h \
+    loginwidget.h \
+    tmcmanager.h \
+    tmcsubmitter.h \
+    submitwidget.h \
+    tmcresultreader.h \
+    ziphelper.h
 
 SOURCES += testmycode.cpp \
-        tmcoutputpane.cpp \
-        tmcrunner.cpp \
-        tmctestresult.cpp \
-        tmcresultmodel.cpp \
-        downloadpanel.cpp \
-        settingswidget.cpp \
-        loginwidget.cpp \
-        tmcmanager.cpp \
-        tmcsubmitter.cpp \
-        submitwidget.cpp \
-        tmcresultreader.cpp
+    tmcoutputpane.cpp \
+    tmcrunner.cpp \
+    tmctestresult.cpp \
+    tmcresultmodel.cpp \
+    downloadpanel.cpp \
+    settingswidget.cpp \
+    loginwidget.cpp \
+    tmcmanager.cpp \
+    tmcsubmitter.cpp \
+    submitwidget.cpp \
+    tmcresultreader.cpp \
+    ziphelper.cpp
 
 FORMS += \
-        ui/loginscreen.ui \
-        ui/downloadscreen.ui \
-        ui/settings.ui \
-        ui/submit.ui
+    ui/loginscreen.ui \
+    ui/downloadscreen.ui \
+    ui/settings.ui \
+    ui/submit.ui
 
 # Qt Creator linking
 

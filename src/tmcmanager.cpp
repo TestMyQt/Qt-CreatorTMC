@@ -13,6 +13,7 @@
 
 #include "tmcmanager.h"
 #include "testmycodeconstants.h"
+#include "ziphelper.h"
 
 #include <projectexplorer/projectexplorer.h>
 
@@ -25,9 +26,6 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QMap>
-#include <QBuffer>
-
-#include <quazip/JlCompress.h>
 
 using Core::ProgressManager;
 using Core::FutureProgress;
@@ -239,10 +237,7 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     QString saveDir = QString("%1/%2").arg(m_settings->getWorkingDirectory(),
                                            activeCourse->getName());
 
-    QBuffer zipBuffer(&zipData);
-    zipBuffer.open(QIODevice::ReadOnly);
-
-    QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
+    QStringList extracted = ZipHelper::extractZip(&zipData, saveDir);
     if (extracted.isEmpty()) {
         displayTMCError("Error unzipping exercise files!");
         return;
@@ -272,21 +267,27 @@ void TmcManager::openExercise(Exercise ex)
         displayTMCError("Exercise location is empty!");
         return;
     }
-
     using namespace ProjectExplorer;
+
     // Part1-Exercise1 -> Part1/Exercise1
     QStringList parts = ex.getName().split("-");
-    QString proFile = ex.getLocation() + "/" + parts.join("/") + "/" + parts.last() + ".pro";
-    const ProjectExplorerPlugin::OpenProjectResult openProjectSucceeded =
-            ProjectExplorerPlugin::openProject(proFile);
+    QString proFile = QString("%1/%2/%3.pro")
+            .arg(ex.getLocation(), parts.join("/"), parts.last());
 
-    if (!openProjectSucceeded.project()) {
+    const auto openProject = ProjectExplorerPlugin::openProject(proFile);
+
+    if (!openProject.alreadyOpen().isEmpty()) {
+        qDebug() << "Project already open";
+        return;
+    }
+
+    if (!openProject) {
         qDebug() << "Exercise open not successful: " << proFile;
         displayTMCError("Exercise open not successful: " + proFile);
         return;
     }
 
-    qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
+    qDebug() << "Opened:" << openProject.project()->displayName();
 }
 
 /*!
