@@ -22,5 +22,7 @@ _Environment variables_:
 - Test build `qmake -spec linux-g++ CONFIG+=test`
 - Run `make` to install the plugin `.so` file to the plugin directory
 
+To run the plugin/IDE, you need to create a Run configuration to launch the `QTC_BUILD`, Projects Mode -> Run. It is recommended to add the additional command line argument `-settingspath path-to-temporary-settings` to not run in the same creator session as your development environment.
+
 ## Generating QDoc
 The QDoc configuration file is `main.qdocconf` in the root directory of the project. The QDoc documentation is automatically generated into `doc/html` by running the command `qdoc main.qdocconf`. Note that each time the command is run, all the previous content of `doc/html` is deleted. So don't place any manually generated content into the directory!

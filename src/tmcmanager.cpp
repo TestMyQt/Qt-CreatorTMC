@@ -15,7 +15,6 @@
 #include "testmycodeconstants.h"
 
 #include <projectexplorer/projectexplorer.h>
-#include <projectexplorer/session.h>
 
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
@@ -32,8 +31,6 @@
 
 using Core::ProgressManager;
 using Core::FutureProgress;
-using namespace ProjectExplorer;
-using namespace TestMyCode;
 
 TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     QObject(parent),
@@ -48,6 +45,7 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     downloadform->setupUi(downloadWidget);
 
     // Monitor for active project change
+    using namespace ProjectExplorer;
     SessionManager *sm = SessionManager::instance();
     connect(sm, &SessionManager::startupProjectChanged,
             this, &TmcManager::onStartupProjectChanged);
@@ -64,6 +62,7 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     m_testRunner = TMCRunner::instance();
     connect(m_testRunner, &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
     connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
+
     // Autotest
     connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
             this, &TmcManager::askSubmit);
@@ -148,19 +147,21 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
     downloadWidget->show();
 }
 
-void TmcManager::onStartupProjectChanged(Project *project)
+void TmcManager::onStartupProjectChanged(ProjectExplorer::Project *project)
 {
     m_activeProject = project;
 }
 
-Exercise TmcManager::getProjectExercise(Project *project)
+Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
 {
     QString projectName = project->displayName();
     QMap<int, Exercise> exercises = m_settings->getActiveCourse()->getExercises();
     Exercise projectExercise;
 
     foreach (Exercise ex, exercises.values()) {
-        if (ex.getName() == projectName) {
+        QStringList parts = ex.getName().split("-");
+        QString exerciseName = parts.last();
+        if (exerciseName == projectName) {
             // TODO: We assume active project is in active courses exercise list
             // by display name only. Need to figure out a stronger relation.
             // Something like this would be better:
@@ -189,11 +190,12 @@ void TmcManager::testActiveProject()
     }
 
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-
+    // TestRunner runs tmc-langs.jar
+    // m_testRunner->testProject(m_activeProject);
     TmcResultReader::instance()->testProject(m_activeProject);
 }
 
-void TmcManager::askSubmit(const Project *project)
+void TmcManager::askSubmit(const ProjectExplorer::Project *project)
 {
     if (!project) {
         qDebug() << "Submission project was null";
@@ -233,7 +235,6 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     zipBuffer.open(QIODevice::ReadOnly);
 
     QStringList extracted = JlCompress::extractDir(&zipBuffer, saveDir);
-    QString location = extracted.at(0).section("/", 0, -2);
     if (extracted.isEmpty()) {
         displayTMCError("Error unzipping exercise files!");
         return;
@@ -246,17 +247,37 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 
     ex.setDownloaded(true);
     ex.setUnzipped(true);
-    ex.setLocation(location);
+
+    ex.setLocation(saveDir);
     // Save updated exercise back to course exercise list
     activeCourse->addExercise(ex);
     QSettings settings("TestMyQt", "TMC");
     ex.saveQSettings(&settings, activeCourse->getName());
     settings.deleteLater();
     // open project
+    openExercise(ex);
+}
+
+void TmcManager::openExercise(Exercise ex)
+{
+    if (ex.getLocation().isEmpty()) {
+        displayTMCError("Exercise location is empty!");
+        return;
+    }
+
     using namespace ProjectExplorer;
-    QString exerciseLocation =  saveDir + "/" + ex.getName() + "/" + ex.getName() + ".pro";
+    // Part1-Exercise1 -> Part1/Exercise1
+    QStringList parts = ex.getName().split("-");
+    QString proFile = ex.getLocation() + "/" + parts.join("/") + "/" + parts.last() + ".pro";
     const ProjectExplorerPlugin::OpenProjectResult openProjectSucceeded =
-            ProjectExplorerPlugin::openProject(exerciseLocation);
+            ProjectExplorerPlugin::openProject(proFile);
+
+    if (!openProjectSucceeded.project()) {
+        qDebug() << "Exercise open not successful: " << proFile;
+        displayTMCError("Exercise open not successful: " + proFile);
+        return;
+    }
+
     qDebug() << "Opened:" << openProjectSucceeded.project()->displayName();
 }
 

@@ -67,6 +67,8 @@ private:
 
     Project *m_activeProject = nullptr;
 
+    void openExercise(Exercise ex);
+
     // DownloadWidget
     Ui::downloadform *downloadform;
     QWidget *downloadWidget;
