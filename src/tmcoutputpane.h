@@ -21,6 +21,20 @@ namespace Core {
 class IContext;
 }
 
+class TmcListView : public Utils::ListView
+{
+    Q_OBJECT
+public:
+    explicit TmcListView(QWidget *parent = 0);
+
+signals:
+    void copyShortcutTriggered();
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
+};
+
+
 class TmcOutputPane : public Core::IOutputPane
 {
     Q_OBJECT
@@ -44,7 +58,15 @@ public:
     void goToNext() override;
     void goToPrev() override;
 
+    void addTestResult(const TmcTestResult &result);
     void addTestResults(const QList<TmcTestResult> &results);
+    const TmcTestResult testResult(const QModelIndex &idx);
+
+    void onCustomContextMenuRequested(const QPoint &pos);
+    void onCopyItemTriggered(const TmcTestResult &result);
+
+public slots:
+    void onTestRunFinished();
 
 private:
     explicit TmcOutputPane(QObject *parent = 0);
@@ -54,10 +76,9 @@ private:
     void createToolButtons();
     void updateRunActions();
 
-    Core::IContext *m_context;
     QStackedWidget *m_outputWidget;
     QWidget *m_resultWidget;
-    Utils::ListView *m_listView;
+    TmcListView *m_listView;
     TmcResultModel *m_model;
     QToolButton *m_runTMC;
     bool m_wasVisibleBefore = false;

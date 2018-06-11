@@ -62,6 +62,11 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     m_testRunner = TMCRunner::instance();
     connect(m_testRunner, &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
     connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
+
+    // Autotest
+    connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
+            this, &TmcManager::askSubmit);
+
     m_submitter = new TmcSubmitter(m_client);
 }
 
@@ -185,7 +190,12 @@ void TmcManager::testActiveProject()
     }
 
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    m_testRunner->testProject(m_activeProject);
+    if (m_settings->haveTmcCli()) {
+        // TestRunner runs tmc-langs.jar
+        m_testRunner->testProject(m_activeProject);
+    } else {
+        TmcResultReader::instance()->testProject(m_activeProject);
+    }
 }
 
 void TmcManager::askSubmit(const ProjectExplorer::Project *project)

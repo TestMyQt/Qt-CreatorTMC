@@ -55,7 +55,8 @@ HEADERS += testmycode.h \
         loginwidget.h \
         tmcmanager.h \
         tmcsubmitter.h \
-        submitwidget.h
+        submitwidget.h \
+        tmcresultreader.h
 
 SOURCES += testmycode.cpp \
         tmcoutputpane.cpp \
@@ -67,7 +68,8 @@ SOURCES += testmycode.cpp \
         loginwidget.cpp \
         tmcmanager.cpp \
         tmcsubmitter.cpp \
-        submitwidget.cpp
+        submitwidget.cpp \
+        tmcresultreader.cpp
 
 FORMS += \
         ui/loginscreen.ui \
@@ -116,7 +118,8 @@ QTC_LIB_DEPENDS += \
 
 QTC_PLUGIN_DEPENDS += \
     coreplugin \
-    projectexplorer
+    projectexplorer \
+    autotest
 
 QTC_PLUGIN_RECOMMENDS += \
     # optional plugin dependencies. nothing here at this time

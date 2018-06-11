@@ -22,12 +22,13 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    TmcTestResult result(const QModelIndex &index) const;
 
+    TmcTestResult testResult(const QModelIndex &idx) const;
     QList<TmcTestResult> results() const;
     void addResult(const TmcTestResult &result);
     void addResults(const QList<TmcTestResult> &results);
     void clearResults();
+    bool hasResults();
 
 private:
 

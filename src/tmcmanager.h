@@ -6,6 +6,9 @@
 #include "tmcrunner.h"
 #include "tmcsubmitter.h"
 #include "downloadpanel.h"
+#include "tmcresultreader.h"
+
+#include <autotest/testresult.h>
 
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/project.h>
@@ -15,6 +18,10 @@
 #include <QFutureWatcher>
 #include <QObject>
 #include <QTimer>
+
+using namespace TestMyCode;
+using namespace Autotest::Internal;
+using namespace ProjectExplorer;
 
 class TmcManager : public QObject
 {
@@ -37,12 +44,12 @@ signals:
 public slots:
     void displayTMCError(QString errorText);
 
-    void onStartupProjectChanged(ProjectExplorer::Project *project);
-    Exercise getProjectExercise(ProjectExplorer::Project *project);
+    void onStartupProjectChanged(Project *project);
+    Exercise getProjectExercise(Project *project);
 
     void setUpdateInterval(int interval);
     void updateExercises();
-    void askSubmit(const ProjectExplorer::Project *project);
+    void askSubmit(const Project *project);
 
     void handleUpdates(Course *updatedCourse, QList<Exercise> newExercises);
     void appendToDownloadWindow(QList<Exercise> exercises);
@@ -58,7 +65,7 @@ private:
     TMCRunner *m_testRunner;
     TmcSubmitter *m_submitter;
 
-    ProjectExplorer::Project *m_activeProject = nullptr;
+    Project *m_activeProject = nullptr;
 
     void openExercise(Exercise ex);
 

@@ -1,5 +1,6 @@
 #include "tmcoutputpane.h"
 #include "tmcrunner.h"
+#include "tmcresultreader.h"
 #include "tmcresultmodel.h"
 
 #include <aggregation/aggregate.h>
@@ -31,9 +32,23 @@
 
 using ProjectExplorer::SessionManager;
 
+TmcListView::TmcListView(QWidget *parent)
+    : Utils::ListView(parent)
+{
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+}
+
+void TmcListView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Copy)) {
+        emit copyShortcutTriggered();
+        event->accept();
+    }
+    ListView::keyPressEvent(event);
+}
+
 TmcOutputPane::TmcOutputPane(QObject *parent) :
     Core::IOutputPane(parent),
-    m_context(new Core::IContext(this)),
     m_outputWidget(nullptr),
     m_runTMC(nullptr)
 {
@@ -48,10 +63,12 @@ TmcOutputPane::TmcOutputPane(QObject *parent) :
     pal.setColor(QPalette::WindowText,
                  Utils::creatorTheme()->color(Utils::Theme::InfoBarText));
 
-    m_listView = new Utils::ListView;
+    m_listView = new TmcListView;
     m_model = new TmcResultModel(m_listView);
     m_listView->setModel(m_model);
     m_listView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_listView->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_listView->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     pal = m_listView->palette();
     pal.setColor(QPalette::Base, pal.window().color());
@@ -61,6 +78,23 @@ TmcOutputPane::TmcOutputPane(QObject *parent) :
     m_outputWidget->addWidget(m_listView);
 
     createToolButtons();
+
+
+    // Copy context menu
+    connect(m_listView, &Utils::ListView::customContextMenuRequested,
+            this, &TmcOutputPane::onCustomContextMenuRequested);
+    connect(m_listView, &TmcListView::copyShortcutTriggered, [this] () {
+        onCopyItemTriggered(testResult(m_listView->currentIndex()));
+    });
+
+    connect(TmcResultReader::instance(), &TmcResultReader::testRunStarted,
+            this, &TmcOutputPane::clearContents);
+
+    connect(TmcResultReader::instance(), &TmcResultReader::testRunFinished,
+            this, &TmcOutputPane::onTestRunFinished);
+
+    connect(TmcResultReader::instance(), &TmcResultReader::testResultReady,
+            this, &TmcOutputPane::addTestResult);
 
     connect(TMCRunner::instance(), &TMCRunner::testResultReady,
             this, &TmcOutputPane::addTestResults);
@@ -99,15 +133,36 @@ void TmcOutputPane::onTMCTriggered()
     runner->testProject(project);
 }
 
-void TmcOutputPane:: addTestResults(const QList<TmcTestResult> &results) {
-    foreach (TmcTestResult r, results) {
-        m_model->addResult(r);
-    }
+void TmcOutputPane::addTestResult(const TmcTestResult &result)
+{
+    m_model->addResult(result);
 
-    // Focus on the results pane
-    popup(IOutputPane::Flag(WithFocus));
     flash();
     navigateStateChanged();
+}
+
+// TODO: remove when not needed
+void TmcOutputPane::addTestResults(const QList<TmcTestResult> &results)
+{
+    m_model->addResults(results);
+
+    // Focus on the results pane
+    flash();
+    navigateStateChanged();
+}
+
+const TmcTestResult TmcOutputPane::testResult(const QModelIndex &idx)
+{
+    if (!idx.isValid())
+        return TmcTestResult();
+
+    return m_model->testResult(idx);
+}
+
+void TmcOutputPane::onTestRunFinished()
+{
+    if (!m_listView->isVisible())
+        popup(Core::IOutputPane::NoModeSwitch);
 }
 
 void TmcOutputPane::clearContents()
@@ -184,3 +239,24 @@ void TmcOutputPane::goToPrev()
 {
 }
 
+void TmcOutputPane::onCustomContextMenuRequested(const QPoint &pos)
+{
+    const bool resultsAvailable = m_model->hasResults();
+    const TmcTestResult clicked = m_model->testResult(m_listView->indexAt(pos));
+    QMenu menu;
+
+    QAction *action = new QAction(tr("Copy"), &menu);
+    action->setShortcut(QKeySequence(QKeySequence::Copy));
+    action->setEnabled(resultsAvailable && clicked.result() != TmcResult::Invalid);
+    connect(action, &QAction::triggered, [this, clicked] () {
+       onCopyItemTriggered(clicked);
+    });
+    menu.addAction(action);
+
+    menu.exec(m_listView->mapToGlobal(pos));
+}
+
+void TmcOutputPane::onCopyItemTriggered(const TmcTestResult &result)
+{
+    QApplication::clipboard()->setText(result.toString());
+}

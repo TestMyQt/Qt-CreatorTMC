@@ -110,7 +110,7 @@ void TMCRunner::launchTmcCLI(const Utils::FileName &workingDirectory)
 bool TMCRunner::checkPassedStatus(QList<TmcTestResult> testResults)
 {
     foreach (const TmcTestResult &result, testResults) {
-        if (!result.isSuccessful()) return false;
+        if (!result.result() != TmcResult::Pass) return false;
     }
 
     return true;
@@ -159,17 +159,15 @@ QList<TmcTestResult> TMCRunner::readTMCOutput(const QString &testOutput)
     const QJsonArray testResults = json["testResults"].toArray();
     foreach (QJsonValue result, testResults) {
         QJsonObject r = result.toObject();
-        TmcTestResult tmcResult(r["name"].toString());
-        tmcResult.setSuccess(r["successful"].toBool());
+        TmcTestResult tmcResult(r["successful"].toBool() ? TmcResult::Pass : TmcResult::Fail);
+        tmcResult.setName(r["name"].toString());
         tmcResult.setMessage(r["message"].toString());
         tmcResult.setException(r["exception"].toString());
 
-        QList<QString> points;
         QJsonArray points_array = r["points"].toArray();
         foreach (QJsonValue point, points_array) {
-            points.append(point.toString());
+            tmcResult.addPoint(point.toString());
         }
-        tmcResult.setPoints(points);
         results.append(tmcResult);
     }
 

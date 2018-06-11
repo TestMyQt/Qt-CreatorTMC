@@ -21,6 +21,7 @@ public:
     Course* getActiveCourse();
     int getAutoupdateInterval();
     QString getTmcCliLocation();
+    bool haveTmcCli();
 
 signals:
     void workingDirectoryChanged(QString location);

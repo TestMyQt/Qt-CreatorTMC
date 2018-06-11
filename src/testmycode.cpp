@@ -120,6 +120,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto tools_menu = ActionManager::actionContainer(Core::Constants::M_WINDOW);
     ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
 
+    addAutoReleasedObject(TmcOutputPane::instance());
+
     // Initialize settings window
     settingsWidget = new SettingsWidget(&tmcClient);
 
