@@ -13,11 +13,14 @@ public:
     bool operator==(const Course &other) const;
     bool operator!=(const Course &other) const;
     bool operator!() const;
+    explicit operator bool() const;
 
     void setId(int id);
     void setName(QString name);
     int getId() const;
     QString getName() const;
+    QString getTitle() const;
+    void setTitle(QString title);
     Exercise getExercise(const int id);
     Exercise getExercise(const Exercise ex);
     void addExercise(const Exercise ex);
@@ -30,6 +33,7 @@ public:
 private:
     int m_id;
     QString m_name;
+    QString m_title;
     QMap<int, Exercise> m_exercises;
 };
 

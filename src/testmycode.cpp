@@ -94,9 +94,16 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     Command *downloadUpdateCmd = ActionManager::registerAction(downloadUpdateAction,
                                                                Constants::DOWNLOAD_UPLOAD_ACTION_ID,
                                                                Context(Core::Constants::C_GLOBAL));
+    auto courseAction = new QAction(this);
+    courseAction->setEnabled(false);
+    courseAction->setVisible(false);
+    Command *courseCmd = ActionManager::registerAction(courseAction,
+                                                       Constants::COURSE_ID,
+                                                       Context(Core::Constants::C_GLOBAL));
 
     auto submitAction = new QAction(tr("Submit"), this);
-    Command *submitCmd = ActionManager::registerAction(submitAction, Constants::SUBMIT_ACTION_ID,
+    Command *submitCmd = ActionManager::registerAction(submitAction,
+                                                       Constants::SUBMIT_ACTION_ID,
                                                        Context(Core::Constants::C_GLOBAL));
 
     // Shortcut
@@ -115,6 +122,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     menu->addAction(settingsCmd);
     menu->addAction(downloadUpdateCmd);
     menu->addAction(submitCmd);
+    menu->addAction(courseCmd);
 
     // Add TestMyCode between Tools and Window in the upper menu
     auto tools_menu = ActionManager::actionContainer(Core::Constants::M_WINDOW);
@@ -127,16 +135,24 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     connect(loginAction, &QAction::triggered, settingsWidget, &SettingsWidget::showLoginWidget);
     connect(settingsAction, &QAction::triggered, settingsWidget, &SettingsWidget::display);
+    connect(settingsWidget, &SettingsWidget::enableDownloadSubmit, this, [=](bool enable){
+       downloadUpdateAction->setEnabled(enable);
+       submitAction->setEnabled(enable);
+    });
+
+    connect(settingsWidget, &SettingsWidget::activeCourseChanged, this, [=](Course *course){
+        courseCmd->action()->setText("Active project: " + course->getTitle());
+        courseAction->setEnabled(true);
+        courseAction->setVisible(true);
+    });
+
+    settingsWidget->loadSettings();
 
     // Disable/Enable Download/Update and Submit buttons
     if (!tmcClient.isAuthenticated()) {
         downloadUpdateAction->setDisabled(true);
         submitAction->setDisabled(true);
     }
-    connect(settingsWidget, &SettingsWidget::enableDownloadSubmit, this, [=](bool enable){
-       downloadUpdateAction->setEnabled(enable);
-       submitAction->setEnabled(enable);
-    });
 
     // TmcManager
     m_tmcManager = new TmcManager(&tmcClient);
@@ -147,6 +163,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(tmcAction, &QAction::triggered, m_tmcManager, &TmcManager::testActiveProject);
     // Submit active project
     connect(submitAction, &QAction::triggered, m_tmcManager, &TmcManager::submitActiveExercise);
+    // Open browser for course page
+    connect(courseAction, &QAction::triggered, m_tmcManager, &TmcManager::openActiveCoursePage);
 
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);

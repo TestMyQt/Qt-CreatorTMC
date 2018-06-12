@@ -1,5 +1,4 @@
 #include "tmcoutputpane.h"
-#include "tmcrunner.h"
 #include "tmcresultreader.h"
 #include "tmcresultmodel.h"
 
@@ -13,6 +12,7 @@
 #include <coreplugin/icore.h>
 #include <projectexplorer/buildmanager.h>
 #include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/session.h>
 #include <texteditor/texteditor.h>
 #include <utils/theme/theme.h>
 #include <utils/utilsicons.h>
@@ -95,9 +95,6 @@ TmcOutputPane::TmcOutputPane(QObject *parent) :
 
     connect(TmcResultReader::instance(), &TmcResultReader::testResultReady,
             this, &TmcOutputPane::addTestResult);
-
-    connect(TMCRunner::instance(), &TMCRunner::testResultReady,
-            this, &TmcOutputPane::addTestResults);
 }
 
 void TmcOutputPane::createToolButtons()

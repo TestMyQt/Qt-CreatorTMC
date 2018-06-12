@@ -15,20 +15,18 @@ class SettingsWidget : public QWidget
 public:
     explicit SettingsWidget(TmcClient *client, QWidget *parent = nullptr);
 
+    void loadSettings();
     void display();
 
     QString getWorkingDirectory();
     Course* getActiveCourse();
     int getAutoupdateInterval();
-    QString getTmcCliLocation();
-    bool haveTmcCli();
 
 signals:
     void workingDirectoryChanged(QString location);
     void organizationChanged(Organization org);
     void activeCourseChanged(Course *course);
     void autoUpdateIntervalChanged(int interval);
-    void tmcCliLocationChanged(QString location);
     void enableDownloadSubmit(bool enable);
 
 public slots:
@@ -45,14 +43,12 @@ private:
     QComboBox *m_courseComboBox;
     QLineEdit *m_workingDir;
     QSpinBox *m_autoUpdateInterval;
-    QLineEdit *m_cliLocation;
     QLabel *m_userLoggedInLabel;
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;
     Course m_activeCourse;
     QString workingDirectory;
-    QString tmcCliLocation;
     int m_interval;
 
     void handleLoginResponse(QString accessToken);
@@ -62,7 +58,6 @@ private:
     void setComboboxIndex(QComboBox *box, QString value);
     void onSettingsOkClicked();
     void onBrowseClicked();
-    void onCliBrowseClicked();
     void clearCredentials();
     void setUpdateInterval(int interval);
 

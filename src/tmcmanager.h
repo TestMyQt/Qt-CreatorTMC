@@ -4,7 +4,6 @@
 #include "tmcclient.h"
 #include "settingswidget.h"
 #include "submitwidget.h"
-#include "tmcrunner.h"
 #include "downloadpanel.h"
 #include "tmcresultreader.h"
 
@@ -32,6 +31,7 @@ public:
 
     void testActiveProject();
     void submitActiveExercise();
+    void openActiveCoursePage();
 
     int updateInterval();
     bool lastUpdateSuccessful();
@@ -62,7 +62,6 @@ private:
 
     TmcClient *m_client;
     SettingsWidget *m_settings;
-    TMCRunner *m_testRunner;
 
     Project *m_activeProject = nullptr;
 

@@ -16,11 +16,13 @@
 #include "ziphelper.h"
 
 #include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/session.h>
 
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
 
 #include <QDebug>
+#include <QDesktopServices>
 #include <QAction>
 #include <QFuture>
 #include <QPushButton>
@@ -57,9 +59,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
     connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
 
-    connect(TMCRunner::instance(), &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
-    connect(TMCRunner::instance(), &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
-
     // Autotest
     connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
             this, &TmcManager::askSubmit);
@@ -84,8 +83,6 @@ void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
-    connect(m_settings, &SettingsWidget::tmcCliLocationChanged, TMCRunner::instance(), &TMCRunner::setTmcCliLocation);
-    TMCRunner::instance()->setTmcCliLocation(m_settings->getTmcCliLocation());
     setUpdateInterval(m_settings->getAutoupdateInterval());
 }
 
@@ -190,12 +187,7 @@ void TmcManager::testActiveProject()
     }
 
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    if (m_settings->haveTmcCli()) {
-        // TestRunner runs tmc-langs.jar
-        TMCRunner::instance()->testProject(m_activeProject);
-    } else {
-        TmcResultReader::instance()->testProject(m_activeProject);
-    }
+    TmcResultReader::instance()->testProject(m_activeProject);
 }
 
 void TmcManager::askSubmit(const ProjectExplorer::Project *project)
@@ -238,6 +230,24 @@ void TmcManager::submitActiveExercise()
     Exercise projectExercise = getProjectExercise(m_activeProject);
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
     showSubmitWidget(m_activeProject);
+}
+
+void TmcManager::openActiveCoursePage()
+{
+    auto activeCourse = m_settings->getActiveCourse();
+    if (!activeCourse)
+        return;
+
+
+    QSettings settings("TestMyQt", "TMC");
+    QString serverUrl = settings.value("server",
+                                       TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString();
+    QString activeCourseId = QString::number(activeCourse->getId());
+
+    QString courseUrl = QString("%1/courses/%2").arg(serverUrl, activeCourseId);
+    QDesktopServices::openUrl(QUrl(courseUrl));
+
+    settings.deleteLater();
 }
 
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)
