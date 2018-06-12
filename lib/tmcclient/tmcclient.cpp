@@ -238,8 +238,9 @@ void TmcClient::authenticate(QString username, QString password)
     QUrlQuery params;
     params.addQueryItem("client_id", clientId);
     params.addQueryItem("client_secret", clientSecret);
-    params.addQueryItem("username", username);
-    params.addQueryItem("password", password);
+    // Need to encode with percent encoding for the literal + character
+    params.addQueryItem("username", QUrl::toPercentEncoding(username));
+    params.addQueryItem("password", QUrl::toPercentEncoding(password));
     params.addQueryItem("grant_type", grantType);
 
     QNetworkRequest request(url);
