@@ -12,24 +12,24 @@ class LoginWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit LoginWidget(TmcClient *client, QWidget *parent = nullptr);
+    explicit LoginWidget(QWidget *parent = nullptr);
 
-    void loadQSettings();
+    void setFields(QString username, QString server);
 
 signals:
+    void credentialsChanged(QString username, QString password);
+    void serverAddressChanged(QString server);
 
 public slots:
+    void handleLoginResponse(QString accessToken);
 
 private:
     Ui::loginform *loginWindow;
-    TmcClient *m_client;
 
     QLineEdit *m_username;
     QLineEdit *m_password;
     QLineEdit *m_server;
 
-    void handleLoginResponse(QString accessToken);
-    void handleAuthResponse(QString clientId, QString clientSecret);
     void onLoginClicked();
     void onChangeServerClicked();
 };

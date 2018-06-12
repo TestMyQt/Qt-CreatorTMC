@@ -15,9 +15,6 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     settingsWindow = new Ui::settingsForm;
     settingsWindow->setupUi(this);
 
-    // Initialize login window
-    loginWidget = new LoginWidget(m_client);
-
     m_orgComboBox = settingsWindow->orgComboBox;
     m_courseComboBox = settingsWindow->courseComboBox;
     m_workingDir = settingsWindow->workingDir;
@@ -28,10 +25,16 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
 void SettingsWidget::loadSettings()
 {
     QSettings settings("TestMyQt", "TMC");
+    m_username = settings.value("username", "").toString();
+    m_serverAddress = settings.value("server", TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString();
+
     m_client->setAccessToken(settings.value("accessToken", "").toString());
     m_client->setClientId(settings.value("clientId", "").toString());
     m_client->setClientSecret(settings.value("clientSecret", "").toString());
-    m_client->setServerAddress(settings.value("server", TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString());
+    m_client->setServerAddress(m_serverAddress);
+
+    // Get client id and secret from the server
+    m_client->authorize();
 
     connect(m_client, &TmcClient::authorizationFinished, this, &SettingsWidget::handleAuthResponse);
     connect(m_client, &TmcClient::authenticationFinished, this, &SettingsWidget::handleLoginResponse);
@@ -51,7 +54,7 @@ void SettingsWidget::loadSettings()
     m_workingDir->setText(workingDirectory);
     m_interval = settings.value("autoupdateInterval", 60).toInt();
     m_autoUpdateInterval->setValue(m_interval);
-    m_userLoggedInLabel->setText("Logged in as <strong>" + settings.value("username").toString() + "</strong>");
+    m_userLoggedInLabel->setText("Logged in as <strong>" + m_username + "</strong>");
 
     settings.deleteLater();
 
@@ -67,7 +70,7 @@ void SettingsWidget::loadSettings()
 
     connect(settingsWindow->okButton, &QPushButton::clicked, this, &SettingsWidget::onSettingsOkClicked);
     connect(settingsWindow->browseButton, &QPushButton::clicked, this, &SettingsWidget::onBrowseClicked);
-    connect(m_orgComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), [=](int index){
+    connect(m_orgComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), this, [=](const int index) {
         Organization selectedOrg = m_orgComboBox->itemData(index).value<Organization>();
         if (!selectedOrg.getName().isEmpty()) {
             m_client->getCourseList(selectedOrg);
@@ -75,6 +78,45 @@ void SettingsWidget::loadSettings()
             m_courseComboBox->clear();
         }
     });
+
+    // Initialize login window
+    m_loginWidget = new LoginWidget();
+    m_loginWidget->setFields(m_username, m_serverAddress);
+
+    connect(m_loginWidget, &LoginWidget::credentialsChanged, this, [=](QString username, QString password) {
+        m_client->authenticate(username, password);
+        m_username = username;
+        m_userLoggedInLabel->setText("Logged in as <strong>" + m_username + "</strong>");
+
+        m_activeCourse = Course();
+        m_activeOrganization = Organization();
+
+        emit activeCourseChanged(&m_activeCourse);
+
+        QSettings settings("TestMyQt", "TMC");
+        settings.setValue("username", username);
+        settings.deleteLater();
+    });
+
+    connect(m_loginWidget, &LoginWidget::serverAddressChanged, this, [=](QString serverAddress) {
+        m_serverAddress = serverAddress;
+        m_client->setServerAddress(serverAddress);
+        m_client->setAccessToken("");
+        m_client->authorize();
+
+        m_activeCourse = Course();
+        m_activeOrganization = Organization();
+
+        emit activeCourseChanged(&m_activeCourse);
+
+        QSettings settings("TestMyQt", "TMC");
+        settings.setValue("server", serverAddress);
+        settings.deleteLater();
+    });
+
+
+    connect(m_client, &TmcClient::authenticationFinished, m_loginWidget, &LoginWidget::handleLoginResponse);
+    connect(m_client, &TmcClient::accessTokenNotValid, m_loginWidget, &LoginWidget::show);
 }
 
 void SettingsWidget::setUpdateInterval(int interval)
@@ -100,8 +142,7 @@ void SettingsWidget::display()
 
 void SettingsWidget::showLoginWidget()
 {
-    loginWidget->loadQSettings();
-    loginWidget->show();
+    m_loginWidget->show();
 }
 
 void SettingsWidget::onBrowseClicked()
@@ -142,6 +183,7 @@ void SettingsWidget::clearCredentials()
     settings.deleteLater();
     m_client->setAccessToken("");
     emit enableDownloadSubmit(false);
+    emit activeCourseChanged(nullptr);
 }
 
 QString SettingsWidget::askSaveLocation()
@@ -176,6 +218,9 @@ void SettingsWidget::handleAuthResponse(QString clientId, QString clientSecret)
     settings.setValue("clientId", clientId);
     settings.setValue("clientSecret", clientSecret);
     settings.deleteLater();
+
+    m_client->setClientId(clientId);
+    m_client->setClientSecret(clientSecret);
 }
 
 void SettingsWidget::handleCourseList(Organization org)

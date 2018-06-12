@@ -141,12 +141,16 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     });
 
     connect(settingsWidget, &SettingsWidget::activeCourseChanged, this, [=](Course *course){
+        if (!course || course->getId() == -1) {
+            courseAction->setEnabled(false);
+            courseAction->setVisible(false);
+            return;
+        }
+
         courseCmd->action()->setText("Active project: " + course->getTitle());
         courseAction->setEnabled(true);
         courseAction->setVisible(true);
     });
-
-    settingsWidget->loadSettings();
 
     // Disable/Enable Download/Update and Submit buttons
     if (!tmcClient.isAuthenticated()) {
@@ -168,6 +172,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
 
     QNetworkAccessManager *m = new QNetworkAccessManager;
     tmcClient.setNetworkManager(m);
+
+    settingsWidget->loadSettings();
 
     return true;
 }

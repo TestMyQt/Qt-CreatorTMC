@@ -5,13 +5,9 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-LoginWidget::LoginWidget(TmcClient *client, QWidget *parent) :
-    QWidget(parent),
-    m_client(client)
+LoginWidget::LoginWidget(QWidget *parent) :
+    QWidget(parent)
 {
-    connect(m_client, &TmcClient::authenticationFinished, this, &LoginWidget::handleLoginResponse);
-    connect(m_client, &TmcClient::accessTokenNotValid, this, &LoginWidget::show);
-
     loginWindow = new Ui::loginform;
     loginWindow->setupUi(this);
 
@@ -26,12 +22,10 @@ LoginWidget::LoginWidget(TmcClient *client, QWidget *parent) :
     m_server = loginWindow->serverInput;
 }
 
-void LoginWidget::loadQSettings()
+void LoginWidget::setFields(QString username, QString server)
 {
-    QSettings settings("TestMyQt", "TMC");
-    m_username->setText(settings.value("username", "").toString());
-    m_server->setText(settings.value("server", TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString());
-    settings.deleteLater();
+    m_username->setText(username);
+    m_server->setText(server);
 }
 
 void LoginWidget::handleLoginResponse(QString accessToken)
@@ -47,11 +41,7 @@ void LoginWidget::onLoginClicked()
     QString username = m_username->text();
     QString password = m_password->text();
     m_password->setText("");
-    m_client->authenticate(username, password);
-    QSettings settings("TestMyQt", "TMC");
-    settings.setValue("username", username);
-    settings.setValue("server", m_server->text());
-    settings.deleteLater();
+    emit credentialsChanged(username, password);
 }
 
 void LoginWidget::onChangeServerClicked()
@@ -67,6 +57,5 @@ void LoginWidget::onChangeServerClicked()
     }
 
     m_server->setText(address);
-    m_client->setServerAddress(address);
-    m_client->authorize();
+    emit serverAddressChanged(address);
 }
