@@ -16,11 +16,13 @@
 #include "ziphelper.h"
 
 #include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/session.h>
 
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/progressmanager/futureprogress.h>
 
 #include <QDebug>
+#include <QDesktopServices>
 #include <QAction>
 #include <QFuture>
 #include <QPushButton>
