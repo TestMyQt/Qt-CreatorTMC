@@ -60,13 +60,15 @@ QStringList ZipHelper::extractZip(QByteArray *zipData, QString saveDir)
     zipBuffer.open(QIODevice::ReadOnly);
 
     QStringList fileList = JlCompress::getFileList(&zipBuffer);
-
-    // Remove student files in "project_dir/src/"
+    // Don't remove student files in "project_dir/src/"
     QStringList studentFiles = fileList.filter("/src/");
 
-    QStringListIterator i(studentFiles);
-    while(i.hasNext()){
-        fileList.removeAll(i.next());
+    QStringListIterator studentFile(studentFiles);
+    while(studentFile.hasNext()){
+        QString file = studentFile.next();
+        if (QFile(saveDir + "/" + file).exists()) {
+            fileList.removeAll(file);
+        }
     }
 
     QStringList extracted = JlCompress::extractFiles(&zipBuffer, fileList, saveDir);
