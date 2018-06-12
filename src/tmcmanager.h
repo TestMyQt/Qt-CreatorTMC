@@ -32,6 +32,7 @@ public:
 
     void testActiveProject();
     void submitActiveExercise();
+    void openActiveCoursePage();
 
     int updateInterval();
     bool lastUpdateSuccessful();

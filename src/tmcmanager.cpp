@@ -240,6 +240,24 @@ void TmcManager::submitActiveExercise()
     showSubmitWidget(m_activeProject);
 }
 
+void TmcManager::openActiveCoursePage()
+{
+    auto activeCourse = m_settings->getActiveCourse();
+    if (!activeCourse)
+        return;
+
+
+    QSettings settings("TestMyQt", "TMC");
+    QString serverUrl = settings.value("server",
+                                       TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString();
+    QString activeCourseId = QString::number(activeCourse->getId());
+
+    QString courseUrl = QString("%1/courses/%2").arg(serverUrl, activeCourseId);
+    QDesktopServices::openUrl(QUrl(courseUrl));
+
+    settings.deleteLater();
+}
+
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)
 {
     Course *activeCourse = m_settings->getActiveCourse();

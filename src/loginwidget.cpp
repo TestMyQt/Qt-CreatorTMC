@@ -1,4 +1,5 @@
 #include "loginwidget.h"
+#include "testmycodeconstants.h"
 
 #include <QPushButton>
 #include <QInputDialog>
@@ -29,7 +30,7 @@ void LoginWidget::loadQSettings()
 {
     QSettings settings("TestMyQt", "TMC");
     m_username->setText(settings.value("username", "").toString());
-    m_server->setText(settings.value("server", "").toString());
+    m_server->setText(settings.value("server", TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString());
     settings.deleteLater();
 }
 

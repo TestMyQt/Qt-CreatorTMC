@@ -1,4 +1,5 @@
 #include "settingswidget.h"
+#include "testmycodeconstants.h"
 
 #include <QSettings>
 #include <QFileDialog>
