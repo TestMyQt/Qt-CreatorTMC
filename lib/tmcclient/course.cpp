@@ -53,6 +53,11 @@ bool Course::operator!() const
     return m_id == -1;
 }
 
+Course::operator bool() const
+{
+    return m_id != -1;
+}
+
 /*!
     Getter function for the \l Course object's collection of \l Exercise
     ID-to-object mappings.
@@ -77,6 +82,17 @@ void Course::setName(QString name)
 {
     m_name = name;
 }
+
+QString Course::getTitle() const
+{
+    return m_title;
+}
+
+void Course::setTitle(QString title)
+{
+    m_title = title;
+}
+
 
 /*!
     Getter function for the course ID.
@@ -140,6 +156,7 @@ bool Course::hasExercise(Exercise ex)
 Course Course::fromJson(const QJsonObject jsonCourse)
 {
     Course course;
+    course.setTitle(jsonCourse["title"].toString());
     course.setName(jsonCourse["name"].toString());
     course.setId(jsonCourse["id"].toInt());
     return course;
@@ -155,6 +172,7 @@ Course Course::fromQSettings(QSettings *settings)
 {
     Course course;
     course.setName(settings->value("courseName", "").toString());
+    course.setTitle(settings->value("courseTitle", "").toString());
     course.setId(settings->value("courseId", -1).toInt());
     return course;
 }
@@ -167,6 +185,7 @@ Course Course::fromQSettings(QSettings *settings)
 void Course::toQSettings(QSettings *settings, Course c)
 {
     settings->setValue("courseName", c.getName());
+    settings->setValue("courseTitle", c.getTitle());
     settings->setValue("courseId", c.getId());
 }
 

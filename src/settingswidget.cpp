@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 
+#include <algorithm>
+
 SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     QWidget(parent),
     m_client(client)
@@ -193,15 +195,27 @@ void SettingsWidget::handleAuthResponse(QString clientId, QString clientSecret)
 void SettingsWidget::handleCourseList(Organization org)
 {
     m_courseComboBox->clear();
-    foreach (Course c, org.getCourses()) {
-        m_courseComboBox->addItem(c.getName(), QVariant::fromValue(c));
+    QList<Course> courses = org.getCourses();
+    std::sort(courses.begin(), courses.end(), [](const Course& lhs, const Course& rhs)
+    {
+        return lhs.getTitle() < rhs.getTitle();
+    });
+
+    foreach (Course c, courses) {
+        m_courseComboBox->addItem(c.getTitle(), QVariant::fromValue(c));
     }
-    setComboboxIndex(m_courseComboBox, m_activeCourse.getName());
+    setComboboxIndex(m_courseComboBox, m_activeCourse.getTitle());
 }
 
 void SettingsWidget::handleOrganizationList(QList<Organization> orgs)
 {
     m_organizations = orgs;
+
+    std::sort(m_organizations.begin(), m_organizations.end(), [](const Organization& lhs, const Organization& rhs)
+    {
+        return lhs.getName() < rhs.getName();
+    });
+
     m_orgComboBox->clear();
 
     bool hasActiveOrg = !!m_activeOrganization;
