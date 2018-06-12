@@ -197,6 +197,9 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
         return;
     }
 
+    if (!m_client->isAuthenticated() || !m_settings->getActiveCourse())
+        return;
+
     int ret = QMessageBox::question(m_settings,
                                   tr("Submit exercise to server"),
                                   tr("All tests passed!\nSubmit exercise to server?"));

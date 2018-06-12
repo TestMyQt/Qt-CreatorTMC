@@ -36,14 +36,16 @@ private:
     TmcClient *m_client;
     Ui::settingsForm *settingsWindow;
 
-    // LoginWidget
-    LoginWidget *loginWidget;
+    LoginWidget *m_loginWidget;
 
     QComboBox *m_orgComboBox;
     QComboBox *m_courseComboBox;
     QLineEdit *m_workingDir;
     QSpinBox *m_autoUpdateInterval;
     QLabel *m_userLoggedInLabel;
+
+    QString m_username;
+    QString m_serverAddress;
 
     QList<Organization> m_organizations;
     Organization m_activeOrganization;
