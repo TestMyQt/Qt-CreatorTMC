@@ -146,6 +146,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
         courseAction->setVisible(true);
     });
 
+    settingsWidget->loadSettings();
 
     // Disable/Enable Download/Update and Submit buttons
     if (!tmcClient.isAuthenticated()) {

@@ -59,9 +59,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
     connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
 
-    connect(TMCRunner::instance(), &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
-    connect(TMCRunner::instance(), &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
-
     // Autotest
     connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
             this, &TmcManager::askSubmit);
@@ -86,8 +83,6 @@ void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
-    connect(m_settings, &SettingsWidget::tmcCliLocationChanged, TMCRunner::instance(), &TMCRunner::setTmcCliLocation);
-    TMCRunner::instance()->setTmcCliLocation(m_settings->getTmcCliLocation());
     setUpdateInterval(m_settings->getAutoupdateInterval());
 }
 
@@ -192,12 +187,7 @@ void TmcManager::testActiveProject()
     }
 
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    if (m_settings->haveTmcCli()) {
-        // TestRunner runs tmc-langs.jar
-        TMCRunner::instance()->testProject(m_activeProject);
-    } else {
-        TmcResultReader::instance()->testProject(m_activeProject);
-    }
+    TmcResultReader::instance()->testProject(m_activeProject);
 }
 
 void TmcManager::askSubmit(const ProjectExplorer::Project *project)

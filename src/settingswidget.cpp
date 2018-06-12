@@ -12,19 +12,6 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     QWidget(parent),
     m_client(client)
 {
-
-    QSettings settings("TestMyQt", "TMC");
-    m_client->setAccessToken(settings.value("accessToken", "").toString());
-    m_client->setClientId(settings.value("clientId", "").toString());
-    m_client->setClientSecret(settings.value("clientSecret", "").toString());
-    m_client->setServerAddress(settings.value("server", "").toString());
-
-    connect(m_client, &TmcClient::authorizationFinished, this, &SettingsWidget::handleAuthResponse);
-    connect(m_client, &TmcClient::authenticationFinished, this, &SettingsWidget::handleLoginResponse);
-
-    connect(m_client, &TmcClient::organizationListReady, this, &SettingsWidget::handleOrganizationList);
-    connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
-
     settingsWindow = new Ui::settingsForm;
     settingsWindow->setupUi(this);
 
@@ -34,20 +21,36 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
     m_orgComboBox = settingsWindow->orgComboBox;
     m_courseComboBox = settingsWindow->courseComboBox;
     m_workingDir = settingsWindow->workingDir;
-    m_cliLocation = settingsWindow->cliLocation;
     m_autoUpdateInterval = settingsWindow->updateInterval;
     m_userLoggedInLabel = settingsWindow->userLoggedInLabel;
+}
+
+void SettingsWidget::loadSettings()
+{
+    QSettings settings("TestMyQt", "TMC");
+    m_client->setAccessToken(settings.value("accessToken", "").toString());
+    m_client->setClientId(settings.value("clientId", "").toString());
+    m_client->setClientSecret(settings.value("clientSecret", "").toString());
+    m_client->setServerAddress(settings.value("server", TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString());
+
+    connect(m_client, &TmcClient::authorizationFinished, this, &SettingsWidget::handleAuthResponse);
+    connect(m_client, &TmcClient::authenticationFinished, this, &SettingsWidget::handleLoginResponse);
+
+    connect(m_client, &TmcClient::organizationListReady, this, &SettingsWidget::handleOrganizationList);
+    connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
 
     m_activeOrganization = Organization::fromQSettings(&settings);
     m_activeCourse = Course::fromQSettings(&settings);
     m_activeCourse.exerciseListFromQSettings(&settings);
 
-    tmcCliLocation = settings.value("tmcCliLocation", "").toString();
+    if (m_activeCourse) {
+        emit activeCourseChanged(&m_activeCourse);
+    }
+
     workingDirectory = settings.value("workingDir", "").toString();
     m_workingDir->setText(workingDirectory);
     m_interval = settings.value("autoupdateInterval", 60).toInt();
     m_autoUpdateInterval->setValue(m_interval);
-    m_cliLocation->setText(tmcCliLocation);
     m_userLoggedInLabel->setText("Logged in as <strong>" + settings.value("username").toString() + "</strong>");
 
     settings.deleteLater();
@@ -64,7 +67,6 @@ SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
 
     connect(settingsWindow->okButton, &QPushButton::clicked, this, &SettingsWidget::onSettingsOkClicked);
     connect(settingsWindow->browseButton, &QPushButton::clicked, this, &SettingsWidget::onBrowseClicked);
-    connect(settingsWindow->cliBrowseButton, &QPushButton::clicked, this, &SettingsWidget::onCliBrowseClicked);
     connect(m_orgComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), [=](int index){
         Organization selectedOrg = m_orgComboBox->itemData(index).value<Organization>();
         if (!selectedOrg.getName().isEmpty()) {
@@ -93,7 +95,6 @@ void SettingsWidget::display()
         m_client->getCourseList(m_activeOrganization);
     }
     m_workingDir->setText(workingDirectory);
-    m_cliLocation->setText(tmcCliLocation);
     show();
 }
 
@@ -102,6 +103,13 @@ void SettingsWidget::showLoginWidget()
     loginWidget->loadQSettings();
     loginWidget->show();
 }
+
+void SettingsWidget::onBrowseClicked()
+{
+    QString dir = askSaveLocation();
+    m_workingDir->setText(dir);
+}
+
 
 QString SettingsWidget::getWorkingDirectory()
 {
@@ -124,29 +132,6 @@ void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
 int SettingsWidget::getAutoupdateInterval()
 {
     return m_interval;
-}
-
-QString SettingsWidget::getTmcCliLocation()
-{
-    return tmcCliLocation;
-}
-
-bool SettingsWidget::haveTmcCli()
-{
-    return !tmcCliLocation.isEmpty();
-}
-
-void SettingsWidget::onBrowseClicked()
-{
-    QString dir = askSaveLocation();
-    m_workingDir->setText(dir);
-}
-
-void SettingsWidget::onCliBrowseClicked()
-{
-    QString jar = QFileDialog::getOpenFileName(this, tr("Choose TMC CLI .jar file"),
-                                               "", tr("Jar files (*.jar)"));
-    m_cliLocation->setText(jar);
 }
 
 void SettingsWidget::clearCredentials()
@@ -251,13 +236,6 @@ void SettingsWidget::onSettingsOkClicked()
         workingDirectory = setDir;
         settings.setValue("workingDir", workingDirectory);
         emit workingDirectoryChanged(workingDirectory);
-    }
-
-    QString setCli = m_cliLocation->text();
-    if (setCli != tmcCliLocation) {
-        tmcCliLocation = setCli;
-        settings.setValue("tmcCliLocation", tmcCliLocation);
-        emit tmcCliLocationChanged(tmcCliLocation);
     }
 
     int setInterval = m_autoUpdateInterval->value();

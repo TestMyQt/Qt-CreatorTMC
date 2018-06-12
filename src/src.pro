@@ -47,7 +47,6 @@ HEADERS += testmycode.h \
     testmycode_global.h \
     testmycodeconstants.h \
     tmcoutputpane.h \
-    tmcrunner.h \
     tmctestresult.h \
     tmcresultmodel.h \
     downloadpanel.h \
@@ -60,7 +59,6 @@ HEADERS += testmycode.h \
 
 SOURCES += testmycode.cpp \
     tmcoutputpane.cpp \
-    tmcrunner.cpp \
     tmctestresult.cpp \
     tmcresultmodel.cpp \
     downloadpanel.cpp \
