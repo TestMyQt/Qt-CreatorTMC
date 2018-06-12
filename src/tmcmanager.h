@@ -3,8 +3,8 @@
 
 #include "tmcclient.h"
 #include "settingswidget.h"
+#include "submitwidget.h"
 #include "tmcrunner.h"
-#include "tmcsubmitter.h"
 #include "downloadpanel.h"
 #include "tmcresultreader.h"
 
@@ -63,11 +63,11 @@ private:
     TmcClient *m_client;
     SettingsWidget *m_settings;
     TMCRunner *m_testRunner;
-    TmcSubmitter *m_submitter;
 
     Project *m_activeProject = nullptr;
 
     void openExercise(Exercise ex);
+    void showSubmitWidget(const Project *project);
 
     // DownloadWidget
     Ui::downloadform *downloadform;

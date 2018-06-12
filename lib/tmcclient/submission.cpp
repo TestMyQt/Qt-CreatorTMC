@@ -1,4 +1,5 @@
 #include "submission.h"
+#include "testcase.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -30,19 +31,26 @@ Submission::Status Submission::getStatus() const
     return m_status;
 }
 
-QList<QString> Submission::getPoints() const
+QStringList Submission::getPoints() const
 {
     return m_points;
 }
 
-QList<QString> Submission::getTestCases() const
+QList<TestCase> Submission::getTestCases() const
 {
     return m_testCases;
 }
 
+
+
 QString Submission::errorString() const
 {
     return m_error;
+}
+
+QString Submission::solutionUrl() const
+{
+    return m_solutionUrl;
 }
 
 void Submission::setStatus(Status status)
@@ -50,12 +58,12 @@ void Submission::setStatus(Status status)
     m_status = status;
 }
 
-void Submission::setPoints(QList<QString> points)
+void Submission::setPoints(QStringList points)
 {
     m_points = points;
 }
 
-void Submission::setTestCases(QList<QString> cases)
+void Submission::setTestCases(QList<TestCase> cases)
 {
     m_testCases = cases;
 }
@@ -75,7 +83,7 @@ void Submission::setError(QString error)
     m_error = error;
 }
 
-void Submission::setSolutionUrl(QUrl url)
+void Submission::setSolutionUrl(QString url)
 {
     m_solutionUrl = url;
 }
@@ -86,15 +94,16 @@ Submission Submission::fromJson(const int id, const QJsonObject jsonSubmission)
     QString jsonStatus = jsonSubmission["status"].toString();
     if (jsonStatus == "ok") {
         submission.setStatus(Status::Ok);
-        QStringList testCases;
-        foreach (QString testCase, testCases) {
-            testCases << testCase;
-        }
-        submission.setTestCases(testCases);
     }
 
     if (jsonStatus == "fail") {
         submission.setStatus(Status::Fail);
+        QList<TestCase> testCases;
+        QJsonArray jsonCases = jsonSubmission["test_cases"].toArray();
+        foreach (QJsonValue jsonCase, jsonCases) {
+            testCases << TestCase::fromJson(jsonCase.toObject());
+        }
+        submission.setTestCases(testCases);
     }
 
     if (jsonStatus == "error") {
@@ -118,6 +127,7 @@ Submission Submission::fromJson(const int id, const QJsonObject jsonSubmission)
     submission.setPoints(points);
     submission.setSubmissionTime(QDate::fromString(jsonSubmission["submitted_at"].toString()));
     submission.setError(jsonSubmission["error"].toString());
+    submission.setSolutionUrl(jsonSubmission["solution_url"].toString());
 
     return submission;
 }

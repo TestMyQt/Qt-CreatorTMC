@@ -54,7 +54,6 @@ HEADERS += testmycode.h \
     settingswidget.h \
     loginwidget.h \
     tmcmanager.h \
-    tmcsubmitter.h \
     submitwidget.h \
     tmcresultreader.h \
     ziphelper.h
@@ -68,7 +67,6 @@ SOURCES += testmycode.cpp \
     settingswidget.cpp \
     loginwidget.cpp \
     tmcmanager.cpp \
-    tmcsubmitter.cpp \
     submitwidget.cpp \
     tmcresultreader.cpp \
     ziphelper.cpp

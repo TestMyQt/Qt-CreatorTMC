@@ -57,15 +57,12 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
     connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
 
-    m_testRunner = TMCRunner::instance();
-    connect(m_testRunner, &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
-    connect(m_testRunner, &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
+    connect(TMCRunner::instance(), &TMCRunner::TMCError, this, &TmcManager::displayTMCError);
+    connect(TMCRunner::instance(), &TMCRunner::testsPassed, this, &TmcManager::askSubmit);
 
     // Autotest
     connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
             this, &TmcManager::askSubmit);
-
-    m_submitter = new TmcSubmitter(m_client);
 }
 
 TmcManager::~TmcManager()
@@ -87,8 +84,8 @@ void TmcManager::setSettings(SettingsWidget *settings)
 {
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
-    connect(m_settings, &SettingsWidget::tmcCliLocationChanged, m_testRunner, &TMCRunner::setTmcCliLocation);
-    m_testRunner->setTmcCliLocation(m_settings->getTmcCliLocation());
+    connect(m_settings, &SettingsWidget::tmcCliLocationChanged, TMCRunner::instance(), &TMCRunner::setTmcCliLocation);
+    TMCRunner::instance()->setTmcCliLocation(m_settings->getTmcCliLocation());
     setUpdateInterval(m_settings->getAutoupdateInterval());
 }
 
@@ -195,7 +192,7 @@ void TmcManager::testActiveProject()
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
     if (m_settings->haveTmcCli()) {
         // TestRunner runs tmc-langs.jar
-        m_testRunner->testProject(m_activeProject);
+        TMCRunner::instance()->testProject(m_activeProject);
     } else {
         TmcResultReader::instance()->testProject(m_activeProject);
     }
@@ -213,8 +210,21 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
                                   tr("All tests passed!\nSubmit exercise to server?"));
 
     if (ret == QMessageBox::Yes) {
-        m_submitter->submitProject(project);
+        showSubmitWidget(project);
     }
+}
+
+void TmcManager::showSubmitWidget(const Project *project)
+{
+    SubmitWidget *submit = new SubmitWidget();
+    submit->show();
+    connect(m_client, &TmcClient::exerciseSubmitReady, submit, &SubmitWidget::onSubmitReply);
+    connect(m_client, &TmcClient::exerciseSubmitProgress, submit, &SubmitWidget::submitProgress);
+    connect(m_client, &TmcClient::submissionStatusReady, submit, &SubmitWidget::updateStatus);
+    connect(submit, &SubmitWidget::projectSubmissionReady, m_client, &TmcClient::postExerciseZip);
+    connect(submit, &SubmitWidget::submissionStatusRequest, m_client, &TmcClient::getSubmissionStatus);
+    submit->setAttribute(Qt::WA_DeleteOnClose);
+    submit->submitProject(project);
 }
 
 void TmcManager::submitActiveExercise()
@@ -227,7 +237,7 @@ void TmcManager::submitActiveExercise()
 
     Exercise projectExercise = getProjectExercise(m_activeProject);
     m_activeProject->setProperty("exercise", QVariant::fromValue(projectExercise));
-    m_submitter->submitProject(m_activeProject);
+    showSubmitWidget(m_activeProject);
 }
 
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)
