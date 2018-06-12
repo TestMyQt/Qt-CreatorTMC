@@ -15,16 +15,18 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
-        tmcclient.cpp \
-        course.cpp \
-        exercise.cpp \
-        organization.cpp \
-        submission.cpp
+    tmcclient.cpp \
+    course.cpp \
+    exercise.cpp \
+    organization.cpp \
+    submission.cpp \
+    testcase.cpp
 
 HEADERS += \
-        tmcclient.h \
-        course.h \
-        exercise.h \
-        organization.h \
-        submission.h
+    tmcclient.h \
+    course.h \
+    exercise.h \
+    organization.h \
+    submission.h \
+    testcase.h
 
