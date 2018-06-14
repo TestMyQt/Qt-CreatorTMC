@@ -1,6 +1,7 @@
 #ifndef TMCOUTPUTPANE_H
 #define TMCOUTPUTPANE_H
 
+#include "testmycode.h"
 #include "tmctestresult.h"
 #include "tmcresultmodel.h"
 
@@ -25,7 +26,7 @@ class TmcListView : public Utils::ListView
 {
     Q_OBJECT
 public:
-    explicit TmcListView(QWidget *parent = 0);
+    explicit TmcListView(QWidget *parent = nullptr);
 
 signals:
     void copyShortcutTriggered();
@@ -39,7 +40,6 @@ class TmcOutputPane : public Core::IOutputPane
 {
     Q_OBJECT
 public:
-    virtual ~TmcOutputPane();
     static TmcOutputPane *instance();
 
     // IOutputPane interface
@@ -69,7 +69,11 @@ public slots:
     void onTestRunFinished();
 
 private:
-    explicit TmcOutputPane(QObject *parent = 0);
+    friend class TestMyCodePlugin::Internal::TestMyCode;
+    static void destroy();
+
+    explicit TmcOutputPane(QObject *parent = nullptr);
+    ~TmcOutputPane() override;
 
     void onTMCTriggered();
 
