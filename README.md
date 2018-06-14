@@ -4,18 +4,24 @@
 ## Development setup
 
 - Get a Qt Creator build
-  - Official binary release from [download.qt.io](http://download.qt.io/official_releases/qtcreator/)
-  - Compile it yourself from source (takes a while)
+  - ~Official binary release from [download.qt.io](http://download.qt.io/official_releases/qtcreator/)~ This option is not yet available due to release builds not having the patch need for the plugin. Release version 4.7 should have it in the future.
+  - Compile it yourself from source (takes a while, 30-45min)
   - Note: **You will need a debug build if you want to debug your project**
-- Get the sources for your Qt Creator build from [code.qt.io](http://code.qt.io/cgit/qt-creator/qt-creator.git/)
-  - `git clone --depth 1 --branch $YOUR_QTC_VERSION git://code.qt.io/qt-creator/qt-creator.git`
+- Get the sources for the Qt Creator build from [code.qt.io](http://code.qt.io/cgit/qt-creator/qt-creator.git/)
+  - `git clone --depth 1 --branch $QTC_BUILD_VERSION git://code.qt.io/qt-creator/qt-creator.git`
 
-### Example setup
+### Build Qt Creator
 
-You want to compile for Qt Creator 4.6.2 and debug it:
+Due to the patch we need, you'll need to compile the Qt Creator 4.7 development branch.
 
-- Download the [debug build](http://download.qt.io/official_releases/qtcreator/4.6/4.6.2/installer_source/linux_gcc_64_rhel72/qtcreator-debug.7z) for Qt Creator
-- `git clone --depth 1 --branch v4.6.2 git://code.qt.io/qt-creator/qt-creator.git qt-creator-4.6.2`
+To build 4.7 in to a separate build directory:
+
+- `git clone --depth 1 --branch 4.7 git://code.qt.io/qt-creator/qt-creator.git qt-creator-4.7`
+- `mkdir qt-creator-4.7-build && cd qt-creator-4.7-build`
+- `qmake ../qt-creator-4.7`
+- `make` or `make -j $(nproc)` to build on all cores
+
+### Compile the plugin
 
 Clone the `master` repository recursively: `git clone --recursive https://github.com/testmyqt/qt-creatortmc`
 
@@ -23,13 +29,13 @@ Clone the `master` repository recursively: `git clone --recursive https://github
 - [`quazip`](https://github.com/TestMyQt/quazip/tree/eeb61805596a83fd8a97f542f48430485330217a)
 - [`zlib`](https://github.com/madler/zlib/tree/cacf7f1d4e3d44d871b605da3b647f07d718623f)
 
-### Environment variables:
-
-To set environment variables in Qt Creator, go to Projects Mode -> Build -> Build Environment
+Project can be opened in Qt Creator. To configure the build target, set the following environment variables:
 
 - `QTC_BUILD` your Qt Creator build
 - `QTC_SOURCE` your Qt Creator sources
 - `BUILD_OUTPUT_PATH` where the shared library file will be located. If not set, will install to `QTC_BUILD` dir.
+
+To set environment variables in Qt Creator, go to Projects Mode -> Build -> Build Environment
 
 ## Linux
 - Debug build `qmake -spec linux-g++ CONFIG+=debug`
