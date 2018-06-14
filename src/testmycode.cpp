@@ -44,7 +44,6 @@
 
 #include <QList>
 
-#include <QtPlugin>
 #include <extensionsystem/pluginmanager.h>
 
 using namespace TestMyCodePlugin::Internal;
@@ -65,6 +64,7 @@ TestMyCode::~TestMyCode()
 {
     // Unregister objects from the plugin manager's object pool
     // Delete members
+    TmcOutputPane::destroy();
 }
 
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
@@ -128,8 +128,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto tools_menu = ActionManager::actionContainer(Core::Constants::M_WINDOW);
     ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
 
-    addAutoReleasedObject(TmcOutputPane::instance());
-
     // Initialize settings window
     settingsWidget = new SettingsWidget(&tmcClient);
 
@@ -157,6 +155,9 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
         downloadUpdateAction->setDisabled(true);
         submitAction->setDisabled(true);
     }
+
+    // Initialize output pane
+    TmcOutputPane::instance();
 
     // TmcManager
     m_tmcManager = new TmcManager(&tmcClient);

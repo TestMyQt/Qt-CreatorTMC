@@ -115,6 +115,12 @@ TmcOutputPane *TmcOutputPane::instance()
     return s_instance;
 }
 
+void TmcOutputPane::destroy()
+{
+    delete s_instance;
+    s_instance = nullptr;
+}
+
 TmcOutputPane::~TmcOutputPane()
 {
     delete m_listView;
