@@ -22,16 +22,31 @@ win32:CONFIG(release, debug|release) {
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/quazip/quazip/debug/libquazipd.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/debug/libz.a
 
-} else:unix {
+} else:unix:CONFIG(release, debug|release){
     LIBS += -L$$OUT_PWD/../lib/tmcclient/ -ltmcclient
     LIBS += -L$$OUT_PWD/../3rdparty/quazip/quazip/ -lquazip
     LIBS += -L$$OUT_PWD/../3rdparty/zlib/ -lz
+
 
     PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/libtmcclient.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/quazip/quazip/libquazip.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/libz.a
 
+} else:unix:CONFIG(debug, debug|release){
+
+    macx: DEBUG_POSTFIX += _debug
+
+    LIBS += -L$$OUT_PWD/../lib/tmcclient/ -ltmcclient
+    LIBS += -L$$OUT_PWD/../3rdparty/quazip/quazip/ -lquazip$${DEBUG_POSTFIX}
+    LIBS += -L$$OUT_PWD/../3rdparty/zlib/ -lz
+
+
+    PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/libtmcclient.a
+    PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/quazip/quazip/libquazip$${DEBUG_POSTFIX}.a
+    PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/libz.a
+
 }
+
 
 INCLUDEPATH += $$PWD/../3rdparty/quazip/ \
                $$PWD/../3rdparty/zlib/zlib/ \
