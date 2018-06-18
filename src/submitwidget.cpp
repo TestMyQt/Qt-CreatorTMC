@@ -125,8 +125,8 @@ void SubmitWidget::submitProgress(Exercise ex, qint64 bytesSent, qint64 bytesTot
 {
     this->setWindowTitle("Submitting " + ex.getName());
     m_status->setText("Submitting " + ex.getName());
-    m_progressBar->setMaximum(bytesTotal);
-    m_progressBar->setValue(bytesSent);
+    m_progressBar->setMaximum(100);
+    m_progressBar->setValue(static_cast<qint32>((bytesSent * 100) / bytesTotal));
 }
 
 void SubmitWidget::updateStatus(Submission submission)

@@ -83,7 +83,7 @@ TmcOutputPane::TmcOutputPane(QObject *parent) :
     // Copy context menu
     connect(m_listView, &Utils::ListView::customContextMenuRequested,
             this, &TmcOutputPane::onCustomContextMenuRequested);
-    connect(m_listView, &TmcListView::copyShortcutTriggered, [this] () {
+    connect(m_listView, &TmcListView::copyShortcutTriggered, this, [this] () {
         onCopyItemTriggered(testResult(m_listView->currentIndex()));
     });
 
@@ -250,7 +250,7 @@ void TmcOutputPane::onCustomContextMenuRequested(const QPoint &pos)
     QAction *action = new QAction(tr("Copy"), &menu);
     action->setShortcut(QKeySequence(QKeySequence::Copy));
     action->setEnabled(resultsAvailable && clicked.result() != TmcResult::Invalid);
-    connect(action, &QAction::triggered, [this, clicked] () {
+    connect(action, &QAction::triggered, this, [this, clicked] () {
        onCopyItemTriggered(clicked);
     });
     menu.addAction(action);

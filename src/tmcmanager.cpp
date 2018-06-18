@@ -155,7 +155,7 @@ Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
     QMap<int, Exercise> exercises = m_settings->getActiveCourse()->getExercises();
     Exercise projectExercise;
 
-    foreach (Exercise ex, exercises.values()) {
+    foreach (const Exercise &ex, exercises) {
         QStringList parts = ex.getName().split("-");
         QString exerciseName = parts.last();
         if (exerciseName == projectName) {
