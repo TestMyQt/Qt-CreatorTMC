@@ -150,12 +150,6 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
         courseAction->setVisible(true);
     });
 
-    // Disable/Enable Download/Update and Submit buttons
-    if (!tmcClient.isAuthenticated()) {
-        downloadUpdateAction->setDisabled(true);
-        submitAction->setDisabled(true);
-    }
-
     // Initialize output pane
     TmcOutputPane::instance();
 
@@ -175,6 +169,12 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     tmcClient.setNetworkManager(m);
 
     settingsWidget->loadSettings();
+
+    // Disable/Enable Download/Update and Submit buttons
+    if (!tmcClient.isAuthenticated()) {
+        downloadUpdateAction->setDisabled(true);
+        submitAction->setDisabled(true);
+    }
 
     return true;
 }
