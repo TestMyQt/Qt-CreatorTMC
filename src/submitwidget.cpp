@@ -52,7 +52,10 @@ void SubmitWidget::submitProject(const Project *project)
     QDirIterator it(dir, QStringList() << "*.qrc", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         it.next();
-        allFiles << FileName(it.fileInfo());
+        FileName name = FileName(it.fileInfo());
+        if (!allFiles.contains(name)) {
+            allFiles << name;
+        }
     }
     QBuffer *zipBuffer = new QBuffer;
     zipBuffer->open(QIODevice::ReadWrite);
