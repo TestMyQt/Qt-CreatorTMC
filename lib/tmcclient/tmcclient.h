@@ -20,7 +20,8 @@ class TmcClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit TmcClient(QObject *parent = 0);
+    explicit TmcClient(QObject *parent = nullptr);
+    static TmcClient* instance();
 
     void setNetworkManager(QNetworkAccessManager *m);
     void setAccessToken(QString token);

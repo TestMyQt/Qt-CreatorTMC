@@ -102,6 +102,15 @@ TmcClient::TmcClient(QObject *parent) : QObject(parent)
 {
 }
 
+static TmcClient *s_instance = nullptr;
+
+TmcClient *TmcClient::instance()
+{
+    if (!s_instance)
+        s_instance = new TmcClient;
+    return s_instance;
+}
+
 /*!
     Setter function for the single \l {http://doc.qt.io/qt-5/qnetworkaccessmanager.html}
     {QNetworkAccessManager} object that the QtCreatorTMC plugin uses for all its
@@ -322,6 +331,7 @@ void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
     multiPart->setParent(reply); // delete multipart with reply
 
     connect(reply, &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal){
+        if (bytesSent == 0) return;
         emit exerciseSubmitProgress(ex, bytesSent, bytesTotal);
     });
 

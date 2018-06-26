@@ -70,7 +70,10 @@ HEADERS += testmycode.h \
     tmcmanager.h \
     submitwidget.h \
     tmcresultreader.h \
-    ziphelper.h
+    ziphelper.h \
+    exercisewidget.h \
+    exercisedelegate.h \
+    exercisemodel.h
 
 SOURCES += testmycode.cpp \
     tmcoutputpane.cpp \
@@ -82,13 +85,16 @@ SOURCES += testmycode.cpp \
     tmcmanager.cpp \
     submitwidget.cpp \
     tmcresultreader.cpp \
-    ziphelper.cpp
+    ziphelper.cpp \
+    exercisewidget.cpp \
+    exercisedelegate.cpp \
+    exercisemodel.cpp
 
 FORMS += \
     ui/loginscreen.ui \
-    ui/downloadscreen.ui \
     ui/settings.ui \
-    ui/submit.ui
+    ui/submit.ui \
+    ui/exercisewidget.ui
 
 # Qt Creator linking
 

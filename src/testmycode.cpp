@@ -128,24 +128,30 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto tools_menu = ActionManager::actionContainer(Core::Constants::M_WINDOW);
     ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
 
-    // Initialize settings window
-    settingsWidget = new SettingsWidget(&tmcClient);
+    // TmcClient
+    tmcClient = TmcClient::instance();
+    auto *m = new QNetworkAccessManager;
+    tmcClient->setNetworkManager(m);
 
-    connect(loginAction, &QAction::triggered, settingsWidget, &SettingsWidget::showLoginWidget);
-    connect(settingsAction, &QAction::triggered, settingsWidget, &SettingsWidget::display);
-    connect(settingsWidget, &SettingsWidget::enableDownloadSubmit, this, [=](bool enable){
+    // Initialize settings window
+    m_settingsWidget = new SettingsWidget(tmcClient);
+    m_settingsWidget->loadSettings();
+
+    connect(loginAction, &QAction::triggered, m_settingsWidget, &SettingsWidget::showLoginWidget);
+    connect(settingsAction, &QAction::triggered, m_settingsWidget, &SettingsWidget::display);
+    connect(m_settingsWidget, &SettingsWidget::enableDownloadSubmit, this, [=](bool enable){
        downloadUpdateAction->setEnabled(enable);
        submitAction->setEnabled(enable);
     });
 
-    connect(settingsWidget, &SettingsWidget::activeCourseChanged, this, [=](Course *course){
+    connect(m_settingsWidget, &SettingsWidget::activeCourseChanged, this, [=](Course *course){
         if (!course || course->getId() == -1) {
             courseAction->setEnabled(false);
             courseAction->setVisible(false);
             return;
         }
 
-        courseCmd->action()->setText("Active project: " + course->getTitle());
+        courseCmd->action()->setText("Active course: " + course->getTitle());
         courseAction->setEnabled(true);
         courseAction->setVisible(true);
     });
@@ -154,8 +160,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     TmcOutputPane::instance();
 
     // TmcManager
-    m_tmcManager = new TmcManager(&tmcClient);
-    m_tmcManager->setSettings(settingsWidget);
+    m_tmcManager = new TmcManager(tmcClient);
+    m_tmcManager->setSettings(m_settingsWidget);
 
     connect(downloadUpdateAction, &QAction::triggered, m_tmcManager, &TmcManager::updateExercises);
     // Run tests
@@ -165,13 +171,8 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     // Open browser for course page
     connect(courseAction, &QAction::triggered, m_tmcManager, &TmcManager::openActiveCoursePage);
 
-    QNetworkAccessManager *m = new QNetworkAccessManager;
-    tmcClient.setNetworkManager(m);
-
-    settingsWidget->loadSettings();
-
     // Disable/Enable Download/Update and Submit buttons
-    if (!tmcClient.isAuthenticated()) {
+    if (!tmcClient->isAuthenticated()) {
         downloadUpdateAction->setDisabled(true);
         submitAction->setDisabled(true);
     }

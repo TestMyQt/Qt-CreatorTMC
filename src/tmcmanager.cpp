@@ -39,10 +39,10 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     m_updateTimer.setSingleShot(false);
     connect(&m_updateTimer, &QTimer::timeout, this, [this]() { updateExercises(); });
 
-    // Initialize download window
-    downloadWidget = new QWidget;
-    downloadform = new Ui::downloadform;
-    downloadform->setupUi(downloadWidget);
+    // Exercise list
+    m_exerciseWidget = new ExerciseWidget;
+    connect(m_exerciseWidget, &ExerciseWidget::onExercisesSelected,
+            this, &TmcManager::downloadSelectedExercises);
 
     // Monitor for active project change
     using namespace ProjectExplorer;
@@ -54,10 +54,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
     connect(m_client, &TmcClient::TMCError, this, &TmcManager::displayTMCError);
-
-    // Signal-Slot for download window
-    connect(downloadform->okbutton, &QPushButton::clicked, this, &TmcManager::onDownloadOkClicked);
-    connect(downloadform->cancelbutton, &QPushButton::clicked, downloadWidget, &QWidget::close);
 
     // Autotest
     connect(TmcResultReader::instance(), &TmcResultReader::projectTestsPassed,
@@ -133,12 +129,9 @@ void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercis
         }
     }
 
-    downloadform->exerciselist->clear();
-
     // Have new exercises
     if (!newExercises.isEmpty()) {
-        appendToDownloadWindow(newExercises);
-        downloadWidget->show();
+        showExerciseWidget(newExercises);
     }
 
     m_updateProgress.reportFinished();
@@ -211,7 +204,7 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
 
 void TmcManager::showSubmitWidget(const Project *project)
 {
-    SubmitWidget *submit = new SubmitWidget();
+    auto *submit = new SubmitWidget();
     submit->show();
     connect(m_client, &TmcClient::exerciseSubmitReady, submit, &SubmitWidget::onSubmitReply);
     connect(m_client, &TmcClient::exerciseSubmitProgress, submit, &SubmitWidget::submitProgress);
@@ -220,6 +213,12 @@ void TmcManager::showSubmitWidget(const Project *project)
     connect(submit, &SubmitWidget::submissionStatusRequest, m_client, &TmcClient::getSubmissionStatus);
     submit->setAttribute(Qt::WA_DeleteOnClose);
     submit->submitProject(project);
+}
+
+void TmcManager::showExerciseWidget(QList<Exercise> exercises)
+{
+    m_exerciseWidget->addExercises(exercises);
+    m_exerciseWidget->show();
 }
 
 void TmcManager::submitActiveExercise()
@@ -240,7 +239,6 @@ void TmcManager::openActiveCoursePage()
     auto activeCourse = m_settings->getActiveCourse();
     if (!activeCourse)
         return;
-
 
     QSettings settings("TestMyQt", "TMC");
     QString serverUrl = settings.value("server",
@@ -284,7 +282,12 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     openExercise(ex);
 }
 
-void TmcManager::openExercise(Exercise ex)
+void TmcManager::downloadSelectedExercises(QList<Exercise> selected)
+{
+    qDebug() << "Download exercises";
+}
+
+void TmcManager::openExercise(Exercise &ex)
 {
     if (ex.getLocation().isEmpty()) {
         displayTMCError("Exercise location is empty!");
@@ -292,11 +295,7 @@ void TmcManager::openExercise(Exercise ex)
     }
     using namespace ProjectExplorer;
 
-    // Part1-Exercise1 -> Part1/Exercise1
-    QStringList parts = ex.getName().split("-");
-    QString proFile = QString("%1/%2/%3.pro")
-            .arg(ex.getLocation(), parts.join("/"), parts.last());
-
+    QString proFile = ex.getProFile();
     const auto openProject = ProjectExplorerPlugin::openProject(proFile);
 
     if (!openProject.alreadyOpen().isEmpty()) {
@@ -336,25 +335,6 @@ void TmcManager::updateExercises()
 }
 
 /*!
-    Appends the \l Exercise objects of the \a exercises parameter to the list of
-    TMC exercises displayed in the download window.
-*/
-void TmcManager::appendToDownloadWindow(QList<Exercise> exercises)
-{
-    foreach (Exercise ex, exercises) {
-        QListWidgetItem* item = new QListWidgetItem(ex.getName(), downloadform->exerciselist);
-        item->setData(Qt::UserRole, QVariant::fromValue(ex));
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        item->setCheckState(Qt::Checked);
-    }
-}
-
-bool TmcManager::lastUpdateSuccessful()
-{
-    return m_updateSuccessful;
-}
-
-/*!
     Sets the \l {TmcManager::updateInterval()} {update interval} of the \l TmcManager
     object to \a interval seconds.
 */
@@ -371,29 +351,3 @@ void TmcManager::displayTMCError(QString errorText)
     QMessageBox::critical(m_settings, "TMC", errorText, QMessageBox::Ok);
 }
 
-void TmcManager::onDownloadOkClicked()
-{
-    auto exerciseList = downloadform->exerciselist;
-    downloadPanel = new DownloadPanel();
-
-    for (int idx = 0; idx < exerciseList->count(); idx++) {
-        auto item = exerciseList->item(idx);
-        if (item->checkState() == Qt::Checked) {
-            Exercise ex = item->data(Qt::UserRole).value<Exercise>();
-            downloadPanel->addWidgetsToDownloadPanel(ex.getName());
-            QNetworkReply* reply = m_client->getExerciseZip(ex);
-
-            connect(reply, &QNetworkReply::downloadProgress,
-                downloadPanel, &DownloadPanel::networkReplyProgress);
-            connect(reply, &QNetworkReply::finished,
-                downloadPanel, &DownloadPanel::httpFinished);
-
-            downloadPanel->addReplyToList(reply);
-        }
-    }
-
-    downloadPanel->addInfoLabel();
-    downloadPanel->sanityCheck(); // Should be removed at some point
-    downloadPanel->show();
-    downloadWidget->close();
-}

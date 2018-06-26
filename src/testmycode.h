@@ -29,10 +29,10 @@ private slots:
 
 private:
     // tmcClient
-    TmcClient tmcClient;
+    TmcClient *tmcClient;
 
     // SettingsWidget
-    SettingsWidget *settingsWidget;
+    SettingsWidget *m_settingsWidget;
 
     // TmcManager
     TmcManager *m_tmcManager;

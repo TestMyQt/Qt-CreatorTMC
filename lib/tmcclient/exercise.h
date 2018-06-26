@@ -12,7 +12,7 @@ class Exercise
 public:
     Exercise();
     Exercise(int id, QString name);
-    ~Exercise() { }
+    ~Exercise() = default;
 
     bool operator==(const Exercise &other) const;
     bool operator!=(const Exercise &other) const;
@@ -22,17 +22,18 @@ public:
     void setName(QString name);
     void setLocation(QString location);
     void setChecksum(QString checksum);
-    void setDlDate(QString dlDate);
+    void setDeadline(const QString &date);
     void setOpenStatus(bool openStatus);
     void setDownloaded(bool downloaded);
     void setUnzipped(bool zipped);
-    void addSubmission(Submission sub);
+    void addSubmission(Submission &sub);
 
     int getId() const;
     QString getName() const;
+    QString getProFile() const;
     QString getLocation() const;
     QString getChecksum() const;
-    QString getDlDate() const;
+    QDateTime getDeadline() const;
     bool getOpenStatus() const;
     bool isDownloaded() const;
     bool isUnzipped() const;
@@ -43,15 +44,16 @@ public:
     static Exercise fromJson(const QJsonObject jsonExercise);
 
 private:
-    int m_id;
+    QMap<int, Submission> m_submissions;
+
     QString m_name;
     QString m_location;
     QString m_checksum;
-    QString m_dlDate;
+    QDateTime m_deadline;
+    int m_id;
     bool m_downloaded;
     bool m_unzipped;
     bool m_openStatus;
-    QMap<int, Submission> m_submissions;
 
 };
 

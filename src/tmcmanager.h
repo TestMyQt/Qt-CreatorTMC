@@ -4,6 +4,7 @@
 #include "tmcclient.h"
 #include "settingswidget.h"
 #include "submitwidget.h"
+#include "exercisewidget.h"
 #include "downloadpanel.h"
 #include "tmcresultreader.h"
 
@@ -11,8 +12,6 @@
 
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/project.h>
-
-#include <ui_downloadscreen.h>
 
 #include <QFutureWatcher>
 #include <QObject>
@@ -34,7 +33,6 @@ public:
     void openActiveCoursePage();
 
     int updateInterval();
-    bool lastUpdateSuccessful();
 
     void setSettings(SettingsWidget *settings);
     void loadSettings();
@@ -52,11 +50,10 @@ public slots:
     void askSubmit(const Project *project);
 
     void handleUpdates(Course *updatedCourse, QList<Exercise> newExercises);
-    void appendToDownloadWindow(QList<Exercise> exercises);
 
 private slots:
-    void onDownloadOkClicked();
     void handleZip(QByteArray zipData, Exercise ex);
+    void downloadSelectedExercises(QList<Exercise> selected);
 
 private:
 
@@ -65,21 +62,16 @@ private:
 
     Project *m_activeProject = nullptr;
 
-    void openExercise(Exercise ex);
+    ExerciseWidget *m_exerciseWidget = nullptr;
+
+    void openExercise(Exercise &ex);
     void showSubmitWidget(const Project *project);
-
-    // DownloadWidget
-    Ui::downloadform *downloadform;
-    QWidget *downloadWidget;
-
-    // DownloadPanel
-    DownloadPanel *downloadPanel;
+    void showExerciseWidget(QList<Exercise> exercises);
 
     QFutureInterface<void> m_updateProgress;
     QFutureInterface<void> m_downloadProgress;
 
     QTimer m_updateTimer;
-    bool m_updateSuccessful;
 
 };
 

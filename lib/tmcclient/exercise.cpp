@@ -84,6 +84,17 @@ QString Exercise::getName() const
     return m_name;
 }
 
+// Part1-Exercise1 -> Part1/Exercise1
+
+/*!
+    Gets the location of the .pro file for the \l Exercise object.
+*/
+QString Exercise::getProFile() const
+{
+    QStringList parts = m_name.split(QStringLiteral("-"));
+    return QStringLiteral("%1/%2/%3.pro").arg(m_location, parts.join(QStringLiteral("/")), parts.last());
+}
+
 /*!
     Getter function for the directory location of the exercise.
 */
@@ -103,9 +114,9 @@ QString Exercise::getChecksum() const
 /*!
     Getter function for the deadline date field of the \l Exercise object.
 */
-QString Exercise::getDlDate() const
+QDateTime Exercise::getDeadline() const
 {
-    return m_dlDate;
+    return m_deadline;
 }
 
 /*!
@@ -142,7 +153,12 @@ bool Exercise::isUnzipped() const
     return m_unzipped;
 }
 
-void Exercise::addSubmission(Submission sub)
+QMap<int, Submission> Exercise::getSubmissions() const
+{
+    return m_submissions;
+}
+
+void Exercise::addSubmission(Submission &sub)
 {
     m_submissions.insert(sub.getId(), sub);
 }
@@ -186,9 +202,9 @@ void Exercise::setChecksum(QString checksum)
     TMC exercises often come with a deadline. After the deadline has passed,
     no points are usually given for completing the exercise.
 */
-void Exercise::setDlDate(QString dlDate)
+void Exercise::setDeadline(const QString &deadline)
 {
-    m_dlDate = dlDate;
+    m_deadline = QDateTime::fromString(deadline, Qt::ISODateWithMs);
 }
 
 /*!
@@ -238,7 +254,7 @@ void Exercise::saveQSettings(QSettings *settings, const QString courseName)
             settings->setValue("id", m_id);
             settings->setValue("checksum", m_checksum);
             settings->setValue("location", m_location);
-            settings->setValue("dlDate", m_dlDate);
+            settings->setValue("deadline", m_deadline);
             settings->setValue("openStatus", m_openStatus);
             settings->setValue("downloaded", m_downloaded);
             settings->setValue("unzipped", m_unzipped);
@@ -259,9 +275,9 @@ void Exercise::saveQSettings(QSettings *settings, const QString courseName)
 Exercise Exercise::fromQSettings(QSettings *settings, QString exerciseName)
 {
     Exercise ex = Exercise(settings->value("id").toInt(), exerciseName);
-    ex.setChecksum(settings->value("checksum", "").toString());
-    ex.setLocation(settings->value("location", "").toString());
-    ex.setDlDate(settings->value("dlDate", "").toString());
+    ex.setChecksum(settings->value("checksum").toString());
+    ex.setLocation(settings->value("location").toString());
+    ex.setDeadline(settings->value("deadline").toString());
     ex.setOpenStatus(settings->value("openStatus", false).toBool());
     ex.setDownloaded(settings->value("downloaded", false).toBool());
     ex.setUnzipped(settings->value("unzipped", false).toBool());
@@ -281,7 +297,7 @@ Exercise Exercise::fromJson(const QJsonObject jsonExercise)
     Exercise fromJson = Exercise(jsonExercise["id"].toInt(),
             jsonExercise["name"].toString());
     fromJson.setChecksum(jsonExercise["checksum"].toString());
-    fromJson.setDlDate(jsonExercise["deadline"].toString());
+    fromJson.setDeadline(jsonExercise["deadline"].toString());
 
     return fromJson;
 }
