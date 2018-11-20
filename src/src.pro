@@ -5,20 +5,20 @@ CONFIG += c++11
 DEFINES += QUAZIP_STATIC
 
 win32:CONFIG(release, debug|release) {
-    LIBS += -L$$OUT_PWD/../lib/tmcclient/ -ltmcclient
+    LIBS += -L$$OUT_PWD/../lib/tmcclient/release -ltmcclient
     LIBS += -L$$OUT_PWD/../3rdparty/quazip/quazip/release/ -lquazip
     LIBS += -L$$OUT_PWD/../3rdparty/zlib/release/ -lz
 
-    PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/libtmcclient.a
+    PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/release/libtmcclient.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/quazip/quazip/release/libquazip.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/release/libz.a
 
 } else:win32:CONFIG(debug, debug|release) {
-    LIBS += -L$$OUT_PWD/../lib/tmcclient/ -ltmcclientd
+    LIBS += -L$$OUT_PWD/../lib/tmcclient/debug/ -ltmcclient
     LIBS += -L$$OUT_PWD/../3rdparty/quazip/quazip/debug/ -lquazipd
     LIBS += -L$$OUT_PWD/../3rdparty/zlib/debug/ -lz
 
-    PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/libtmcclient.a
+    PRE_TARGETDEPS += $$OUT_PWD/../lib/tmcclient/debug/libtmcclient.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/quazip/quazip/debug/libquazipd.a
     PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/zlib/debug/libz.a
 
