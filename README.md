@@ -4,21 +4,22 @@
 ## Development setup
 
 - Get a Qt Creator build
-  - ~Official binary release from [download.qt.io](http://download.qt.io/official_releases/qtcreator/)~ This option is not yet available due to release builds not having the patch need for the plugin. Release version 4.7 should have it in the future.
+  - Official binary release from [download.qt.io](http://download.qt.io/official_releases/qtcreator/)
   - Compile it yourself from source (takes a while, 30-45min)
   - Note: **You will need a debug build if you want to debug your project**
 - Get the sources for the Qt Creator build from [code.qt.io](http://code.qt.io/cgit/qt-creator/qt-creator.git/)
-  - `git clone --depth 1 --branch $QTC_BUILD_VERSION git://code.qt.io/qt-creator/qt-creator.git`
+  - `git clone --depth 1 git://code.qt.io/qt-creator/qt-creator.git`
+  - Qt Creator is released from tags, like `v4.8.0-beta2`, so checkout the right Qt Creator version tag:
+  - `git checkout v4.8.0-beta2`
 
-### Build Qt Creator
+### (Optional) Build Qt Creator
 
-Due to the patch we need, you'll need to compile the Qt Creator 4.7 development branch.
+To build Qt Creator in to a separate build directory:
 
-To build 4.7 in to a separate build directory:
-
-- `git clone --depth 1 --branch 4.7 git://code.qt.io/qt-creator/qt-creator.git qt-creator-4.7`
-- `mkdir qt-creator-4.7-build && cd qt-creator-4.7-build`
-- `qmake ../qt-creator-4.7`
+- `git clone --depth 1 git://code.qt.io/qt-creator/qt-creator.git`
+- `cd qt-creator && git checkout $QTC_BUILD_VERSION`
+- `mkdir ../qt-creator-build && cd ../qt-creator-build`
+- `qmake ../qt-creator`
 - `make` or `make -j $(nproc)` to build on all cores
 
 ### Compile the plugin
