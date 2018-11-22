@@ -8,10 +8,9 @@
 
 #include <algorithm>
 
-SettingsWidget::SettingsWidget(TmcClient *client, QWidget *parent) :
-    QWidget(parent),
-    m_client(client)
+SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 {
+    m_client = TmcClient::instance();
     settingsWindow = new Ui::settingsForm;
     settingsWindow->setupUi(this);
 

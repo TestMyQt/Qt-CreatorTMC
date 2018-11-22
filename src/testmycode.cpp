@@ -134,7 +134,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     tmcClient->setNetworkManager(m);
 
     // Initialize settings window
-    m_settingsWidget = new SettingsWidget(tmcClient);
+    m_settingsWidget = new SettingsWidget;
     m_settingsWidget->loadSettings();
 
     connect(loginAction, &QAction::triggered, m_settingsWidget, &SettingsWidget::showLoginWidget);
