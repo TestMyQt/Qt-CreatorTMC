@@ -1,6 +1,7 @@
 #ifndef EXERCISEMODEL_H
 #define EXERCISEMODEL_H
 
+#include "course.h"
 #include "exercise.h"
 
 #include <QAbstractTableModel>
@@ -16,6 +17,7 @@ public:
     ExerciseModel(QObject *parent = nullptr);
     QList<Exercise> selectedExercises();
     void triggerDownload();
+    void onTableClicked(const QModelIndex &index);
 
     // QAbstractTableModel
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -33,17 +35,24 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 public slots:
-    void addExercises(const QList<Exercise> exercises);
+    void onExerciseListUpdated(Course *updatedCourse, QList<Exercise> newExercises);
+    void onWorkingDirectoryChanged(QString workingDir);
     void onSelectAll(int state);
 
     void onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal);
     void onDownloadFinished();
 
+signals:
+    void exerciseUpdates();
+    void exerciseOpen(const Exercise &ex);
+
 private:
     QList<Exercise> m_exercises;
     QList<Exercise> m_selected;
-    QMap<QNetworkReply *, int> m_exerciseIndexes;
-    QMap<int, int> m_progress;
+    QMap<QNetworkReply *, Exercise> m_downloads;
+    QMap<Exercise, int> m_progress;
+
+    QString m_workingDir;
 
     QString calculateDeadline(const Exercise &ex) const;
 };

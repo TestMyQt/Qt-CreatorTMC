@@ -17,6 +17,7 @@ public:
     bool operator==(const Exercise &other) const;
     bool operator!=(const Exercise &other) const;
     bool operator!() const;
+    bool operator<(const Exercise &other) const;
 
     void setId(int id);
     void setName(QString name);

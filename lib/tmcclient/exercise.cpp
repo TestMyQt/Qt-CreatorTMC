@@ -68,6 +68,11 @@ bool Exercise::operator!() const
     return m_id == -1;
 }
 
+bool Exercise::operator<(const Exercise &other) const
+{
+    return m_id < other.getId();
+}
+
 /*!
     Getter function for the exercise ID.
 */

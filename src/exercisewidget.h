@@ -14,13 +14,12 @@ class ExerciseWidget : public QWidget
     Q_OBJECT
 public:
     explicit ExerciseWidget(QWidget *parent = nullptr);
-    void addExercises(const QList<Exercise> exercises);
+    void setModel(ExerciseModel *model);
 
 signals:
     void onExercisesSelected(QList<Exercise> selected);
 
 public slots:
-    void selectExercises();
 
 private:
     Ui::ExerciseWindow *m_exerciseWindow;

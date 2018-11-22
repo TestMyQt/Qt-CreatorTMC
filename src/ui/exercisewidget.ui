@@ -44,9 +44,9 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="okButton">
+      <widget class="QPushButton" name="downloadButton">
        <property name="text">
-        <string>Ok</string>
+        <string>Download selected</string>
        </property>
       </widget>
      </item>
@@ -77,7 +77,7 @@
         <string>Select all exercises</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>

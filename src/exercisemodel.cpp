@@ -10,27 +10,81 @@ ExerciseModel::ExerciseModel(QObject *parent)
 
 }
 
-QList<Exercise> ExerciseModel::selectedExercises()
+void ExerciseModel::onExerciseListUpdated(Course *updatedCourse, QList<Exercise> newExercises)
 {
-    return m_selected;
+    QString courseName = updatedCourse->getName();
+
+    if (updatedCourse->getName().isEmpty()) {
+        qDebug() << "Updated course name is null!";
+        return;
+    }
+
+    QString saveDirectory = QString("%1/%2").arg(m_workingDir, courseName);
+
+    for (Exercise &ex : newExercises) {
+        ex.setLocation(saveDirectory);
+
+        Exercise found = updatedCourse->getExercise(ex);
+
+        if (!found) {
+            // Not found, new exercise
+            ex.setDownloaded(false);
+            ex.setUnzipped(false);
+            updatedCourse->addExercise(ex);
+            continue;
+        }
+
+        if (found == ex) {
+            // Id and checksum matches! Not a new exercise.
+            if (found.isDownloaded()) {
+                // Exercise has been downloaded
+                newExercises.removeAll(ex);
+            }
+        }
+    }
+
+    // Have new exercises
+    if (!newExercises.isEmpty()) {
+        emit exerciseUpdates();
+    }
+
+    beginResetModel();
+    m_exercises = updatedCourse->getExercises().values();
+    endResetModel();
+}
+
+void ExerciseModel::onWorkingDirectoryChanged(QString workingDir)
+{
+    m_workingDir = workingDir;
 }
 
 void ExerciseModel::triggerDownload()
 {
     for (auto &ex : m_selected) {
         QNetworkReply* reply = TmcClient::instance()->getExerciseZip(ex);
-        m_exerciseIndexes[reply] = m_exercises.indexOf(ex);
+        m_downloads[reply] = ex;
         connect(reply, &QNetworkReply::downloadProgress, this, &ExerciseModel::onProgressUpdate);
         connect(reply, &QNetworkReply::finished, this, &ExerciseModel::onDownloadFinished);
     }
 }
 
-void ExerciseModel::addExercises(const QList<Exercise> exercises)
+void ExerciseModel::onTableClicked(const QModelIndex &index)
 {
-    beginInsertRows(QModelIndex(), 0, exercises.count() - 1);
-    m_exercises = exercises;
-    m_selected = exercises;
-    endInsertRows();
+    if (index.isValid() && index.column() == 1) {
+        const Exercise &ex = m_exercises.at(index.row());
+
+        if (ex.isDownloaded() && ex.isUnzipped()) {
+            emit exerciseOpen(ex);
+            return;
+        }
+
+        qDebug() << "Downloading exercise" << ex.getName();
+        QNetworkReply* reply = TmcClient::instance()->getExerciseZip(ex);
+        m_downloads[reply] = ex;
+        m_progress[ex] = 0;
+        connect(reply, &QNetworkReply::downloadProgress, this, &ExerciseModel::onProgressUpdate);
+        connect(reply, &QNetworkReply::finished, this, &ExerciseModel::onDownloadFinished);
+    }
 }
 
 void ExerciseModel::onSelectAll(int state)
@@ -43,16 +97,24 @@ void ExerciseModel::onSelectAll(int state)
 
 void ExerciseModel::onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal)
 {
-    int exerciseIndex = m_exerciseIndexes[(static_cast<QNetworkReply *>(QObject::sender()))];
-    QModelIndex modelIndex = index(exerciseIndex, 0);
+    Exercise &ex = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
+    QModelIndex modelIndex = index(m_exercises.indexOf(ex), 1);
 
-    m_progress[exerciseIndex] = static_cast<qint32>((bytesReceived * 100) / bytesTotal);
+    if (bytesTotal == -1)
+        bytesTotal = 1500000;
+
+    m_progress[ex] = static_cast<qint32>((bytesReceived * 100) / bytesTotal);
+
     emit dataChanged(modelIndex, modelIndex);
 }
 
 void ExerciseModel::onDownloadFinished()
 {
+    Exercise &ex = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
+    QModelIndex modelIndex = index(m_exercises.indexOf(ex), 1);
 
+    m_progress[ex] = -1;
+    emit dataChanged(modelIndex, modelIndex);
 }
 
 QString ExerciseModel::calculateDeadline(const Exercise &ex) const
@@ -115,7 +177,7 @@ QVariant ExerciseModel::data(const QModelIndex &index, int role) const
         case 0:
             return ex.getName();
         case 1:
-            return m_progress[index.row()];
+            return ex.isUnzipped() ? -1 : m_progress[ex];
         case 2:
             return calculateDeadline(ex);
         default:
@@ -144,8 +206,6 @@ bool ExerciseModel::insertRows(int row, int count, const QModelIndex &)
 {
     Q_UNUSED(row)
     Q_UNUSED(count)
-
-    // NOP: update the model in addExercises
     return true;
 }
 
@@ -165,7 +225,7 @@ QVariant ExerciseModel::headerData(int section, Qt::Orientation orientation, int
         case 0:
             return "Exercise";
         case 1:
-            return "Download";
+            return "Action";
         case 2:
             return "Deadline";
         default:
@@ -173,7 +233,7 @@ QVariant ExerciseModel::headerData(int section, Qt::Orientation orientation, int
         }
     }
 
-    if ( orientation == Qt::Vertical && role == Qt::DisplayRole ){
+    if (orientation == Qt::Vertical && role == Qt::DisplayRole){
         return section;
     }
 

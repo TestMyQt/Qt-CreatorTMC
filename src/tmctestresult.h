@@ -24,8 +24,6 @@ public:
     TmcTestResult();
     explicit TmcTestResult(const TmcResult::Type result);
 
-    virtual ~TmcTestResult() {}
-
     QString name() const { return m_name; }
     TmcResult::Type result() const { return m_result; }
     QString message() const { return m_message; }

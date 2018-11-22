@@ -41,8 +41,18 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
 
     // Exercise list
     m_exerciseWidget = new ExerciseWidget;
-    connect(m_exerciseWidget, &ExerciseWidget::onExercisesSelected,
-            this, &TmcManager::downloadSelectedExercises);
+    m_exerciseModel = new ExerciseModel;
+    m_exerciseWidget->setModel(m_exerciseModel);
+
+    connect(TmcClient::instance(), &TmcClient::exerciseListReady,
+            m_exerciseModel, &ExerciseModel::onExerciseListUpdated);
+
+    connect(m_exerciseModel, &ExerciseModel::exerciseUpdates,
+            m_exerciseWidget, &ExerciseWidget::show);
+
+    connect(m_exerciseModel, &ExerciseModel::exerciseOpen,
+            this, &TmcManager::onExerciseOpen);
+
 
     // Monitor for active project change
     using namespace ProjectExplorer;
@@ -51,7 +61,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
             this, &TmcManager::onStartupProjectChanged);
 
     // TmcClient
-    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
     connect(m_client, &TmcClient::TMCError, this, &TmcManager::displayTMCError);
 
@@ -80,60 +89,17 @@ void TmcManager::setSettings(SettingsWidget *settings)
     m_settings = settings;
     connect(m_settings, &SettingsWidget::autoUpdateIntervalChanged, this, &TmcManager::setUpdateInterval);
     setUpdateInterval(m_settings->getAutoupdateInterval());
+
+    m_exerciseModel->onWorkingDirectoryChanged(m_settings->getWorkingDirectory());
+    connect(m_settings, &SettingsWidget::workingDirectoryChanged,
+            m_exerciseModel, &ExerciseModel::onWorkingDirectoryChanged);
+
+    //connect(m_settings, &SettingsWidget::activeCourseChanged, m_exerciseModel, );
+
 }
 
-/*!
-    The slot is connected to \l TmcClient::exerciseListReady. Parameter \a newExercises
-    is an up-to-date version of the TMC exercises of course \a updatedCourse. Each
-    \l Exercise object in \a newExercises is examined against the already present
-    exercises in \a updatedCourse. Any exercise in \a newExercises that is found to already
-    be in \a updatedCourse is removed from \a newExercises. After removing the already
-    present exercises from \a newExercises the list is then used to inform the user of
-    exercise updates (if any are available).
-*/
-void TmcManager::handleUpdates(Course *updatedCourse, QList<Exercise> newExercises)
+void TmcManager::handleUpdates(Course */*updatedCourse*/, QList<Exercise> /*newExercises*/)
 {
-    QString workingDirectory = m_settings->getWorkingDirectory();
-    QString courseName = updatedCourse->getName();
-
-    if (workingDirectory.isEmpty()) {
-        qDebug() << "No save directory set!";
-        return;
-    }
-
-    if (updatedCourse->getName().isEmpty()) {
-        qDebug() << "Updated course name is null!";
-        return;
-    }
-
-    QString saveDirectory = QString("%1/%2").arg(workingDirectory, courseName);
-
-    foreach (Exercise ex, newExercises) {
-        ex.setLocation(saveDirectory);
-
-        Exercise found = updatedCourse->getExercise(ex);
-
-        if (!found) {
-            // Not found, new exercise
-            ex.setDownloaded(false);
-            updatedCourse->addExercise(ex);
-            continue;
-        }
-
-        if (found == ex) {
-            // Id and checksum matches! Not a new exercise.
-            if (found.isDownloaded()) {
-                // Exercise has been downloaded
-                newExercises.removeAll(ex);
-            }
-        }
-    }
-
-    // Have new exercises
-    if (!newExercises.isEmpty()) {
-        showExerciseWidget(newExercises);
-    }
-
     m_updateProgress.reportFinished();
 }
 
@@ -215,12 +181,6 @@ void TmcManager::showSubmitWidget(const Project *project)
     submit->submitProject(project);
 }
 
-void TmcManager::showExerciseWidget(QList<Exercise> exercises)
-{
-    m_exerciseWidget->addExercises(exercises);
-    m_exerciseWidget->show();
-}
-
 void TmcManager::submitActiveExercise()
 {
     if (!m_activeProject) {
@@ -278,16 +238,9 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     QSettings settings("TestMyQt", "TMC");
     ex.saveQSettings(&settings, activeCourse->getName());
     settings.deleteLater();
-    // open project
-    openExercise(ex);
 }
 
-void TmcManager::downloadSelectedExercises(QList<Exercise> selected)
-{
-    qDebug() << "Download exercises";
-}
-
-void TmcManager::openExercise(Exercise &ex)
+void TmcManager::onExerciseOpen(const Exercise &ex)
 {
     if (ex.getLocation().isEmpty()) {
         displayTMCError("Exercise location is empty!");

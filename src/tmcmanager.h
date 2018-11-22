@@ -4,7 +4,10 @@
 #include "tmcclient.h"
 #include "settingswidget.h"
 #include "submitwidget.h"
+
 #include "exercisewidget.h"
+#include "exercisemodel.h"
+
 #include "downloadpanel.h"
 #include "tmcresultreader.h"
 
@@ -49,11 +52,12 @@ public slots:
     void updateExercises();
     void askSubmit(const Project *project);
 
+    void onExerciseOpen(const Exercise &ex);
+
     void handleUpdates(Course *updatedCourse, QList<Exercise> newExercises);
 
 private slots:
     void handleZip(QByteArray zipData, Exercise ex);
-    void downloadSelectedExercises(QList<Exercise> selected);
 
 private:
 
@@ -63,8 +67,8 @@ private:
     Project *m_activeProject = nullptr;
 
     ExerciseWidget *m_exerciseWidget = nullptr;
+    ExerciseModel *m_exerciseModel = nullptr;
 
-    void openExercise(Exercise &ex);
     void showSubmitWidget(const Project *project);
     void showExerciseWidget(QList<Exercise> exercises);
 
