@@ -200,15 +200,11 @@ void TmcManager::openActiveCoursePage()
     if (!activeCourse)
         return;
 
-    QSettings settings("TestMyQt", "TMC");
-    QString serverUrl = settings.value("server",
-                                       TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString();
-    QString activeCourseId = QString::number(activeCourse->getId());
+    QString serverAddress = m_settings->getServerAddress();
 
-    QString courseUrl = QString("%1/courses/%2").arg(serverUrl, activeCourseId);
+    QString courseUrl = QString("%1/courses/%2").arg(serverAddress,
+                                                     QString::number(activeCourse->getId()));
     QDesktopServices::openUrl(QUrl(courseUrl));
-
-    settings.deleteLater();
 }
 
 void TmcManager::handleZip(QByteArray zipData, Exercise ex)
@@ -235,9 +231,7 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
     ex.setLocation(saveDir);
     // Save updated exercise back to course exercise list
     activeCourse->addExercise(ex);
-    QSettings settings("TestMyQt", "TMC");
-    ex.saveQSettings(&settings, activeCourse->getName());
-    settings.deleteLater();
+    m_settings->saveExercise(ex, activeCourse);
 }
 
 void TmcManager::onExerciseOpen(const Exercise &ex)

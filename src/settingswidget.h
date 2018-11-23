@@ -18,6 +18,9 @@ public:
     void loadSettings();
     void display();
 
+    void saveExercise(Exercise &ex, Course *course);
+
+    QString getServerAddress();
     QString getWorkingDirectory();
     Course* getActiveCourse();
     int getAutoupdateInterval();
