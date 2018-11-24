@@ -12,7 +12,12 @@ class Exercise
 public:
     Exercise();
     Exercise(int id, QString name);
-    ~Exercise() = default;
+
+    enum State {
+        None,
+        Open,
+        Downloaded
+    };
 
     bool operator==(const Exercise &other) const;
     bool operator!=(const Exercise &other) const;
@@ -24,7 +29,7 @@ public:
     void setLocation(QString location);
     void setChecksum(QString checksum);
     void setDeadline(const QString &date);
-    void setOpenStatus(bool openStatus);
+    void setState(State state);
     void setDownloaded(bool downloaded);
     void setUnzipped(bool zipped);
     void addSubmission(Submission &sub);
@@ -35,7 +40,7 @@ public:
     QString getLocation() const;
     QString getChecksum() const;
     QDateTime getDeadline() const;
-    bool getOpenStatus() const;
+    Exercise::State getState() const;
     bool isDownloaded() const;
     bool isUnzipped() const;
     QMap<int, Submission> getSubmissions() const;
@@ -52,9 +57,9 @@ private:
     QString m_checksum;
     QDateTime m_deadline;
     int m_id;
+    State m_state;
     bool m_downloaded;
     bool m_unzipped;
-    bool m_openStatus;
 
 };
 

@@ -129,9 +129,9 @@ QDateTime Exercise::getDeadline() const
     If the corresponding TMC exercise project has been opened in Qt Creator,
     \c true is returned and \c false otherwise.
 */
-bool Exercise::getOpenStatus() const
+Exercise::State Exercise::getState() const
 {
-    return m_openStatus;
+    return m_state;
 }
 
 /*!
@@ -146,7 +146,7 @@ bool Exercise::getOpenStatus() const
 */
 bool Exercise::isDownloaded() const
 {
-    return m_downloaded;
+    return m_state == Downloaded;
 }
 
 /*!
@@ -212,15 +212,9 @@ void Exercise::setDeadline(const QString &deadline)
     m_deadline = QDateTime::fromString(deadline, Qt::ISODateWithMs);
 }
 
-/*!
-    Sets the open status of the \l Exercise object to \a openStatus. The open
-    status should be set to \c true when the corresponding TMC exercise project
-    is opened in Qt Creator; when the project is closed, the open status should
-    be set to \c false.
-*/
-void Exercise::setOpenStatus(bool openStatus)
+void Exercise::setState(State state)
 {
-    m_openStatus = openStatus;
+    m_state = state;
 }
 
 /*!
@@ -260,7 +254,7 @@ void Exercise::saveQSettings(QSettings *settings, const QString courseName)
             settings->setValue("checksum", m_checksum);
             settings->setValue("location", m_location);
             settings->setValue("deadline", m_deadline);
-            settings->setValue("openStatus", m_openStatus);
+            settings->setValue("state", m_state);
             settings->setValue("downloaded", m_downloaded);
             settings->setValue("unzipped", m_unzipped);
         settings->endGroup();
@@ -283,7 +277,7 @@ Exercise Exercise::fromQSettings(QSettings *settings, QString exerciseName)
     ex.setChecksum(settings->value("checksum").toString());
     ex.setLocation(settings->value("location").toString());
     ex.setDeadline(settings->value("deadline").toString());
-    ex.setOpenStatus(settings->value("openStatus", false).toBool());
+    ex.setState(State(settings->value("state", 0).toInt()));
     ex.setDownloaded(settings->value("downloaded", false).toBool());
     ex.setUnzipped(settings->value("unzipped", false).toBool());
     return ex;

@@ -42,7 +42,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
     // Exercise list
     m_exerciseWidget = new ExerciseWidget;
     m_exerciseModel = new ExerciseModel;
-    m_exerciseWidget->setModel(m_exerciseModel);
 
     connect(TmcClient::instance(), &TmcClient::exerciseListReady,
             m_exerciseModel, &ExerciseModel::onExerciseListUpdated);
@@ -52,7 +51,6 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
 
     connect(m_exerciseModel, &ExerciseModel::exerciseOpen,
             this, &TmcManager::onExerciseOpen);
-
 
     // Monitor for active project change
     using namespace ProjectExplorer;
@@ -94,8 +92,10 @@ void TmcManager::setSettings(SettingsWidget *settings)
     connect(m_settings, &SettingsWidget::workingDirectoryChanged,
             m_exerciseModel, &ExerciseModel::onWorkingDirectoryChanged);
 
-    //connect(m_settings, &SettingsWidget::activeCourseChanged, m_exerciseModel, );
+    m_exerciseModel->onActiveCourseChanged(m_settings->getActiveCourse());
+    connect(m_settings, &SettingsWidget::activeCourseChanged, m_exerciseModel, &ExerciseModel::onActiveCourseChanged);
 
+    m_exerciseWidget->setModel(m_exerciseModel);
 }
 
 void TmcManager::handleUpdates(Course */*updatedCourse*/, QList<Exercise> /*newExercises*/)
@@ -225,8 +225,7 @@ void TmcManager::handleZip(QByteArray zipData, Exercise ex)
         return;
     }
 
-    ex.setDownloaded(true);
-    ex.setUnzipped(true);
+    ex.setState(Exercise::Downloaded);
 
     ex.setLocation(saveDir);
     // Save updated exercise back to course exercise list

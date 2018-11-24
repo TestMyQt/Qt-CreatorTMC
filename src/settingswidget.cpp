@@ -21,10 +21,15 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     m_userLoggedInLabel = settingsWindow->userLoggedInLabel;
 }
 
+QString SettingsWidget::getSettingsPath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) % "/TestMyQt/TMC.ini";
+}
+
 void SettingsWidget::loadSettings()
 {
     // Use Ini format on all platforms
-    QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
     m_username = settings.value("username", "").toString();
     m_serverAddress = settings.value("server", TestMyCodePlugin::Constants::DEFAULT_TMC_SERVER).toString();
 
@@ -93,7 +98,7 @@ void SettingsWidget::loadSettings()
 
         emit activeCourseChanged(&m_activeCourse);
 
-        QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+        QSettings settings(getSettingsPath(), QSettings::IniFormat);
         settings.setValue("username", username);
         settings.deleteLater();
     });
@@ -109,7 +114,7 @@ void SettingsWidget::loadSettings()
 
         emit activeCourseChanged(&m_activeCourse);
 
-        QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+        QSettings settings(getSettingsPath(), QSettings::IniFormat);
         settings.setValue("server", serverAddress);
         settings.deleteLater();
     });
@@ -142,7 +147,7 @@ void SettingsWidget::display()
 
 void SettingsWidget::saveExercise(Exercise &ex, Course *course)
 {
-    QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
     ex.saveQSettings(&settings, course->getName());
     settings.deleteLater();
 }
@@ -188,7 +193,7 @@ int SettingsWidget::getAutoupdateInterval()
 
 void SettingsWidget::clearCredentials()
 {
-    QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
     settings.setValue("username", "");
     settings.setValue("accessToken", "");
     settings.deleteLater();
@@ -212,7 +217,7 @@ QString SettingsWidget::askSaveLocation()
 
 void SettingsWidget::handleLoginResponse(QString accessToken)
 {
-    QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
     if (accessToken == "") {
         settings.setValue("username", "");
     } else {
@@ -225,7 +230,7 @@ void SettingsWidget::handleLoginResponse(QString accessToken)
 
 void SettingsWidget::handleAuthResponse(QString clientId, QString clientSecret)
 {
-    QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
     settings.setValue("clientId", clientId);
     settings.setValue("clientSecret", clientSecret);
     settings.deleteLater();
@@ -286,7 +291,7 @@ void SettingsWidget::onSettingsOkClicked()
         return;
     }
 
-    QSettings settings(QSettings::IniFormat, QSettings::Scope::UserScope, "TestMyQt", "TMC");
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
     QString setDir = m_workingDir->text();
     if (setDir != workingDirectory) {
         workingDirectory = setDir;

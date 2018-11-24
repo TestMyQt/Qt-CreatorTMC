@@ -38,7 +38,6 @@ void ExerciseDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         return;
     }
 
-
     QStyleOptionProgressBar progressBarOption;
     progressBarOption.rect = option.rect;
     progressBarOption.minimum = 0;

@@ -20,6 +20,8 @@ public:
 
     void saveExercise(Exercise &ex, Course *course);
 
+    static QString getSettingsPath();
+
     QString getServerAddress();
     QString getWorkingDirectory();
     Course* getActiveCourse();

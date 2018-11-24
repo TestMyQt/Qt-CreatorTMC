@@ -13,9 +13,11 @@ class ExerciseModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-
     ExerciseModel(QObject *parent = nullptr);
-    QList<Exercise> selectedExercises();
+
+    void onActiveCourseChanged(Course *course);
+    QList<Exercise> exercises() const;
+
     void triggerDownload();
     void onTableClicked(const QModelIndex &index);
 
@@ -24,11 +26,6 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    //bool insertColumns(int column, int count, const QModelIndex &parent) override;
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    //bool removeColumns(int column, int count, const QModelIndex &parent) override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
@@ -47,10 +44,10 @@ signals:
     void exerciseOpen(const Exercise &ex);
 
 private:
-    QList<Exercise> m_exercises;
+    Course *m_activeCourse;
     QList<Exercise> m_selected;
-    QMap<QNetworkReply *, Exercise> m_downloads;
-    QMap<Exercise, int> m_progress;
+    QMap<QNetworkReply *, int> m_downloads;
+    QMap<int, int> m_progress;
 
     QString m_workingDir;
 

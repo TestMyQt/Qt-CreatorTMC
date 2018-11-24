@@ -10,17 +10,30 @@ ExerciseModel::ExerciseModel(QObject *parent)
 
 }
 
+void ExerciseModel::onActiveCourseChanged(Course *course)
+{
+    beginResetModel();
+    m_activeCourse = course;
+    endResetModel();
+}
+
+QList<Exercise> ExerciseModel::exercises() const
+{
+    return m_activeCourse->getExercises().values();
+}
+
 void ExerciseModel::onExerciseListUpdated(Course *updatedCourse, QList<Exercise> newExercises)
 {
     QString courseName = updatedCourse->getName();
 
-    if (updatedCourse->getName().isEmpty()) {
+    if (courseName.isEmpty()) {
         qDebug() << "Updated course name is null!";
         return;
     }
 
     QString saveDirectory = QString("%1/%2").arg(m_workingDir, courseName);
 
+    beginResetModel();
     for (Exercise &ex : newExercises) {
         ex.setLocation(saveDirectory);
 
@@ -28,29 +41,27 @@ void ExerciseModel::onExerciseListUpdated(Course *updatedCourse, QList<Exercise>
 
         if (!found) {
             // Not found, new exercise
-            ex.setDownloaded(false);
-            ex.setUnzipped(false);
+            ex.setState(Exercise::None);
             updatedCourse->addExercise(ex);
             continue;
         }
 
         if (found == ex) {
             // Id and checksum matches! Not a new exercise.
-            if (found.isDownloaded()) {
+            if (ex.getState() != Exercise::None) {
                 // Exercise has been downloaded
                 newExercises.removeAll(ex);
             }
         }
+
     }
+    endResetModel();
 
     // Have new exercises
     if (!newExercises.isEmpty()) {
         emit exerciseUpdates();
     }
 
-    beginResetModel();
-    m_exercises = updatedCourse->getExercises().values();
-    endResetModel();
 }
 
 void ExerciseModel::onWorkingDirectoryChanged(QString workingDir)
@@ -62,7 +73,7 @@ void ExerciseModel::triggerDownload()
 {
     for (auto &ex : m_selected) {
         QNetworkReply* reply = TmcClient::instance()->getExerciseZip(ex);
-        m_downloads[reply] = ex;
+        m_downloads[reply] = exercises().indexOf(ex);
         connect(reply, &QNetworkReply::downloadProgress, this, &ExerciseModel::onProgressUpdate);
         connect(reply, &QNetworkReply::finished, this, &ExerciseModel::onDownloadFinished);
     }
@@ -70,19 +81,25 @@ void ExerciseModel::triggerDownload()
 
 void ExerciseModel::onTableClicked(const QModelIndex &index)
 {
+    qDebug() << "onTableClicked";
     if (index.isValid() && index.column() == 1) {
-        const Exercise &ex = m_exercises.at(index.row());
+        const Exercise &ex = exercises()[index.row()];
 
-        if (ex.isDownloaded() && ex.isUnzipped()) {
+        if (ex.getState() == Exercise::Downloaded) {
             emit exerciseOpen(ex);
             return;
         }
 
+        if (m_progress[index.row()] != 0)
+            return;
+
         qDebug() << "Downloading exercise" << ex.getName();
+        m_progress[index.row()] = 1;
+
         QNetworkReply* reply = TmcClient::instance()->getExerciseZip(ex);
-        m_downloads[reply] = ex;
-        m_progress[ex] = 0;
-        connect(reply, &QNetworkReply::downloadProgress, this, &ExerciseModel::onProgressUpdate);
+        m_downloads.insert(reply, index.row());
+        emit dataChanged(index, index);
+
         connect(reply, &QNetworkReply::finished, this, &ExerciseModel::onDownloadFinished);
     }
 }
@@ -97,23 +114,25 @@ void ExerciseModel::onSelectAll(int state)
 
 void ExerciseModel::onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal)
 {
-    Exercise &ex = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
-    QModelIndex modelIndex = index(m_exercises.indexOf(ex), 1);
+    qDebug() << "onProgressUpdate";
+    int row = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
+    QModelIndex modelIndex = index(row, 1);
 
     if (bytesTotal == -1)
-        bytesTotal = 1500000;
+        bytesTotal = 20000;
 
-    m_progress[ex] = static_cast<qint32>((bytesReceived * 100) / bytesTotal);
+    m_progress[row] = static_cast<qint32>((bytesReceived * 100) / bytesTotal);
 
     emit dataChanged(modelIndex, modelIndex);
 }
 
 void ExerciseModel::onDownloadFinished()
 {
-    Exercise &ex = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
-    QModelIndex modelIndex = index(m_exercises.indexOf(ex), 1);
+    qDebug() << "onDownloadFinished";
+    int row = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
+    QModelIndex modelIndex = index(row, 1);
 
-    m_progress[ex] = -1;
+    m_progress[row] = -1;
     emit dataChanged(modelIndex, modelIndex);
 }
 
@@ -151,7 +170,7 @@ QString ExerciseModel::calculateDeadline(const Exercise &ex) const
 int ExerciseModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return m_exercises.count();
+    return exercises().count();
 }
 
 int ExerciseModel::columnCount(const QModelIndex &) const
@@ -163,21 +182,21 @@ QVariant ExerciseModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-    if (index.row() >= m_exercises.size() || index.row() < 0)
+    if (index.row() >= exercises().size() || index.row() < 0)
         return QVariant();
 
     if (role == Qt::CheckStateRole && index.column() == 0) {
-        bool checked = m_selected.contains(m_exercises.at(index.row()));
+        bool checked = m_selected.contains(exercises().at(index.row()));
         return checked ? Qt::Checked : Qt::Unchecked;
     }
 
     if (role == Qt::DisplayRole) {
-        const Exercise& ex = m_exercises.at(index.row());
+        const Exercise& ex = exercises().at(index.row());
         switch (index.column()) {
         case 0:
             return ex.getName();
         case 1:
-            return ex.isUnzipped() ? -1 : m_progress[ex];
+            return ex.isDownloaded() ? -1 : m_progress[index.row()];
         case 2:
             return calculateDeadline(ex);
         default:
@@ -191,29 +210,14 @@ bool ExerciseModel::setData(const QModelIndex &index, const QVariant &value, int
 {
     if (role == Qt::CheckStateRole && index.column() == 0) {
         if (value == Qt::Checked){
-            m_selected.append(m_exercises.at(index.row()));
+            m_selected.append(exercises().at(index.row()));
         } else {
-            m_selected.removeAll(m_exercises.at(index.row()));
+            m_selected.removeAll(exercises().at(index.row()));
         }
         emit dataChanged(index, index);
         return true;
     }
 
-    return true;
-}
-
-bool ExerciseModel::insertRows(int row, int count, const QModelIndex &)
-{
-    Q_UNUSED(row)
-    Q_UNUSED(count)
-    return true;
-}
-
-bool ExerciseModel::removeRows(int row, int count, const QModelIndex &){
-    beginRemoveRows(QModelIndex(), row, row + count - 1);
-    for (auto i = 0; i < count; ++i)
-        m_exercises.removeAt(row);
-    endRemoveRows();
     return true;
 }
 
