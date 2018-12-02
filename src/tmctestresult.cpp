@@ -20,14 +20,17 @@ QString TmcTestResult::toString() const
         foreach (QString point, m_points) {
             points.append(QString("[ %1 ]").arg(point));
         }
-        return QString("[%1]: %2, points awarded: %3").arg(m_name, "PASSED", points);
+        return QString("[%1]: PASSED, points awarded: %2").arg(m_name, points);
     }
 
     case TmcResult::Fail:
-        return QString("[%1]: %2 %3").arg(m_name, "FAILED", m_message);
+        return QString("[%1]: FAILED: %2").arg(m_name, m_message);
 
     case TmcResult::Invalid:
-        return QString("Invalid");
+        if (m_name.isEmpty())
+            return QString("INVALID: %1").arg(m_message);
+        else
+            return QString("[%1]: INVALID: %2").arg(m_name, m_message);
 
     case TmcResult::TestCaseStart:
         return "";

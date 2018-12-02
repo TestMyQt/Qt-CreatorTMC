@@ -42,6 +42,8 @@ void TmcResultModel::addResults(const QList<TmcTestResult> &results)
 
 void TmcResultModel::clearResults()
 {
+    if (m_results.empty())
+        return;
     beginRemoveRows(QModelIndex(), 0, m_results.count() - 1);
     m_results.erase(m_results.begin(), m_results.end());
     endRemoveRows();

@@ -5,6 +5,7 @@
 #include <autotest/testtreemodel.h>
 
 #include <QDebug>
+#include <algorithm>
 
 using namespace Autotest::Internal;
 
@@ -36,6 +37,7 @@ void TmcResultReader::testProject(Project *project)
         qDebug() << "Testing project null!";
         return;
     }
+
     m_testResults.clear();
     m_project = project;
     TestRunner *runner = TestRunner::instance();
@@ -92,6 +94,14 @@ void TmcResultReader::readTestResult(const TestResultPtr &result) {
         // emit testResultReady(TmcTestResult(TmcResult::TestCaseEnd));
         break;
 
+    case Result::MessageFatal:
+        // Test runner has most likely crashed, mark the test as invalid
+        m_openResult.setResult(TmcResult::Invalid);
+        m_openResult.setMessage("Test runner failed to run. It may have crashed or failed to build.");
+        m_testResults.append(m_openResult);
+        emit testResultReady(m_openResult);
+        break;
+
     default:
         break;
     }
@@ -104,15 +114,11 @@ void TmcResultReader::resultsReady() {
         return;
     }
 
-    bool testsPassed = true;
-    foreach (TmcTestResult r, m_testResults) {
-        qDebug() << r.name() << r.result() << r.points();
-        if (r.result() != TmcResult::Pass) {
-            testsPassed = false;
-        }
-    }
-
     emit testRunFinished();
+
+    auto not_passing = std::find_if(m_testResults.begin(), m_testResults.end(),
+                              [](TmcTestResult r) { return r.result() != TmcResult::Pass; });
+    bool testsPassed = not_passing == m_testResults.end();
 
     if (testsPassed) {
         qDebug("Project tests passed");

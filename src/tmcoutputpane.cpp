@@ -143,16 +143,6 @@ void TmcOutputPane::addTestResult(const TmcTestResult &result)
     navigateStateChanged();
 }
 
-// TODO: remove when not needed
-void TmcOutputPane::addTestResults(const QList<TmcTestResult> &results)
-{
-    m_model->addResults(results);
-
-    // Focus on the results pane
-    flash();
-    navigateStateChanged();
-}
-
 const TmcTestResult TmcOutputPane::testResult(const QModelIndex &idx)
 {
     if (!idx.isValid())

@@ -59,7 +59,6 @@ public:
     void goToPrev() override;
 
     void addTestResult(const TmcTestResult &result);
-    void addTestResults(const QList<TmcTestResult> &results);
     const TmcTestResult testResult(const QModelIndex &idx);
 
     void onCustomContextMenuRequested(const QPoint &pos);
