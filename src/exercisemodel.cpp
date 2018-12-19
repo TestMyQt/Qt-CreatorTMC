@@ -19,6 +19,9 @@ void ExerciseModel::onActiveCourseChanged(Course *course)
 
 QList<Exercise> ExerciseModel::exercises() const
 {
+    if (!m_activeCourse)
+        return {};
+
     return m_activeCourse->getExercises().values();
 }
 
