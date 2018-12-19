@@ -81,7 +81,6 @@ void ExerciseModel::triggerDownload()
 
 void ExerciseModel::onTableClicked(const QModelIndex &index)
 {
-    qDebug() << "onTableClicked";
     if (index.isValid() && index.column() == 1) {
         const Exercise &ex = exercises()[index.row()];
 
@@ -114,7 +113,6 @@ void ExerciseModel::onSelectAll(int state)
 
 void ExerciseModel::onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal)
 {
-    qDebug() << "onProgressUpdate";
     int row = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
     QModelIndex modelIndex = index(row, 1);
 
@@ -128,7 +126,6 @@ void ExerciseModel::onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal)
 
 void ExerciseModel::onDownloadFinished()
 {
-    qDebug() << "onDownloadFinished";
     int row = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
     QModelIndex modelIndex = index(row, 1);
 
