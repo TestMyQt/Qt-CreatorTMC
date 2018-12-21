@@ -13,39 +13,33 @@ ExerciseDelegate::ExerciseDelegate(QWidget *parent) : QStyledItemDelegate(parent
 
 void ExerciseDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if (index.column() != 1) {
-        QStyledItemDelegate::paint(painter, option, index);
-        return;
-    }
-
     int progress = index.data().toInt();
+    QStyleOptionButton opt;
 
-    if (progress == 0) {
-        QStyleOptionButton opt;
+    switch (progress) {
+    case 0:
         opt.state |= QStyle::State_Active;
         opt.text =  "Download";
         opt.rect = option.rect;
         QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter);
-        return;
-    }
-
-    if (progress == -1) {
-        QStyleOptionButton opt;
+        break;
+    case -1:
         opt.state |= QStyle::State_Active;
         opt.text =  "Open";
         opt.rect = option.rect;
         QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter);
-        return;
+        break;
+    default:
+        QStyleOptionProgressBar progressBarOption;
+        progressBarOption.rect = option.rect;
+        progressBarOption.minimum = 0;
+        progressBarOption.maximum = 100;
+        progressBarOption.progress = progress;
+        progressBarOption.text = QString::number(progress) + "%";
+        progressBarOption.textVisible = true;
+
+        QApplication::style()->drawControl(QStyle::CE_ProgressBar,
+                                           &progressBarOption, painter);
+        break;
     }
-
-    QStyleOptionProgressBar progressBarOption;
-    progressBarOption.rect = option.rect;
-    progressBarOption.minimum = 0;
-    progressBarOption.maximum = 100;
-    progressBarOption.progress = progress;
-    progressBarOption.text = QString::number(progress) + "%";
-    progressBarOption.textVisible = true;
-
-    QApplication::style()->drawControl(QStyle::CE_ProgressBar,
-                                       &progressBarOption, painter);
 }

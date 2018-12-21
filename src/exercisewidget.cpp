@@ -12,7 +12,7 @@ ExerciseWidget::ExerciseWidget(QWidget *parent) : QWidget(parent)
     m_tableView->horizontalHeader()->setStretchLastSection(true);
     m_tableView->horizontalHeader()->setMinimumSectionSize(60);
     m_tableView->setWordWrap(false);
-    m_tableView->setItemDelegate(new ExerciseDelegate);
+    m_tableView->setItemDelegateForColumn(1, new ExerciseDelegate(this));
 
     m_selectAll = m_exerciseWindow->selectAll;
 
