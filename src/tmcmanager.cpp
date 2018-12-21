@@ -59,6 +59,7 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
             this, &TmcManager::onStartupProjectChanged);
 
     // TmcClient
+    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
     connect(m_client, &TmcClient::TMCError, this, &TmcManager::displayTMCError);
 
@@ -71,9 +72,6 @@ TmcManager::~TmcManager()
 {
     if (m_updateProgress.isRunning())
         m_updateProgress.reportFinished();
-
-    if (m_downloadProgress.isRunning())
-        m_downloadProgress.reportFinished();
 }
 
 /*!
@@ -287,6 +285,10 @@ void TmcManager::updateExercises()
 void TmcManager::setUpdateInterval(int interval)
 {
     // Interval in minutes
+    m_updateTimer.stop();
+    if (m_updateProgress.isRunning())
+        m_updateProgress.reportFinished();
+
     m_updateTimer.setInterval(interval * 60000);
     if (m_updateTimer.interval() > 0)
         m_updateTimer.start();
