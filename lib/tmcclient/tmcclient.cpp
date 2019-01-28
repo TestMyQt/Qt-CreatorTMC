@@ -118,34 +118,34 @@ TmcClient *TmcClient::instance()
 */
 void TmcClient::setNetworkManager(QNetworkAccessManager *m)
 {
-    manager = m;
+    m_manager = m;
 }
 
 /*!
     Sets the value of the private \c accessToken member of \l TmcClient
     to \a token.
 */
-void TmcClient::setAccessToken(QString token)
+void TmcClient::setAccessToken(const QString &token)
 {
-    accessToken = token;
+    m_accessToken = token;
 }
 
 /*!
     Sets the value of the private \c clientId member of \l TmcClient
     to \a id.
 */
-void TmcClient::setClientId(QString id)
+void TmcClient::setClientId(const QString &id)
 {
-    clientId = id;
+    m_clientId = id;
 }
 
 /*!
     Sets the value of the private \c clientSecret member of \l TmcClient
     to \a secret.
 */
-void TmcClient::setClientSecret(QString secret)
+void TmcClient::setClientSecret(const QString &secret)
 {
-    clientSecret = secret;
+    m_clientSecret = secret;
 }
 
 /*!
@@ -156,11 +156,11 @@ void TmcClient::setClientSecret(QString secret)
     This makes it straightforward to concatenate the server address with a path
     such as \c {/one/two.txt}.
 */
-void TmcClient::setServerAddress(QString address)
+void TmcClient::setServerAddress(QString &address)
 {
     if (address.endsWith("/"))
         address.remove(address.length()-1, 1);
-    serverAddress = address;
+    m_serverAddress = address;
 }
 
 /*!
@@ -171,7 +171,7 @@ void TmcClient::setServerAddress(QString address)
 */
 bool TmcClient::isAuthorized()
 {
-    return !(clientId.isEmpty() || clientSecret.isEmpty());
+    return !(m_clientId.isEmpty() || m_clientSecret.isEmpty());
 }
 
 /*!
@@ -182,21 +182,21 @@ bool TmcClient::isAuthorized()
 */
 bool TmcClient::isAuthenticated()
 {
-    return !accessToken.isEmpty();
+    return !m_accessToken.isEmpty();
 }
 
-QNetworkRequest TmcClient::buildRequest(QUrl url)
+QNetworkRequest TmcClient::buildRequest(const QUrl &url)
 {
     QNetworkRequest request(url);
     QString a = "Bearer ";
-    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(accessToken).toUtf8()));
+    request.setRawHeader(QByteArray("Authorization") , QByteArray(a.append(m_accessToken).toUtf8()));
     return request;
 }
 
-QNetworkReply* TmcClient::doGet(QUrl url)
+QNetworkReply* TmcClient::doGet(const QUrl &url)
 {
     QNetworkRequest request = buildRequest(url);
-    QNetworkReply *reply = manager->get(request);
+    QNetworkReply *reply = m_manager->get(request);
     return reply;
 }
 
@@ -204,7 +204,7 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
 {
     if (reply->error()) {
         if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 403) {
-            emit accessTokenNotValid();
+            Q_EMIT accessTokenNotValid();
         }
         reply->close();
         reply->deleteLater();
@@ -218,7 +218,7 @@ bool TmcClient::checkRequestStatus(QNetworkReply *reply)
 */
 void TmcClient::authorize()
 {
-    QUrl url(serverAddress + "/api/v8/application/qtcreator_plugin/credentials.json");
+    QUrl url(m_serverAddress + "/api/v8/application/qtcreator_plugin/credentials.json");
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -231,22 +231,22 @@ void TmcClient::authorize()
     \tt {TMC Login} dialog. The values for the parameters \a username
     and \a password are those entered by the user in the dialog.
 */
-void TmcClient::authenticate(QString username, QString password)
+void TmcClient::authenticate(const QString &username, const QString &password)
 {
 
     if (!isAuthorized()) {
-        emit TMCError(QString("Login failed: "
-                              "no client id/secret available"));
-        emit authenticationFinished("");
+        Q_EMIT TMCError(QString("Login failed: "
+                                "no client id/secret available"));
+        Q_EMIT authenticationFinished("");
         return;
     }
 
-    QUrl url(serverAddress + "/oauth/token");
+    QUrl url(m_serverAddress + "/oauth/token");
 
     QString grantType = "password";
     QUrlQuery params;
-    params.addQueryItem("client_id", clientId);
-    params.addQueryItem("client_secret", clientSecret);
+    params.addQueryItem("client_id", m_clientId);
+    params.addQueryItem("client_secret", m_clientSecret);
     // Need to encode with percent encoding for the literal + character
     params.addQueryItem("username", QUrl::toPercentEncoding(username));
     params.addQueryItem("password", QUrl::toPercentEncoding(password));
@@ -256,7 +256,7 @@ void TmcClient::authenticate(QString username, QString password)
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
-    QNetworkReply *reply = manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
+    QNetworkReply *reply = m_manager->post(request, params.toString(QUrl::FullyEncoded).toUtf8());
 
     connect(reply, &QNetworkReply::finished, this, [=](){
         authenticationReplyFinished(reply);
@@ -269,7 +269,7 @@ void TmcClient::authenticate(QString username, QString password)
 */
 void TmcClient::getOrganizationList()
 {
-    QUrl url(QString(serverAddress + "/api/v8/org.json"));
+    QUrl url(QString(m_serverAddress + "/api/v8/org.json"));
     QNetworkReply *reply = doGet(url);
     connect(reply, &QNetworkReply::finished, this, [=](){
         organizationListReplyFinished(reply);
@@ -280,9 +280,9 @@ void TmcClient::getOrganizationList()
     Retrieves the course list for the organization specified by the \l Organization
     parameter \a org.
 */
-void TmcClient::getCourseList(Organization org)
+void TmcClient::getCourseList(Organization &org)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/org/%1/courses").arg(org.getSlug()));
+    QUrl url(QString(m_serverAddress + "/api/v8/core/org/%1/courses").arg(org.getSlug()));
     QNetworkReply *reply = doGet(url);
     connect(reply, &QNetworkReply::finished, this, [=](){
         courseListReplyFinished(reply, org);
@@ -296,9 +296,9 @@ void TmcClient::getCourseList(Organization org)
     automatically extracted to the appropriate directory (determining what
     this directory is involves \l {Exercise::} {getLocation()}).
 */
-QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
+QNetworkReply *TmcClient::getExerciseZip(const Exercise &ex)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/download").arg(ex.getId()));
+    QUrl url(QString(m_serverAddress + "/api/v8/core/exercises/%1/download").arg(ex.getId()));
     QNetworkReply *reply = doGet(url);
     connect(reply, &QNetworkReply::finished, this, [=](){
         exerciseZipReplyFinished(reply, ex);
@@ -312,12 +312,12 @@ QNetworkReply* TmcClient::getExerciseZip(Exercise ex)
     to the TMC server using the HTTP(S) protocol. The project directory along with
     all its files has been packed into the archive file \a zipData prior to sending.
  */
-void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
+void TmcClient::postExerciseZip(const Exercise &ex, const QByteArray &zipData)
 {
-    QUrl url(QString(serverAddress + "/api/v8/core/exercises/%1/submissions").arg(ex.getId()));
+    QUrl url(QString(m_serverAddress + "/api/v8/core/exercises/%1/submissions").arg(ex.getId()));
     QNetworkRequest request = buildRequest(url);
 
-    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart filePart;
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
@@ -327,12 +327,12 @@ void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
     filePart.setBody(zipData);
     multiPart->append(filePart);
 
-    QNetworkReply *reply = manager->post(request, multiPart);
+    QNetworkReply *reply = m_manager->post(request, multiPart);
     multiPart->setParent(reply); // delete multipart with reply
 
     connect(reply, &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal){
         if (bytesSent == 0) return;
-        emit exerciseSubmitProgress(ex, bytesSent, bytesTotal);
+        Q_EMIT exerciseSubmitProgress(ex, bytesSent, bytesTotal);
     });
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -342,7 +342,7 @@ void TmcClient::postExerciseZip(Exercise ex, QByteArray zipData)
 
 void TmcClient::getSubmissionStatus(int submissionId)
 {
-    QUrl url(serverAddress + "/api/v8/core/submissions/" + QString::number(submissionId));
+    QUrl url(m_serverAddress + "/api/v8/core/submissions/" + QString::number(submissionId));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -357,7 +357,7 @@ void TmcClient::getSubmissionStatus(int submissionId)
 */
 void TmcClient::getExerciseList(Course *course)
 {
-    QUrl url(serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
+    QUrl url(m_serverAddress + "/api/v8/core/courses/" + QString::number(course->getId()));
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -370,7 +370,7 @@ void TmcClient::getExerciseList(Course *course)
 */
 void TmcClient::getUserInfo()
 {
-    QUrl url(serverAddress + "/api/v8/users/current");
+    QUrl url(m_serverAddress + "/api/v8/users/current");
     QNetworkReply *reply = doGet(url);
 
     connect(reply, &QNetworkReply::finished, this, [=](){
@@ -382,8 +382,8 @@ void TmcClient::getUserInfo()
 void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
 {
     if (!checkRequestStatus(reply)) {
-        emit TMCError(QString("Client authorization failed: %1: %2")
-                      .arg(reply->errorString(), reply->error()));
+        Q_EMIT TMCError(QString("Client authorization failed: %1: %2")
+                        .arg(reply->errorString(), reply->error()));
         return;
     }
 
@@ -391,15 +391,17 @@ void TmcClient::authorizationReplyFinished(QNetworkReply *reply)
     setClientId(json["application_id"].toString());
     setClientSecret(json["secret"].toString());
 
-    emit authorizationFinished(clientId, clientSecret);
+    Q_EMIT authorizationFinished(m_clientId, m_clientSecret);
+
+    reply->deleteLater();
 }
 
 void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
 {
     if (!checkRequestStatus(reply)) {
-        emit TMCError(QString("Login failed: %1: %2")
-                      .arg(reply->errorString(), reply->error()));
-        emit authenticationFinished("");
+        Q_EMIT TMCError(QString("Login failed: %1: %2")
+                        .arg(reply->errorString(), reply->error()));
+        Q_EMIT authenticationFinished("");
         return;
     }
     qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
@@ -409,12 +411,10 @@ void TmcClient::authenticationReplyFinished(QNetworkReply *reply)
     qDebug() << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
 
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
-    qDebug() << json.toJson();
     auto name = json.object();
-    accessToken = name["access_token"].toString();
-    qDebug() << accessToken;
+    m_accessToken = name["access_token"].toString();
 
-    emit authenticationFinished(accessToken);
+    Q_EMIT authenticationFinished(m_accessToken);
     reply->deleteLater();
 }
 
@@ -422,17 +422,17 @@ void TmcClient::organizationListReplyFinished(QNetworkReply *reply)
 {
     if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Organization list reply finished";
-        emit TMCError(QString("Failed to download organization list: %1: %2")
-                      .arg(reply->errorString(), reply->error()));
+        Q_EMIT TMCError(QString("Failed to download organization list: %1: %2")
+                        .arg(reply->errorString(), reply->error()));
         return;
     }
     QList<Organization> organizations;
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray orgJson = json.array();
-    foreach (QJsonValue jsonVal, orgJson) {
+    for (QJsonValue jsonVal : orgJson) {
         organizations.append(Organization::fromJson(jsonVal.toObject()));
     }
-    emit organizationListReady(organizations);
+    Q_EMIT organizationListReady(organizations);
     reply->deleteLater();
 }
 
@@ -440,16 +440,16 @@ void TmcClient::courseListReplyFinished(QNetworkReply *reply, Organization org)
 {
     if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Course list reply finished";
-        emit TMCError(QString("Failed to download course list: %1: %2")
-                      .arg(reply->errorString(), reply->error()));
+        Q_EMIT TMCError(QString("Failed to download course list: %1: %2")
+                        .arg(reply->errorString(), reply->error()));
         return;
     }
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
     QJsonArray coursesJson = json.array();
-    foreach (QJsonValue courseJson, coursesJson) {
+    for (QJsonValue courseJson : coursesJson) {
         org.addCourse(Course::fromJson(courseJson.toObject()));
     }
-    emit courseListReady(org);
+    Q_EMIT courseListReady(org);
     reply->deleteLater();
 }
 
@@ -457,11 +457,10 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
 {
     if (!checkRequestStatus(reply)) {
         qDebug() << "Error at Exercise list reply finished";
-        emit TMCError(QString("Failed to download exercise list: %1: %2")
-                      .arg(reply->errorString(), reply->error()));
+        Q_EMIT TMCError(QString("Failed to download exercise list: %1: %2")
+                        .arg(reply->errorString(), reply->error()));
         return;
     }
-
     QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
 
     QJsonObject jsonObj = json.object();
@@ -469,16 +468,15 @@ void TmcClient::exerciseListReplyFinished(QNetworkReply *reply, Course *course)
     QJsonArray exercises = jsonCourse["exercises"].toArray();
 
     QList<Exercise> courseList;
-    foreach (QJsonValue jsonVal, exercises) {
+    for (QJsonValue jsonVal: exercises) {
         courseList.append(Exercise::fromJson(jsonVal.toObject()));
     }
 
-    emit exerciseListReady(course, courseList);
-
+    Q_EMIT exerciseListReady(course, courseList);
     reply->deleteLater();
 }
 
-void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
+void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, const Exercise &ex)
 {
     if (!checkRequestStatus(reply)) {
         // One of the downloads was cancelled by the user
@@ -486,42 +484,42 @@ void TmcClient::exerciseZipReplyFinished(QNetworkReply *reply, Exercise ex)
             qDebug() << "Cancelled download:" << ex.getName();
         } else {
             qDebug() << "Error at exerciseListReplyFinished";
-            emit TMCError(QString("Zip download error %1: %2")
-                          .arg(reply->errorString(), reply->error()));
+            Q_EMIT TMCError(QString("Zip download error %1: %2")
+                            .arg(reply->errorString(), reply->error()));
         }
         return;
     }
 
-    emit exerciseZipReady(reply->readAll(), ex);
+    Q_EMIT exerciseZipReady(reply->readAll(), ex);
     reply->close();
-    reply->deleteLater();
+   // reply->deleteLater();
 }
 
-void TmcClient::zipSubmitReplyFinished(QNetworkReply *reply, Exercise ex)
+void TmcClient::zipSubmitReplyFinished(QNetworkReply *reply, const Exercise &ex)
 {
     if (!checkRequestStatus(reply)) {
-            emit TMCError(QString("Zip upload error %1: %2")
-                          .arg(reply->errorString(), reply->error()));
-            return;
+        Q_EMIT TMCError(QString("Zip upload error %1: %2")
+                        .arg(reply->errorString(), reply->error()));
+        return;
     }
     QJsonObject submission = QJsonDocument::fromJson(reply->readAll()).object();
     QString submissionUrl = submission["submission_url"].toString();
 
-    emit exerciseSubmitReady(ex, submissionUrl);
+    Q_EMIT exerciseSubmitReady(ex, submissionUrl);
     reply->deleteLater();
 }
 
 void TmcClient::submissionStatusReplyFinished(QNetworkReply *reply, int submissionId)
 {
     if (!checkRequestStatus(reply)) {
-            emit TMCError(QString("Submission status update error %1: %2")
-                          .arg(reply->errorString(), reply->error()));
-            return;
+        Q_EMIT TMCError(QString("Submission status update error %1: %2")
+                        .arg(reply->errorString(), reply->error()));
+        return;
     }
 
     QJsonObject jsonSubmission = QJsonDocument::fromJson(reply->readAll()).object();
     Submission submission = Submission::fromJson(submissionId, jsonSubmission);
 
-    emit submissionStatusReady(submission);
+    Q_EMIT submissionStatusReady(submission);
     reply->deleteLater();
 }

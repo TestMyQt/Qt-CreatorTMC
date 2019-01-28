@@ -13,16 +13,16 @@ class DownloadPanel : public QWidget
     Q_OBJECT
 
 public:
-    DownloadPanel( QWidget *parent = 0 );
+    DownloadPanel(QWidget *parent = nullptr);
     ~DownloadPanel();
-    void addReplyToList( QNetworkReply *reply );
-    QNetworkReply *getRepliesListItem( int index );
+    void addReplyToList(QNetworkReply *reply);
+    QNetworkReply *getRepliesListItem(int index);
     void sanityCheck();
-    void addWidgetsToDownloadPanel( QString downloadName );
+    void addWidgetsToDownloadPanel(const QString &downloadName);
     void addInfoLabel();
 
-public slots:
-    void networkReplyProgress( qint64 bytesReceived, qint64 bytesTotal );
+public Q_SLOTS:
+    void networkReplyProgress(qint64 bytesReceived, qint64 bytesTotal);
     void httpFinished();
     void cancelDownload();
 

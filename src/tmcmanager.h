@@ -40,10 +40,8 @@ public:
     void setSettings(SettingsWidget *settings);
     void loadSettings();
 
-signals:
-
-public slots:
-    void displayTMCError(QString errorText);
+public Q_SLOTS:
+    void displayTMCError(const QString &errorText);
 
     void onStartupProjectChanged(Project *project);
     Exercise getProjectExercise(Project *project);
@@ -56,11 +54,10 @@ public slots:
 
     void handleUpdates(Course *updatedCourse, QList<Exercise> newExercises);
 
-private slots:
+private Q_SLOTS:
     void handleZip(QByteArray zipData, Exercise ex);
 
 private:
-
     TmcClient *m_client;
     SettingsWidget *m_settings;
 

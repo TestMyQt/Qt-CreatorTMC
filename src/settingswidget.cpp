@@ -8,7 +8,10 @@
 
 #include <algorithm>
 
-SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
+SettingsWidget::SettingsWidget(QWidget *parent)
+    : QWidget(parent)
+    , m_loginWidget(nullptr)
+    , m_interval(60)
 {
     m_client = TmcClient::instance();
     settingsWindow = new Ui::settingsForm;
@@ -47,12 +50,12 @@ void SettingsWidget::loadSettings()
     connect(m_client, &TmcClient::organizationListReady, this, &SettingsWidget::handleOrganizationList);
     connect(m_client, &TmcClient::courseListReady, this, &SettingsWidget::handleCourseList);
 
-    m_activeOrganization = Organization::fromQSettings(&settings);
-    m_activeCourse = Course::fromQSettings(&settings);
-    m_activeCourse.exerciseListFromQSettings(&settings);
+    m_activeOrganization = Organization::fromQSettings(settings);
+    m_activeCourse = Course::fromQSettings(settings);
+    m_activeCourse.exerciseListFromQSettings(settings);
 
     if (m_activeCourse) {
-        emit activeCourseChanged(&m_activeCourse);
+        Q_EMIT activeCourseChanged(&m_activeCourse);
     }
 
     workingDirectory = settings.value("workingDir", "").toString();
@@ -60,8 +63,6 @@ void SettingsWidget::loadSettings()
     m_interval = settings.value("autoupdateInterval", 60).toInt();
     m_autoUpdateInterval->setValue(m_interval);
     m_userLoggedInLabel->setText("Logged in as <strong>" + m_username + "</strong>");
-
-    settings.deleteLater();
 
     connect(settingsWindow->logoutButton, &QPushButton::clicked, this, [=](){
         clearCredentials();
@@ -88,7 +89,7 @@ void SettingsWidget::loadSettings()
     m_loginWidget = new LoginWidget();
     m_loginWidget->setFields(m_username, m_serverAddress);
 
-    connect(m_loginWidget, &LoginWidget::credentialsChanged, this, [=](QString username, QString password) {
+    connect(m_loginWidget, &LoginWidget::credentialsChanged, this, [=](const QString &username, const QString &password) {
         m_client->authenticate(username, password);
         m_username = username;
         m_userLoggedInLabel->setText("Logged in as <strong>" + m_username + "</strong>");
@@ -96,11 +97,10 @@ void SettingsWidget::loadSettings()
         m_activeCourse = Course();
         m_activeOrganization = Organization();
 
-        emit activeCourseChanged(&m_activeCourse);
+        Q_EMIT activeCourseChanged(&m_activeCourse);
 
         QSettings settings(getSettingsPath(), QSettings::IniFormat);
         settings.setValue("username", username);
-        settings.deleteLater();
     });
 
     connect(m_loginWidget, &LoginWidget::serverAddressChanged, this, [=](QString serverAddress) {
@@ -112,13 +112,11 @@ void SettingsWidget::loadSettings()
         m_activeCourse = Course();
         m_activeOrganization = Organization();
 
-        emit activeCourseChanged(&m_activeCourse);
+        Q_EMIT activeCourseChanged(&m_activeCourse);
 
         QSettings settings(getSettingsPath(), QSettings::IniFormat);
         settings.setValue("server", serverAddress);
-        settings.deleteLater();
     });
-
 
     connect(m_client, &TmcClient::authenticationFinished, m_loginWidget, &LoginWidget::handleLoginResponse);
     connect(m_client, &TmcClient::accessTokenNotValid, m_loginWidget, &LoginWidget::show);
@@ -127,7 +125,7 @@ void SettingsWidget::loadSettings()
 void SettingsWidget::setUpdateInterval(int interval)
 {
     m_interval = interval;
-    emit autoUpdateIntervalChanged(m_interval);
+    Q_EMIT autoUpdateIntervalChanged(m_interval);
 }
 
 void SettingsWidget::display()
@@ -148,8 +146,7 @@ void SettingsWidget::display()
 void SettingsWidget::saveExercise(Exercise &ex, Course *course)
 {
     QSettings settings(getSettingsPath(), QSettings::IniFormat);
-    ex.saveQSettings(&settings, course->getName());
-    settings.deleteLater();
+    ex.saveQSettings(settings, course->getName());
 }
 
 QString SettingsWidget::getServerAddress()
@@ -178,7 +175,7 @@ Course* SettingsWidget::getActiveCourse()
     return &m_activeCourse;
 }
 
-void SettingsWidget::setComboboxIndex(QComboBox *box, QString value)
+void SettingsWidget::setComboboxIndex(QComboBox *box, const QString &value)
 {
     int index = box->findText(value);
     if (index != -1) {
@@ -196,10 +193,9 @@ void SettingsWidget::clearCredentials()
     QSettings settings(getSettingsPath(), QSettings::IniFormat);
     settings.setValue("username", "");
     settings.setValue("accessToken", "");
-    settings.deleteLater();
     m_client->setAccessToken("");
-    emit enableDownloadSubmit(false);
-    emit activeCourseChanged(nullptr);
+    Q_EMIT enableDownloadSubmit(false);
+    Q_EMIT activeCourseChanged(nullptr);
 }
 
 QString SettingsWidget::askSaveLocation()
@@ -215,25 +211,23 @@ QString SettingsWidget::askSaveLocation()
     return directory;
 }
 
-void SettingsWidget::handleLoginResponse(QString accessToken)
+void SettingsWidget::handleLoginResponse(const QString &accessToken)
 {
     QSettings settings(getSettingsPath(), QSettings::IniFormat);
     if (accessToken == "") {
         settings.setValue("username", "");
     } else {
         settings.setValue("accessToken", accessToken);
-        emit enableDownloadSubmit(true);
+        Q_EMIT enableDownloadSubmit(true);
         display();
     }
-    settings.deleteLater();
 }
 
-void SettingsWidget::handleAuthResponse(QString clientId, QString clientSecret)
+void SettingsWidget::handleAuthResponse(const QString &clientId, const QString &clientSecret)
 {
     QSettings settings(getSettingsPath(), QSettings::IniFormat);
     settings.setValue("clientId", clientId);
     settings.setValue("clientSecret", clientSecret);
-    settings.deleteLater();
 
     m_client->setClientId(clientId);
     m_client->setClientSecret(clientSecret);
@@ -248,7 +242,7 @@ void SettingsWidget::handleCourseList(Organization org)
         return lhs.getTitle() < rhs.getTitle();
     });
 
-    foreach (Course c, courses) {
+    for (const Course &c : courses) {
         m_courseComboBox->addItem(c.getTitle(), QVariant::fromValue(c));
     }
     setComboboxIndex(m_courseComboBox, m_activeCourse.getTitle());
@@ -272,7 +266,7 @@ void SettingsWidget::handleOrganizationList(QList<Organization> orgs)
                                QVariant::fromValue(Organization()));
     }
 
-    foreach (Organization org, m_organizations) {
+    for (Organization &org : m_organizations) {
         m_orgComboBox->addItem(org.getName(), QVariant::fromValue(org));
     }
 
@@ -296,29 +290,28 @@ void SettingsWidget::onSettingsOkClicked()
     if (setDir != workingDirectory) {
         workingDirectory = setDir;
         settings.setValue("workingDir", workingDirectory);
-        emit workingDirectoryChanged(workingDirectory);
+        Q_EMIT workingDirectoryChanged(workingDirectory);
     }
 
     int setInterval = m_autoUpdateInterval->value();
     if (setInterval != m_interval) {
         m_interval = setInterval;
         settings.setValue("autoupdateInterval", m_interval);
-        emit autoUpdateIntervalChanged(m_interval);
+        Q_EMIT autoUpdateIntervalChanged(m_interval);
     }
 
     Organization setOrg = m_orgComboBox->currentData().value<Organization>();
     if (m_activeOrganization != setOrg) {
         m_activeOrganization = setOrg;
-        Organization::toQSettings(&settings, setOrg);
-        emit organizationChanged(setOrg);
+        Organization::toQSettings(settings, setOrg);
+        Q_EMIT organizationChanged(setOrg);
     }
 
     Course setCourse = m_courseComboBox->currentData().value<Course>();
     if (!!setCourse && m_activeCourse != setCourse) {
         m_activeCourse = setCourse;
-        Course::toQSettings(&settings, setCourse);
-        emit activeCourseChanged(&m_activeCourse);
+        Course::toQSettings(settings, setCourse);
+        Q_EMIT activeCourseChanged(&m_activeCourse);
     }
-    settings.deleteLater();
     close();
 }

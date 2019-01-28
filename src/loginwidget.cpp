@@ -5,8 +5,8 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-LoginWidget::LoginWidget(QWidget *parent) :
-    QWidget(parent)
+LoginWidget::LoginWidget(QWidget *parent)
+    : QWidget(parent)
 {
     loginWindow = new Ui::loginform;
     loginWindow->setupUi(this);
@@ -41,7 +41,7 @@ void LoginWidget::onLoginClicked()
     QString username = m_username->text();
     QString password = m_password->text();
     m_password->setText("");
-    emit credentialsChanged(username, password);
+    Q_EMIT credentialsChanged(username, password);
 }
 
 void LoginWidget::onChangeServerClicked()
@@ -57,5 +57,5 @@ void LoginWidget::onChangeServerClicked()
     }
 
     m_server->setText(address);
-    emit serverAddressChanged(address);
+    Q_EMIT serverAddressChanged(address);
 }

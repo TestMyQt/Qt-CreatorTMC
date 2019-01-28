@@ -16,7 +16,7 @@ bool ZipHelper::createZip(QDir projectDir, FileNameList files, QBuffer *zipBuffe
     QuaZipFile zipFile(&zip);
     QFile inFile;
 
-    foreach(FileName file, files) {
+    for (const FileName &file : files) {
         if (!file.toFileInfo().isFile())
             continue;
 

@@ -74,7 +74,7 @@ void SubmitWidget::submitProject(const Project *project)
     m_uploadProgress.reportStarted();
     zipBuffer->open(QIODevice::ReadOnly);
     qDebug() << "Posting:" << project->displayName();
-    emit projectSubmissionReady(ex, zipBuffer->readAll());
+    Q_EMIT projectSubmissionReady(ex, zipBuffer->readAll());
 }
 
 void SubmitWidget::onSubmitReply(Exercise ex, QString submissionUrl)
@@ -96,7 +96,7 @@ void SubmitWidget::onSubmitReply(Exercise ex, QString submissionUrl)
                              TestMyCodePlugin::Constants::TASK_INDEX);
 
     connect(&m_submitTimer, &QTimer::timeout, this, [this, submissionId]() {
-        emit submissionStatusRequest(submissionId);
+        Q_EMIT submissionStatusRequest(submissionId);
     });
     m_submitTimer.start();
 }
@@ -114,11 +114,11 @@ void SubmitWidget::onSubmissionStatusReply(Submission sub)
     } else {
         m_submitTimer.stop();
         m_submitProgress.reportFinished();
-        emit submitTimedOut(sub);
+        Q_EMIT submitTimedOut(sub);
         return;
     }
 
-    emit submitResult(sub);
+    Q_EMIT submitResult(sub);
 }
 
 void SubmitWidget::submitProgress(Exercise ex, qint64 bytesSent, qint64 bytesTotal)
@@ -144,7 +144,7 @@ void SubmitWidget::updateStatus(Submission submission)
         m_progressBar->setMinimum(0);
         break;
     case (Submission::Fail):
-        foreach (TestCase testCase, submission.getTestCases()) {
+        for (const TestCase &testCase : submission.getTestCases()) {
             output.append(QString("%1: %2\n")
                           .arg(testCase.name, testCase.message));
         }
@@ -158,6 +158,7 @@ void SubmitWidget::updateStatus(Submission submission)
                           "<a href=\"%2\">Click here for the suggested solution</a>")
                           .arg(submission.getPoints().join(", "),
                                submission.solutionUrl()));
+        // TODO: Change standard button role from Cancel to Close for better UX
         m_status->setTextFormat(Qt::RichText);
         m_status->setTextInteractionFlags(Qt::TextBrowserInteraction);
         m_status->setOpenExternalLinks(true);

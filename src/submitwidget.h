@@ -27,13 +27,13 @@ public:
 
     void submitProject(const Project *project);
 
-signals:
+Q_SIGNALS:
     void projectSubmissionReady(Exercise ex, QByteArray zipData);
     void submissionStatusRequest(int submissionId);
     void submitResult(Submission sub);
     void submitTimedOut(Submission sub);
 
-public slots:
+public Q_SLOTS:
     void onSubmitReply(Exercise ex, QString submissionUrl);
     void onSubmissionStatusReply(Submission sub);
     void submitProgress(Exercise ex, qint64 bytesSent, qint64 bytesTotal);

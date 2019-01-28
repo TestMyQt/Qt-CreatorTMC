@@ -23,13 +23,13 @@ public:
     static TmcResultReader* instance();
     void testProject(Project *project);
 
-signals:
+Q_SIGNALS:
     void testRunStarted();
     void testResultReady(const TmcTestResult &result);
     void testRunFinished();
     void projectTestsPassed(Project *passedProject);
 
-public slots:
+public Q_SLOTS:
     void readTestResult(const TestResultPtr &result);
     void resultsReady();
 

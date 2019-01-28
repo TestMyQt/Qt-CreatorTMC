@@ -1,13 +1,14 @@
 #include "exercisemodel.h"
 #include "tmcclient.h"
 
-#include <QDebug>
 #include <QDateTime>
+#include <QApplication>
+#include <QtDebug>
 
 ExerciseModel::ExerciseModel(QObject *parent)
     : QAbstractTableModel(parent)
+    , m_activeCourse(nullptr)
 {
-
 }
 
 void ExerciseModel::onActiveCourseChanged(Course *course)
@@ -19,30 +20,33 @@ void ExerciseModel::onActiveCourseChanged(Course *course)
 
 QList<Exercise> ExerciseModel::exercises() const
 {
+    if (!m_activeCourse)
+        return {};
+
     return m_activeCourse->getExercises().values();
 }
 
 void ExerciseModel::onExerciseListUpdated(Course *updatedCourse, QList<Exercise> newExercises)
 {
-    QString courseName = updatedCourse->getName();
+    QString courseName(updatedCourse->getName());
 
     if (courseName.isEmpty()) {
         qDebug() << "Updated course name is null!";
         return;
     }
-
     QString saveDirectory = QString("%1/%2").arg(m_workingDir, courseName);
 
     beginResetModel();
+
     for (Exercise &ex : newExercises) {
         ex.setLocation(saveDirectory);
-
         Exercise found = updatedCourse->getExercise(ex);
 
         if (!found) {
             // Not found, new exercise
             ex.setState(Exercise::None);
             updatedCourse->addExercise(ex);
+
             continue;
         }
 
@@ -53,18 +57,16 @@ void ExerciseModel::onExerciseListUpdated(Course *updatedCourse, QList<Exercise>
                 newExercises.removeAll(ex);
             }
         }
-
     }
     endResetModel();
 
     // Have new exercises
     if (!newExercises.isEmpty()) {
-        emit exerciseUpdates();
+        Q_EMIT exerciseUpdates();
     }
-
 }
 
-void ExerciseModel::onWorkingDirectoryChanged(QString workingDir)
+void ExerciseModel::onWorkingDirectoryChanged(const QString &workingDir)
 {
     m_workingDir = workingDir;
 }
@@ -72,7 +74,7 @@ void ExerciseModel::onWorkingDirectoryChanged(QString workingDir)
 void ExerciseModel::triggerDownload()
 {
     for (auto &ex : m_selected) {
-        QNetworkReply* reply = TmcClient::instance()->getExerciseZip(ex);
+        QNetworkReply *reply = TmcClient::instance()->getExerciseZip(ex);
         m_downloads[reply] = exercises().indexOf(ex);
         connect(reply, &QNetworkReply::downloadProgress, this, &ExerciseModel::onProgressUpdate);
         connect(reply, &QNetworkReply::finished, this, &ExerciseModel::onDownloadFinished);
@@ -81,12 +83,11 @@ void ExerciseModel::triggerDownload()
 
 void ExerciseModel::onTableClicked(const QModelIndex &index)
 {
-    qDebug() << "onTableClicked";
     if (index.isValid() && index.column() == 1) {
-        const Exercise &ex = exercises()[index.row()];
+        const Exercise ex = exercises().at(index.row());
 
         if (ex.getState() == Exercise::Downloaded) {
-            emit exerciseOpen(ex);
+            Q_EMIT exerciseOpen(ex);
             return;
         }
 
@@ -96,9 +97,9 @@ void ExerciseModel::onTableClicked(const QModelIndex &index)
         qDebug() << "Downloading exercise" << ex.getName();
         m_progress[index.row()] = 1;
 
-        QNetworkReply* reply = TmcClient::instance()->getExerciseZip(ex);
+        QNetworkReply *reply = TmcClient::instance()->getExerciseZip(ex);
         m_downloads.insert(reply, index.row());
-        emit dataChanged(index, index);
+        Q_EMIT dataChanged(index, index);
 
         connect(reply, &QNetworkReply::finished, this, &ExerciseModel::onDownloadFinished);
     }
@@ -114,8 +115,7 @@ void ExerciseModel::onSelectAll(int state)
 
 void ExerciseModel::onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal)
 {
-    qDebug() << "onProgressUpdate";
-    int row = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
+    int row = m_downloads[(dynamic_cast<QNetworkReply *>(QObject::sender()))];
     QModelIndex modelIndex = index(row, 1);
 
     if (bytesTotal == -1)
@@ -123,17 +123,16 @@ void ExerciseModel::onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal)
 
     m_progress[row] = static_cast<qint32>((bytesReceived * 100) / bytesTotal);
 
-    emit dataChanged(modelIndex, modelIndex);
+    Q_EMIT dataChanged(modelIndex, modelIndex);
 }
 
 void ExerciseModel::onDownloadFinished()
 {
-    qDebug() << "onDownloadFinished";
-    int row = m_downloads[(static_cast<QNetworkReply *>(QObject::sender()))];
+    int row = m_downloads[(dynamic_cast<QNetworkReply *>(QObject::sender()))];
     QModelIndex modelIndex = index(row, 1);
 
     m_progress[row] = -1;
-    emit dataChanged(modelIndex, modelIndex);
+    Q_EMIT dataChanged(modelIndex, modelIndex);
 }
 
 QString ExerciseModel::calculateDeadline(const Exercise &ex) const
@@ -191,10 +190,12 @@ QVariant ExerciseModel::data(const QModelIndex &index, int role) const
     }
 
     if (role == Qt::DisplayRole) {
-        const Exercise& ex = exercises().at(index.row());
+        const Exercise ex = exercises().at(index.row());
+
         switch (index.column()) {
-        case 0:
+        case 0: {
             return ex.getName();
+        }
         case 1:
             return ex.isDownloaded() ? -1 : m_progress[index.row()];
         case 2:
@@ -207,14 +208,14 @@ QVariant ExerciseModel::data(const QModelIndex &index, int role) const
 }
 
 bool ExerciseModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
+{    
     if (role == Qt::CheckStateRole && index.column() == 0) {
         if (value == Qt::Checked){
             m_selected.append(exercises().at(index.row()));
         } else {
             m_selected.removeAll(exercises().at(index.row()));
         }
-        emit dataChanged(index, index);
+        Q_EMIT dataChanged(index, index);
         return true;
     }
 

@@ -27,14 +27,14 @@ public:
     Course* getActiveCourse();
     int getAutoupdateInterval();
 
-signals:
+Q_SIGNALS:
     void workingDirectoryChanged(QString location);
     void organizationChanged(Organization org);
     void activeCourseChanged(Course *course);
     void autoUpdateIntervalChanged(int interval);
     void enableDownloadSubmit(bool enable);
 
-public slots:
+public Q_SLOTS:
     void showLoginWidget();
 
 private:
@@ -58,11 +58,11 @@ private:
     QString workingDirectory;
     int m_interval;
 
-    void handleLoginResponse(QString accessToken);
-    void handleAuthResponse(QString clientId, QString clientSecret);
+    void handleLoginResponse(const QString &accessToken);
+    void handleAuthResponse(const QString &clientId, const QString &clientSecret);
     void handleOrganizationList(QList<Organization> orgs);
     void handleCourseList(Organization org);
-    void setComboboxIndex(QComboBox *box, QString value);
+    void setComboboxIndex(QComboBox *box, const QString &value);
     void onSettingsOkClicked();
     void onBrowseClicked();
     void clearCredentials();

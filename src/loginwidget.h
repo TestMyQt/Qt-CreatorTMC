@@ -16,11 +16,11 @@ public:
 
     void setFields(QString username, QString server);
 
-signals:
+Q_SIGNALS:
     void credentialsChanged(QString username, QString password);
     void serverAddressChanged(QString server);
 
-public slots:
+public Q_SLOTS:
     void handleLoginResponse(QString accessToken);
 
 private:

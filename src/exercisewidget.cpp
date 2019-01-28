@@ -1,7 +1,9 @@
 #include "exercisewidget.h"
 #include "exercisedelegate.h"
 
-ExerciseWidget::ExerciseWidget(QWidget *parent) : QWidget(parent)
+ExerciseWidget::ExerciseWidget(QWidget *parent)
+    : QWidget(parent)
+    , m_model(nullptr)
 {
     m_exerciseWindow = new Ui::ExerciseWindow;
     m_exerciseWindow->setupUi(this);
@@ -12,7 +14,7 @@ ExerciseWidget::ExerciseWidget(QWidget *parent) : QWidget(parent)
     m_tableView->horizontalHeader()->setStretchLastSection(true);
     m_tableView->horizontalHeader()->setMinimumSectionSize(60);
     m_tableView->setWordWrap(false);
-    m_tableView->setItemDelegate(new ExerciseDelegate);
+    m_tableView->setItemDelegateForColumn(1, new ExerciseDelegate(this));
 
     m_selectAll = m_exerciseWindow->selectAll;
 

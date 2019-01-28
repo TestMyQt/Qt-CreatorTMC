@@ -23,7 +23,7 @@ Organization::Organization()
     m_slug = "";
 }
 
-Organization::Organization(QString name, QString slug) :
+Organization::Organization(const QString &name, const QString &slug) :
     m_name(name),
     m_slug(slug)
 {
@@ -79,7 +79,7 @@ QString Organization::getSlug() const
 /*!
     Adds the \l Course parameter \a c to the collection of the organization's courses.
 */
-void Organization::addCourse(Course c)
+void Organization::addCourse(const Course &c)
 {
     m_courses.append(c);
 }
@@ -100,10 +100,10 @@ QList<Course> Organization::getCourses()
     The main purpose of the function is to preserve the user-selected organization
     between sessions.
 */
-Organization Organization::fromQSettings(QSettings *settings)
+Organization Organization::fromQSettings(QSettings &settings)
 {
-    return Organization(settings->value("orgName", "").toString(),
-                        settings->value("orgSlug", "").toString());
+    return Organization(settings.value("orgName", "").toString(),
+                        settings.value("orgSlug", "").toString());
 }
 
 /*!
@@ -112,10 +112,10 @@ Organization Organization::fromQSettings(QSettings *settings)
     \a org in the \l {http://doc.qt.io/qt-5/qsettings.html} {QSettings}
     parameter \a settings.
 */
-void Organization::toQSettings(QSettings *settings, Organization org)
+void Organization::toQSettings(QSettings &settings, const Organization &org)
 {
-    settings->setValue("orgName", org.getName());
-    settings->setValue("orgSlug", org.getSlug());
+    settings.setValue("orgName", org.getName());
+    settings.setValue("orgSlug", org.getSlug());
 }
 
 /*!
@@ -125,7 +125,7 @@ void Organization::toQSettings(QSettings *settings, Organization org)
     fields of the \l Organization object are set to the values extracted from
     \a jsonOrg.
 */
-Organization Organization::fromJson(const QJsonObject jsonOrg)
+Organization Organization::fromJson(const QJsonObject &jsonOrg)
 {
     Organization fromJson = Organization(
                 jsonOrg["name"].toString(),

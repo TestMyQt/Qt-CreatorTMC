@@ -14,22 +14,22 @@ public:
     bool operator!=(const Course &other) const;
     bool operator!() const;
     explicit operator bool() const;
-
     void setId(int id);
-    void setName(QString name);
+    void setName(const QString &name);
     int getId() const;
     QString getName() const;
     QString getTitle() const;
-    void setTitle(QString title);
+    void setTitle(const QString &title);
     Exercise getExercise(const int id);
-    Exercise getExercise(const Exercise ex);
-    void addExercise(const Exercise ex);
+    Exercise getExercise(const Exercise &ex);
+    void addExercise(const Exercise &ex);
     QMap<int, Exercise> getExercises();
-    bool hasExercise(Exercise ex);
-    static Course fromJson(const QJsonObject jsonCourse);
-    static Course fromQSettings(QSettings *settings);
-    static void toQSettings(QSettings *settings, Course c);
-    void exerciseListFromQSettings(QSettings *settings);
+    bool hasExercise(const Exercise &ex);
+    static Course fromJson(const QJsonObject &jsonCourse);
+    static Course fromQSettings(QSettings &settings);
+    static void toQSettings(QSettings &settings, const Course &c);
+    void exerciseListFromQSettings(QSettings &settings);
+
 private:
     int m_id;
     QString m_name;

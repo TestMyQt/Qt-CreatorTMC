@@ -100,7 +100,7 @@ Submission Submission::fromJson(const int id, const QJsonObject jsonSubmission)
         submission.setStatus(Status::Fail);
         QList<TestCase> testCases;
         QJsonArray jsonCases = jsonSubmission["test_cases"].toArray();
-        foreach (QJsonValue jsonCase, jsonCases) {
+        for (QJsonValue jsonCase : jsonCases) {
             testCases << TestCase::fromJson(jsonCase.toObject());
         }
         submission.setTestCases(testCases);

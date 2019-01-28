@@ -21,15 +21,13 @@ public:
     TestMyCode();
     ~TestMyCode();
 
-    bool initialize(const QStringList &arguments, QString *errorString);
-    void extensionsInitialized();
-    ShutdownFlag aboutToShutdown();
-
-private slots:
+    bool initialize(const QStringList &arguments, QString *errorString) override;
+    void extensionsInitialized() override;
+    ShutdownFlag aboutToShutdown() override;
 
 private:
-    // tmcClient
-    TmcClient *tmcClient;
+    // m_tmcClient
+    TmcClient *m_tmcClient;
 
     // SettingsWidget
     SettingsWidget *m_settingsWidget;
@@ -37,7 +35,7 @@ private:
     // TmcManager
     TmcManager *m_tmcManager;
 
-    void displayTMCError(QString errorText);
+    void displayTMCError(const QString &errorText);
 };
 
 } // namespace Internal

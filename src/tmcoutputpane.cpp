@@ -41,7 +41,7 @@ TmcListView::TmcListView(QWidget *parent)
 void TmcListView::keyPressEvent(QKeyEvent *event)
 {
     if (event->matches(QKeySequence::Copy)) {
-        emit copyShortcutTriggered();
+        Q_EMIT copyShortcutTriggered();
         event->accept();
     }
     ListView::keyPressEvent(event);

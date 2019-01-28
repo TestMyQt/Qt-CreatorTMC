@@ -22,7 +22,7 @@ Exercise::Exercise()
     m_unzipped = false;
 }
 
-Exercise::Exercise(int id, QString name)
+Exercise::Exercise(int id, const QString &name)
 {
     m_id = id;
     m_name = name;
@@ -179,7 +179,7 @@ void Exercise::setId(int id)
 /*!
     Sets the exercise name to \a name.
 */
-void Exercise::setName(QString name)
+void Exercise::setName(const QString &name)
 {
     m_name = name;
 }
@@ -187,7 +187,7 @@ void Exercise::setName(QString name)
 /*!
     Sets the directory location of the exercise to \a location.
 */
-void Exercise::setLocation(QString location)
+void Exercise::setLocation(const QString &location)
 {
     m_location = location;
 }
@@ -196,7 +196,7 @@ void Exercise::setLocation(QString location)
     Sets the TMC exercise checksum field of the \l Exercise object
     to \a checksum.
 */
-void Exercise::setChecksum(QString checksum)
+void Exercise::setChecksum(const QString &checksum)
 {
     m_checksum = checksum;
 }
@@ -246,19 +246,19 @@ void Exercise::setUnzipped(bool zipped)
     is used as a prefix in forming the key names with \l
     {http://doc.qt.io/qt-5/qsettings.html#beginGroup} {QSettings::beginGroup()}.
 */
-void Exercise::saveQSettings(QSettings *settings, const QString courseName)
+void Exercise::saveQSettings(QSettings &settings, const QString &courseName)
 {
-    settings->beginGroup(courseName);
-        settings->beginGroup(m_name);
-            settings->setValue("id", m_id);
-            settings->setValue("checksum", m_checksum);
-            settings->setValue("location", m_location);
-            settings->setValue("deadline", m_deadline);
-            settings->setValue("state", m_state);
-            settings->setValue("downloaded", m_downloaded);
-            settings->setValue("unzipped", m_unzipped);
-        settings->endGroup();
-    settings->endGroup();
+    settings.beginGroup(courseName);
+        settings.beginGroup(m_name);
+            settings.setValue("id", m_id);
+            settings.setValue("checksum", m_checksum);
+            settings.setValue("location", m_location);
+            settings.setValue("deadline", m_deadline);
+            settings.setValue("state", m_state);
+            settings.setValue("downloaded", m_downloaded);
+            settings.setValue("unzipped", m_unzipped);
+        settings.endGroup();
+    settings.endGroup();
 }
 
 /*!
@@ -271,15 +271,15 @@ void Exercise::saveQSettings(QSettings *settings, const QString courseName)
     parameter in the calling function using
     \l {http://doc.qt.io/qt-5/qsettings.html#beginGroup} {QSettings::beginGroup()}.
 */
-Exercise Exercise::fromQSettings(QSettings *settings, QString exerciseName)
+Exercise Exercise::fromQSettings(QSettings &settings, const QString &exerciseName)
 {
-    Exercise ex = Exercise(settings->value("id").toInt(), exerciseName);
-    ex.setChecksum(settings->value("checksum").toString());
-    ex.setLocation(settings->value("location").toString());
-    ex.setDeadline(settings->value("deadline").toString());
-    ex.setState(State(settings->value("state", 0).toInt()));
-    ex.setDownloaded(settings->value("downloaded", false).toBool());
-    ex.setUnzipped(settings->value("unzipped", false).toBool());
+    Exercise ex = Exercise(settings.value("id").toInt(), exerciseName);
+    ex.setChecksum(settings.value("checksum").toString());
+    ex.setLocation(settings.value("location").toString());
+    ex.setDeadline(settings.value("deadline").toString());
+    ex.setState(State(settings.value("state", 0).toInt()));
+    ex.setDownloaded(settings.value("downloaded", false).toBool());
+    ex.setUnzipped(settings.value("unzipped", false).toBool());
     return ex;
 }
 
@@ -291,7 +291,7 @@ Exercise Exercise::fromQSettings(QSettings *settings, QString exerciseName)
     and \l {Exercise::getDlDate()} {deadline} fields to the values extracted from
     \a jsonExercise.
 */
-Exercise Exercise::fromJson(const QJsonObject jsonExercise)
+Exercise Exercise::fromJson(const QJsonObject &jsonExercise)
 {
     Exercise fromJson = Exercise(jsonExercise["id"].toInt(),
             jsonExercise["name"].toString());

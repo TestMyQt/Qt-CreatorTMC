@@ -11,19 +11,19 @@ class Organization
 {
 public:
     Organization();
-    Organization(QString name, QString slug);
+    Organization(const QString &name, const QString &slug);
     bool operator==(const Organization &other) const;
     bool operator!=(const Organization &other) const;
     bool operator!() const;
 
     QString getName() const;
     QString getSlug() const;
-    void addCourse(Course c);
+    void addCourse(const Course &c);
     QList<Course> getCourses();
 
-    static Organization fromQSettings(QSettings *settings);
-    static Organization fromJson(const QJsonObject jsonOrg);
-    static void toQSettings(QSettings *settings, Organization org);
+    static Organization fromQSettings(QSettings &settings);
+    static Organization fromJson(const QJsonObject &jsonOrg);
+    static void toQSettings(QSettings &settings, const Organization &org);
 
 private:
     QString m_name;

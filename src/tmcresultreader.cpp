@@ -4,7 +4,7 @@
 #include <autotest/testrunner.h>
 #include <autotest/testtreemodel.h>
 
-#include <QDebug>
+#include <QtDebug>
 #include <algorithm>
 
 using namespace Autotest::Internal;
@@ -44,7 +44,7 @@ void TmcResultReader::testProject(Project *project)
     TestTreeModel *model = TestTreeModel::instance();
     runner->setSelectedTests(model->getAllTestCases());
     runner->prepareToRunTests(TestRunMode::Run);
-    emit testRunStarted();
+    Q_EMIT testRunStarted();
 }
 
 void TmcResultReader::readTestResult(const TestResultPtr &result) {
@@ -59,7 +59,7 @@ void TmcResultReader::readTestResult(const TestResultPtr &result) {
         // Start a new result
         m_openResult = TmcTestResult();
         // Emit start of test cases ?
-        // emit testResultReady(TmcTestResult(TmcResult::TestCaseStart));
+        // Q_EMIT testResultReady(TmcTestResult(TmcResult::TestCaseStart));
         break;
 
     case Result::Pass:
@@ -88,10 +88,10 @@ void TmcResultReader::readTestResult(const TestResultPtr &result) {
         // TestCase results have ended, lets see if we have the name and points
         if (!(m_openResult.name().isEmpty() && m_openResult.points().isEmpty())) {
             m_testResults.append(m_openResult);
-            emit testResultReady(m_openResult);
+            Q_EMIT testResultReady(m_openResult);
         }
         // Emit end ?
-        // emit testResultReady(TmcTestResult(TmcResult::TestCaseEnd));
+        // Q_EMIT testResultReady(TmcTestResult(TmcResult::TestCaseEnd));
         break;
 
     case Result::MessageFatal:
@@ -99,7 +99,7 @@ void TmcResultReader::readTestResult(const TestResultPtr &result) {
         m_openResult.setResult(TmcResult::Invalid);
         m_openResult.setMessage("Test runner failed to run. It may have crashed or failed to build.");
         m_testResults.append(m_openResult);
-        emit testResultReady(m_openResult);
+        Q_EMIT testResultReady(m_openResult);
         break;
 
     default:
@@ -114,7 +114,7 @@ void TmcResultReader::resultsReady() {
         return;
     }
 
-    emit testRunFinished();
+    Q_EMIT testRunFinished();
 
     auto not_passing = std::find_if(m_testResults.begin(), m_testResults.end(),
                               [](TmcTestResult r) { return r.result() != TmcResult::Pass; });
@@ -122,7 +122,7 @@ void TmcResultReader::resultsReady() {
 
     if (testsPassed) {
         qDebug("Project tests passed");
-        emit projectTestsPassed(m_project);
+        Q_EMIT projectTestsPassed(m_project);
     }
 }
 

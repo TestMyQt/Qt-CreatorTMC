@@ -11,7 +11,7 @@ class Exercise
 {
 public:
     Exercise();
-    Exercise(int id, QString name);
+    Exercise(int id,const QString &name);
 
     enum State {
         None,
@@ -25,9 +25,9 @@ public:
     bool operator<(const Exercise &other) const;
 
     void setId(int id);
-    void setName(QString name);
-    void setLocation(QString location);
-    void setChecksum(QString checksum);
+    void setName(const QString &name);
+    void setLocation(const QString &location);
+    void setChecksum(const QString &checksum);
     void setDeadline(const QString &date);
     void setState(State state);
     void setDownloaded(bool downloaded);
@@ -45,13 +45,12 @@ public:
     bool isUnzipped() const;
     QMap<int, Submission> getSubmissions() const;
 
-    void saveQSettings(QSettings *settings, const QString courseName);
-    static Exercise fromQSettings(QSettings *settings, QString exerciseName);
-    static Exercise fromJson(const QJsonObject jsonExercise);
+    void saveQSettings(QSettings &settings, const QString &courseName);
+    static Exercise fromQSettings(QSettings &settings, const QString &exerciseName);
+    static Exercise fromJson(const QJsonObject &jsonExercise);
 
 private:
     QMap<int, Submission> m_submissions;
-
     QString m_name;
     QString m_location;
     QString m_checksum;

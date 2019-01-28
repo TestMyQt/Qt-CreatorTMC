@@ -32,9 +32,10 @@
 using Core::ProgressManager;
 using Core::FutureProgress;
 
-TmcManager::TmcManager(TmcClient *client, QObject *parent) :
-    QObject(parent),
-    m_client(client)
+TmcManager::TmcManager(TmcClient *client, QObject *parent)
+    : QObject(parent)
+    , m_client(client)
+    , m_settings(nullptr)
 {
     m_updateTimer.setSingleShot(false);
     connect(&m_updateTimer, &QTimer::timeout, this, [this]() { updateExercises(); });
@@ -59,6 +60,7 @@ TmcManager::TmcManager(TmcClient *client, QObject *parent) :
             this, &TmcManager::onStartupProjectChanged);
 
     // TmcClient
+    connect(m_client, &TmcClient::exerciseListReady, this, &TmcManager::handleUpdates);
     connect(m_client, &TmcClient::exerciseZipReady, this, &TmcManager::handleZip);
     connect(m_client, &TmcClient::TMCError, this, &TmcManager::displayTMCError);
 
@@ -71,9 +73,6 @@ TmcManager::~TmcManager()
 {
     if (m_updateProgress.isRunning())
         m_updateProgress.reportFinished();
-
-    if (m_downloadProgress.isRunning())
-        m_downloadProgress.reportFinished();
 }
 
 /*!
@@ -114,7 +113,7 @@ Exercise TmcManager::getProjectExercise(ProjectExplorer::Project *project)
     QMap<int, Exercise> exercises = m_settings->getActiveCourse()->getExercises();
     Exercise projectExercise;
 
-    foreach (const Exercise &ex, exercises) {
+    for (const Exercise &ex : exercises) {
         QStringList parts = ex.getName().split("-");
         QString exerciseName = parts.last();
         if (exerciseName == projectName) {
@@ -160,8 +159,8 @@ void TmcManager::askSubmit(const ProjectExplorer::Project *project)
         return;
 
     int ret = QMessageBox::question(m_settings,
-                                  tr("Submit exercise to server"),
-                                  tr("All tests passed!\nSubmit exercise to server?"));
+                                    tr("Submit exercise to server"),
+                                    tr("All tests passed!\nSubmit exercise to server?"));
 
     if (ret == QMessageBox::Yes) {
         showSubmitWidget(project);
@@ -265,18 +264,21 @@ void TmcManager::onExerciseOpen(const Exercise &ex)
 */
 void TmcManager::updateExercises()
 {
-    Course* activeCourse = m_settings->getActiveCourse();
+    Course *activeCourse = m_settings->getActiveCourse();
     if (!activeCourse || !(*activeCourse)) {
         m_settings->display();
         return;
     }
 
     qDebug() << "Updating exercises for course" << activeCourse->getName();
+
     m_updateProgress.setProgressRange(0, activeCourse->getExercises().size());
+
     ProgressManager::addTask(m_updateProgress.future(),
                              tr("Updating TestMyCode exercises"),
                              TestMyCodePlugin::Constants::TASK_INDEX);
     m_updateProgress.reportStarted();
+
     m_client->getExerciseList(activeCourse);
 }
 
@@ -287,12 +289,16 @@ void TmcManager::updateExercises()
 void TmcManager::setUpdateInterval(int interval)
 {
     // Interval in minutes
+    m_updateTimer.stop();
+    if (m_updateProgress.isRunning())
+        m_updateProgress.reportFinished();
+
     m_updateTimer.setInterval(interval * 60000);
     if (m_updateTimer.interval() > 0)
         m_updateTimer.start();
 }
 
-void TmcManager::displayTMCError(QString errorText)
+void TmcManager::displayTMCError(const QString &errorText)
 {
     QMessageBox::critical(m_settings, "TMC", errorText, QMessageBox::Ok);
 }

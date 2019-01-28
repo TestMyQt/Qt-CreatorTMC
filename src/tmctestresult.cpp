@@ -17,7 +17,7 @@ QString TmcTestResult::toString() const
     switch (m_result) {
     case TmcResult::Pass: {
         QString points = QString(" ");
-        foreach (QString point, m_points) {
+        for (const QString &point : m_points) {
             points.append(QString("[ %1 ]").arg(point));
         }
         return QString("[%1]: PASSED, points awarded: %2").arg(m_name, points);

@@ -1,6 +1,11 @@
 #ifndef TMCCLIENT_H
 #define TMCCLIENT_H
 
+#include "exercise.h"
+#include "course.h"
+#include "organization.h"
+#include "submission.h"
+
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -11,38 +16,33 @@
 #include <QUrlQuery>
 #include <QBuffer>
 
-#include "exercise.h"
-#include "course.h"
-#include "organization.h"
-#include "submission.h"
-
 class TmcClient : public QObject
 {
     Q_OBJECT
 public:
     explicit TmcClient(QObject *parent = nullptr);
-    static TmcClient* instance();
+    static TmcClient *instance();
 
     void setNetworkManager(QNetworkAccessManager *m);
-    void setAccessToken(QString token);
-    void setClientId(QString id);
-    void setClientSecret(QString secret);
-    void setServerAddress(QString address);
+    void setAccessToken(const QString &token);
+    void setClientId(const QString &id);
+    void setClientSecret(const QString &secret);
+    void setServerAddress(QString &address);
 
     void authorize();
-    void authenticate(QString username, QString password);
+    void authenticate(const QString &username, const QString &password);
     void getUserInfo();
     void getExerciseList(Course *course);
-    QNetworkReply* getExerciseZip(Exercise ex);
-    void postExerciseZip(Exercise ex, QByteArray zipData);
+    QNetworkReply *getExerciseZip(const Exercise &ex);
+    void postExerciseZip(const Exercise &ex, const QByteArray &zipData);
     void getSubmissionStatus(int submissionId);
-    void getCourseList(Organization org);
+    void getCourseList(Organization &org);
     void getOrganizationList();
 
     bool isAuthorized();
     bool isAuthenticated();
 
-signals:
+Q_SIGNALS:
     void TMCError(QString errorString);
     void authorizationFinished(QString clientId, QString clientSecret);
     void authenticationFinished(QString accessToken);
@@ -55,25 +55,25 @@ signals:
     void submissionStatusReady(Submission submission);
     void accessTokenNotValid();
 
-private slots:
+private Q_SLOTS:
     void authorizationReplyFinished (QNetworkReply *reply);
     void authenticationReplyFinished (QNetworkReply *reply);
     void organizationListReplyFinished(QNetworkReply *reply);
     void courseListReplyFinished(QNetworkReply *reply, Organization org);
     void exerciseListReplyFinished (QNetworkReply *reply, Course *course);
-    void exerciseZipReplyFinished (QNetworkReply *reply, Exercise ex);
-    void zipSubmitReplyFinished(QNetworkReply *reply, Exercise ex);
+    void exerciseZipReplyFinished (QNetworkReply *reply, const Exercise &ex);
+    void zipSubmitReplyFinished(QNetworkReply *reply, const Exercise &ex);
     void submissionStatusReplyFinished(QNetworkReply *reply, int submissionId);
 
 
 private:
-    QNetworkRequest buildRequest(QUrl url);
-    QNetworkReply* doGet(QUrl url);
-    QNetworkAccessManager *manager;
-    QString accessToken;
-    QString clientId;
-    QString clientSecret;
-    QString serverAddress;
+    QNetworkRequest buildRequest(const QUrl &url);
+    QNetworkReply* doGet(const QUrl &url);
+    QNetworkAccessManager *m_manager;
+    QString m_accessToken;
+    QString m_clientId;
+    QString m_clientSecret;
+    QString m_serverAddress;
     bool checkRequestStatus(QNetworkReply *reply);
 };
 

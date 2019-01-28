@@ -3,7 +3,7 @@
 class TestMyCodeTest : public QObject {
     Q_OBJECT
 
-private slots:
+private Q_SLOTS:
     void initTestCase(); // called before the first test function is executed
     void init(); // called before each test function is executed
     void cleanup(); // called after every test function

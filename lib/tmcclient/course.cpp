@@ -78,7 +78,7 @@ void Course::setId(int id)
 /*!
     Sets the course name to \a name.
 */
-void Course::setName(QString name)
+void Course::setName(const QString &name)
 {
     m_name = name;
 }
@@ -88,7 +88,7 @@ QString Course::getTitle() const
     return m_title;
 }
 
-void Course::setTitle(QString title)
+void Course::setTitle(const QString &title)
 {
     m_title = title;
 }
@@ -125,7 +125,7 @@ Exercise Course::getExercise(const int id)
     If no such \l Exercise object is found in the \l Course object's collection,
     the function returns a new \l Exercise object instantiated by \l Exercise::Exercise().
 */
-Exercise Course::getExercise(const Exercise ex)
+Exercise Course::getExercise(const Exercise &ex)
 {
     return m_exercises.value(ex.getId(), Exercise());
 }
@@ -133,7 +133,7 @@ Exercise Course::getExercise(const Exercise ex)
 /*!
     Adds parameter \a ex to the \l Course object's \l Exercise collection.
 */
-void Course::addExercise(const Exercise ex)
+void Course::addExercise(const Exercise &ex)
 {
     m_exercises.insert(ex.getId(), ex);
 }
@@ -142,7 +142,7 @@ void Course::addExercise(const Exercise ex)
     Returns \c true if the \l Course object's collection contains an \l Exercise
     object with the same ID as that of parameter \a ex; otherwise returns \c false.
 */
-bool Course::hasExercise(Exercise ex)
+bool Course::hasExercise(const Exercise &ex)
 {
     return m_exercises.contains(ex.getId());
 }
@@ -153,7 +153,7 @@ bool Course::hasExercise(Exercise ex)
     The ID and name fields of the \l Course object are set to the values
     extracted from \a jsonCourse.
  */
-Course Course::fromJson(const QJsonObject jsonCourse)
+Course Course::fromJson(const QJsonObject &jsonCourse)
 {
     Course course;
     course.setTitle(jsonCourse["title"].toString());
@@ -168,12 +168,12 @@ Course Course::fromJson(const QJsonObject jsonCourse)
     object includes setting the course name and ID to the values specified in \a
     settings. If \a settings doesn't contain the appropriate values, defaults are used.
  */
-Course Course::fromQSettings(QSettings *settings)
+Course Course::fromQSettings(QSettings &settings)
 {
     Course course;
-    course.setName(settings->value("courseName", "").toString());
-    course.setTitle(settings->value("courseTitle", "").toString());
-    course.setId(settings->value("courseId", -1).toInt());
+    course.setName(settings.value("courseName", "").toString());
+    course.setTitle(settings.value("courseTitle", "").toString());
+    course.setId(settings.value("courseId", -1).toInt());
     return course;
 }
 
@@ -182,11 +182,11 @@ Course Course::fromQSettings(QSettings *settings)
     the \l Course parameter \a c into the \l {http://doc.qt.io/qt-5/qsettings.html}
     {QSettings} object pointed to by parameter \a settings.
 */
-void Course::toQSettings(QSettings *settings, Course c)
+void Course::toQSettings(QSettings &settings, const Course &c)
 {
-    settings->setValue("courseName", c.getName());
-    settings->setValue("courseTitle", c.getTitle());
-    settings->setValue("courseId", c.getId());
+    settings.setValue("courseName", c.getName());
+    settings.setValue("courseTitle", c.getTitle());
+    settings.setValue("courseId", c.getId());
 }
 
 /*!
@@ -197,19 +197,19 @@ void Course::toQSettings(QSettings *settings, Course c)
     list, they are preserved. Any new exercises from \a settings are added
     to the existing ones.
 */
-void Course::exerciseListFromQSettings(QSettings *settings)
+void Course::exerciseListFromQSettings(QSettings &settings)
 {
-    settings->beginGroup(m_name);
-        QStringList exerciseList = settings->childGroups();
-        foreach (QString exercise, exerciseList) {
-            settings->beginGroup(exercise);
-                if (!QDir(settings->value("location", "?").toString()).exists() ) {
-                    settings->endGroup();
+    settings.beginGroup(m_name);
+        QStringList exerciseList = settings.childGroups();
+        for (const QString &exercise : exerciseList) {
+            settings.beginGroup(exercise);
+                if (!QDir(settings.value("location", "?").toString()).exists() ) {
+                    settings.endGroup();
                     continue;
                 }
                 Exercise ex = Exercise::fromQSettings(settings, exercise);
-            settings->endGroup();
+            settings.endGroup();
             addExercise(ex);
         }
-    settings->endGroup();
+    settings.endGroup();
 }

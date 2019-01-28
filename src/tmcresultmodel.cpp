@@ -2,11 +2,11 @@
 #include "tmctestresult.h"
 
 #include <QStandardItemModel>
-#include <QDebug>
+#include <QtDebug>
 
-TmcResultModel::TmcResultModel(QObject *parent) : QAbstractListModel(parent)
+TmcResultModel::TmcResultModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
-
 }
 
 TmcTestResult TmcResultModel::testResult(const QModelIndex &idx) const

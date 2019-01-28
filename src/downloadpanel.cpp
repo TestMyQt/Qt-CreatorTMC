@@ -26,10 +26,10 @@
     approximation \c AVERAGE_DOWNLOAD_SIZE.
 */
 
+#include "downloadpanel.h"
+
 #include <QDebug>
 #include <QTimer>
-
-#include "downloadpanel.h"
 
 static const int TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS = 2000;
 // Perhaps with a different font the height of the widgets could be reduced
@@ -39,19 +39,20 @@ static const int FIXED_WIDGET_HEIGHT = 15;
 // so the following crude estimate is needed.
 static const int AVERAGE_DOWNLOAD_SIZE = 1500000;
 
-DownloadPanel::DownloadPanel( QWidget *parent ) : QWidget( parent )
+DownloadPanel::DownloadPanel(QWidget *parent)
+    : QWidget(parent)
+    , infoLabel(nullptr)
 {
-    layout = new QGridLayout( parent );
+    layout = new QGridLayout(parent);
     numberOfProgressBars = 0;
     doneAddingWidgets = false;
 
-    setLayout( layout );
-    setWindowTitle( "Download Panel" );
+    setLayout(layout);
+    setWindowTitle("Download Panel");
 }
 
 DownloadPanel::~DownloadPanel()
 {
-
 }
 
 /*!
@@ -61,16 +62,16 @@ DownloadPanel::~DownloadPanel()
  */
 void DownloadPanel::addInfoLabel()
 {
-    if( doneAddingWidgets ) {
+    if (doneAddingWidgets) {
         qDebug() << "DownloadPanel::addInfoLabel() was called even though "
             "doneAddingWidgets was false";
         return;
     }
 
-    infoLabel = new QLabel( "Downloading files...", this );
-    infoLabel->setAlignment( Qt::AlignCenter );
-    infoLabel->setFixedHeight( 35 );
-    layout->addWidget( infoLabel, 2 * numberOfProgressBars + 1, 0 );
+    infoLabel = new QLabel("Downloading files...", this);
+    infoLabel->setAlignment(Qt::AlignCenter);
+    infoLabel->setFixedHeight(35);
+    layout->addWidget(infoLabel, 2 * numberOfProgressBars + 1, 0);
 
     doneAddingWidgets = true;
 }
@@ -82,36 +83,36 @@ void DownloadPanel::addInfoLabel()
     displaying the progress. The parameter \a downloadName is displayed in
     the \c QLabel.
  */
-void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
+void DownloadPanel::addWidgetsToDownloadPanel(const QString &downloadName)
 {
-    if( doneAddingWidgets ) {
+    if (doneAddingWidgets) {
         qDebug() << "DownloadPanel::addWidgetsToDownloadPanel() was called "
             "even though doneAddingWidgets was false";
         return;
     }
 
     // Add the label
-    QLabel *label = new QLabel( downloadName, this );
-    label->setFixedHeight( FIXED_WIDGET_HEIGHT );
-    layout->addWidget( label, 2 * numberOfProgressBars, 0 );
-    progressBarLabels.append( label );
+    QLabel *label = new QLabel(downloadName, this);
+    label->setFixedHeight(FIXED_WIDGET_HEIGHT);
+    layout->addWidget(label, 2 * numberOfProgressBars, 0);
+    progressBarLabels.append(label);
 
     // Add the progress bar
-    QProgressBar *bar = new QProgressBar( this );
-    bar->setMinimum( 0 );
-    bar->setMaximum( AVERAGE_DOWNLOAD_SIZE );
-    bar->setValue( 0 );
-    bar->setFixedHeight( FIXED_WIDGET_HEIGHT );
-    layout->addWidget( bar, 2 * numberOfProgressBars + 1, 0 );
-    progressBars.append( bar );
+    QProgressBar *bar = new QProgressBar(this);
+    bar->setMinimum(0);
+    bar->setMaximum(AVERAGE_DOWNLOAD_SIZE);
+    bar->setValue(0);
+    bar->setFixedHeight(FIXED_WIDGET_HEIGHT);
+    layout->addWidget(bar, 2 * numberOfProgressBars + 1, 0);
+    progressBars.append(bar);
 
     // Add the button
-    QPushButton *button = new QPushButton( "❎", this );
-    button->setFixedHeight( FIXED_WIDGET_HEIGHT );
-    button->setFixedWidth( FIXED_WIDGET_HEIGHT );
-    layout->addWidget( button, 2 * numberOfProgressBars + 1, 1 );
-    connect( button, SIGNAL( clicked() ), this, SLOT( cancelDownload() ) );
-    downloadCancelButtons.append( button );
+    QPushButton *button = new QPushButton("❎", this);
+    button->setFixedHeight(FIXED_WIDGET_HEIGHT);
+    button->setFixedWidth(FIXED_WIDGET_HEIGHT);
+    layout->addWidget(button, 2 * numberOfProgressBars + 1, 1);
+    connect(button, &QPushButton::clicked, this, &DownloadPanel::cancelDownload);
+    downloadCancelButtons.append(button);
 
     ++numberOfProgressBars;
 }
@@ -122,18 +123,18 @@ void DownloadPanel::addWidgetsToDownloadPanel( QString downloadName )
     \c replies. Each element in \c replies corresponds to the element at the
     same index in \c progressBars.
  */
-void DownloadPanel::addReplyToList( QNetworkReply *reply )
+void DownloadPanel::addReplyToList(QNetworkReply *reply)
 {
-    replies.append( reply );
+    replies.append(reply);
 }
 
 /*!
     Returns the \c QNetworkReply pointer specified by the \a index parameter. The
     pointer is an element in the \c QList instance variable \c replies.
  */
-QNetworkReply *DownloadPanel::getRepliesListItem( int index )
+QNetworkReply *DownloadPanel::getRepliesListItem(int index)
 {
-    return replies.at( index );
+    return replies.at(index);
 }
 
 /*!
@@ -145,15 +146,14 @@ QNetworkReply *DownloadPanel::getRepliesListItem( int index )
     the download. If the value of \a bytesTotal is -1, the total download size
     is unknown.
  */
-void DownloadPanel::networkReplyProgress(
-    qint64 bytesReceived, qint64 bytesTotal )
+void DownloadPanel::networkReplyProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     int senderIndex = replies.indexOf(reinterpret_cast<QNetworkReply *>
         (QObject::sender()));
 
-    progressBars[ senderIndex ]->setMaximum(
-        bytesTotal != -1 ? bytesTotal : AVERAGE_DOWNLOAD_SIZE );
-    progressBars[ senderIndex ]->setValue( bytesReceived );
+    progressBars[senderIndex]->setMaximum(
+        bytesTotal != -1 ? bytesTotal : AVERAGE_DOWNLOAD_SIZE);
+    progressBars[senderIndex]->setValue(bytesReceived);
 }
 
 /*!
@@ -167,9 +167,10 @@ void DownloadPanel::httpFinished()
         (QObject::sender()));
 
     // Grey out the cancel button of the download
-    downloadCancelButtons[ senderIndex ]->setEnabled( false );
+    downloadCancelButtons[senderIndex]->setEnabled(false);
 
-    replies[ senderIndex ] = Q_NULLPTR;
+    replies[senderIndex]->deleteLater();
+    replies[senderIndex] = nullptr;
     closeWindowIfAllDownloadsComplete();
 }
 
@@ -192,15 +193,15 @@ void DownloadPanel::sanityCheck()
  */
 void DownloadPanel::closeWindowIfAllDownloadsComplete()
 {
-    for( int i = 0; i < replies.size(); i++ ) {
-        if( replies[ i ] ) { // Not a null pointer
+    for (int i = 0; i < replies.size(); i++) {
+        if (replies[ i ]) { // Not a null pointer
             return;
         }
     }
 
-    infoLabel->setText( "Done!" );
-    QTimer::singleShot( TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS,
-        this, SLOT( close() ) );
+    infoLabel->setText("Done!");
+    QTimer::singleShot(TIME_BEFORE_WINDOW_CLOSES_AFTER_DOWNLOADS,
+        this, &DownloadPanel::close);
 }
 
 /*!
@@ -209,19 +210,19 @@ void DownloadPanel::closeWindowIfAllDownloadsComplete()
  */
 void DownloadPanel::cancelDownload()
 {
-    for( int i = 0; i < downloadCancelButtons.size(); i++ ) {
-        if( downloadCancelButtons[ i ] == QObject::sender() ) {
-            downloadCancelButtons[ i ]->setEnabled( false );
-            replies[ i ]->abort();
-            progressBars[ i ]->setValue( 0 );
+    for (int i = 0; i < downloadCancelButtons.size(); i++) {
+        if (downloadCancelButtons[i] == QObject::sender()) {
+            downloadCancelButtons[i]->setEnabled(false);
+            replies[i]->abort();
+            progressBars[i]->setValue(0);
             // Without the following statement the progress bar of a cancelled
             // download that has not yet started will look different from one
             // that has already started
-            progressBars[ i ]->setMaximum( -1 );
-            progressBars[ i ]->setTextVisible( false );
-            infoLabel->setText( "Cancelled download of\n" +
-                progressBarLabels[ i ]->text() );
-            progressBarLabels[ i ]->setText( "(cancelled)" );
+            progressBars[i]->setMaximum(-1);
+            progressBars[i]->setTextVisible(false);
+            infoLabel->setText("Cancelled download of\n" +
+                progressBarLabels[ i ]->text());
+            progressBarLabels[i]->setText("(cancelled)");
         }
     }
 

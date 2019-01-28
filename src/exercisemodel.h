@@ -31,15 +31,15 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-public slots:
+public Q_SLOTS:
     void onExerciseListUpdated(Course *updatedCourse, QList<Exercise> newExercises);
-    void onWorkingDirectoryChanged(QString workingDir);
+    void onWorkingDirectoryChanged(const QString &workingDir);
     void onSelectAll(int state);
 
     void onProgressUpdate(qint64 bytesReceived, qint64 bytesTotal);
     void onDownloadFinished();
 
-signals:
+Q_SIGNALS:
     void exerciseUpdates();
     void exerciseOpen(const Exercise &ex);
 

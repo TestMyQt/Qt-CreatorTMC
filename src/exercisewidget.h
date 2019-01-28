@@ -16,10 +16,8 @@ public:
     explicit ExerciseWidget(QWidget *parent = nullptr);
     void setModel(ExerciseModel *model);
 
-signals:
+Q_SIGNALS:
     void onExercisesSelected(QList<Exercise> selected);
-
-public slots:
 
 private:
     Ui::ExerciseWindow *m_exerciseWindow;

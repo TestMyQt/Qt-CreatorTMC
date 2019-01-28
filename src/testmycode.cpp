@@ -26,7 +26,7 @@
 #include "tmcoutputpane.h"
 #include "course.h"
 
-#include <QDebug>
+#include <QtDebug>
 
 #include <coreplugin/icore.h>
 #include <coreplugin/icontext.h>
@@ -56,8 +56,10 @@ namespace TestMyCodePlugin {
 namespace Internal {
 
 TestMyCode::TestMyCode()
+    : m_tmcClient(nullptr)
+    , m_settingsWidget(nullptr)
+    , m_tmcManager(nullptr)
 {
-    // Create your members
 }
 
 TestMyCode::~TestMyCode()
@@ -65,6 +67,9 @@ TestMyCode::~TestMyCode()
     // Unregister objects from the plugin manager's object pool
     // Delete members
     TmcOutputPane::destroy();
+    delete m_tmcClient;
+    delete m_settingsWidget;
+    delete m_tmcManager;
 }
 
 bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
@@ -128,10 +133,10 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     auto tools_menu = ActionManager::actionContainer(Core::Constants::M_WINDOW);
     ActionManager::actionContainer(Core::Constants::MENU_BAR)->addMenu(tools_menu, menu);
 
-    // TmcClient
-    tmcClient = TmcClient::instance();
+    // m_tmcClient
+    m_tmcClient = TmcClient::instance();
     auto *m = new QNetworkAccessManager;
-    tmcClient->setNetworkManager(m);
+    m_tmcClient->setNetworkManager(m);
 
     // Initialize settings window
     m_settingsWidget = new SettingsWidget;
@@ -160,7 +165,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     TmcOutputPane::instance();
 
     // TmcManager
-    m_tmcManager = new TmcManager(tmcClient);
+    m_tmcManager = new TmcManager(m_tmcClient);
     m_tmcManager->setSettings(m_settingsWidget);
 
     connect(downloadUpdateAction, &QAction::triggered, m_tmcManager, &TmcManager::updateExercises);
@@ -172,7 +177,7 @@ bool TestMyCode::initialize(const QStringList &arguments, QString *errorString)
     connect(courseAction, &QAction::triggered, m_tmcManager, &TmcManager::openActiveCoursePage);
 
     // Disable/Enable Download/Update and Submit buttons
-    if (!tmcClient->isAuthenticated()) {
+    if (!m_tmcClient->isAuthenticated()) {
         downloadUpdateAction->setDisabled(true);
         submitAction->setDisabled(true);
     }

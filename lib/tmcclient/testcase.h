@@ -7,7 +7,7 @@
 class TestCase
 {
 public:
-    TestCase(QString d_msg, QString ex, QString msg, QString name, bool pass);
+    TestCase(const QString &d_msg, const QString &ex, const QString &msg, const QString &name, bool pass);
 
 public:
     QString detailed_message;
@@ -16,7 +16,7 @@ public:
     QString name;
     bool successful;
 
-    static TestCase fromJson(const QJsonObject jsonCase);
+    static TestCase fromJson(const QJsonObject &jsonCase);
 };
 
 #endif // TESTCASE_H

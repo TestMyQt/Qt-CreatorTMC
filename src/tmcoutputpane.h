@@ -28,11 +28,11 @@ class TmcListView : public Utils::ListView
 public:
     explicit TmcListView(QWidget *parent = nullptr);
 
-signals:
+Q_SIGNALS:
     void copyShortcutTriggered();
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 
@@ -64,7 +64,7 @@ public:
     void onCustomContextMenuRequested(const QPoint &pos);
     void onCopyItemTriggered(const TmcTestResult &result);
 
-public slots:
+public Q_SLOTS:
     void onTestRunFinished();
 
 private:
