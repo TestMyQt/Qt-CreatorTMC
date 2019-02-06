@@ -35,9 +35,7 @@ If you wish to develop the plugin, you might want a setup with a second instance
     - `qmake ../qt-creator`
     - `make` or `make -j $(nproc)` to build on all cores
 3. Clone this repository recursively: `git clone --recursive https://github.com/testmyqt/qt-creatortmc`
-    -`3rdparty` contains sources for dependencies that are statically-linked to the plugin shared object file:
-    - [`quazip`](https://github.com/TestMyQt/quazip/tree/eeb61805596a83fd8a97f542f48430485330217a)
-    - [`zlib`](https://github.com/madler/zlib/tree/cacf7f1d4e3d44d871b605da3b647f07d718623f)
+    - `3rdparty` contains sources for dependencies that are statically-linked to the plugin shared object file: [`quazip`](https://github.com/TestMyQt/quazip/tree/eeb61805596a83fd8a97f542f48430485330217a) and [`zlib`](https://github.com/madler/zlib/tree/cacf7f1d4e3d44d871b605da3b647f07d718623f)
 4. The project can be opened in Qt Creator now. To configure the build target set the following environment variables:
     - To set environment variables in Qt Creator, go to Projects Mode -> Build -> Build Environment
     - `QTC_BUILD` your Qt Creator build
